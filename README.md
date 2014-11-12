@@ -1,6 +1,6 @@
 LUR7
 ====
 
-LUracing 2014/2015
+LURacing 2014/2015
 
-Hej heeej
+A collection of big and small projects relating to LUR7.
