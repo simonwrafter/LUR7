@@ -47,7 +47,7 @@ typedef uint8_t Bool;
 #define F_CPU          (FOSC*1000) // Need for AVR GCC
 
     // -------------- CAN LIB CONFIGURATION
-#define CAN_BAUDRATE   250        // in kBit
+#define CAN_BAUDRATE   100        // in kBit
 
     // -------------- MISCELLANEOUS
 

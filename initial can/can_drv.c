@@ -3,12 +3,12 @@
  *
  * Created: 10/17/2013 2:53:10 PM
  *  Author: Scott_Schmit
- 	
+
  	The contents of this file were copy & pasted from the CAN Software Library
  	on Atmel.com. The library was written for AT90CANxx devices, but was modified
  	as an ATmegaxxM1 driver.
- 	
- */ 
+
+ */
 
 //******************************************************************************
 //! @file $RCSfile: can_drv.c,v $
@@ -54,19 +54,10 @@
 //------------------------------------------------------------------------------
 void can_clear_all_mob(void) {
 	uint8_t  mob_number;
-	/*
-	uint8_t  data_index;
-	*/
-	
+
 	for (mob_number = 0; mob_number < NB_MOB; mob_number++) {
 		CANPAGE = (mob_number << 4);	//! Page index
 		Can_clear_mob();				//! All MOb Registers=0
-	/*
-		for (data_index = 0; data_index < NB_DATA_MAX; data_index++)
-		{
-			CANMSG = 0;				 //! MOb data FIFO
-		}
-	*/
 	}
 }
 
@@ -87,7 +78,7 @@ void can_clear_all_mob(void) {
 uint8_t can_get_mob_free(void)
 {
 	uint8_t mob_number, page_saved;
-	
+
 	page_saved = CANPAGE;
 	for (mob_number = 0; mob_number < NB_MOB; mob_number++)
 	{
@@ -174,7 +165,7 @@ uint8_t can_get_mob_status(void) {
 //------------------------------------------------------------------------------
 void can_get_data(uint8_t* p_can_message_data) {
 	uint8_t data_index;
-	
+
 	for (data_index = 0; data_index < (Can_get_dlc()); data_index++) {
 		*(p_can_message_data + data_index) = CANMSG;
 	}

@@ -52,8 +52,7 @@ int main(void)
 	response_msg.pt_data = &response_buffer[0]; // Point Response MOb to first element of buffer
 	response_msg.status = 0; // clear status
 	
-    while(1)
-    {	
+    while (1) {	
 		// If SW0 is pressed
 		if(Read_Button()) { 
 			
@@ -61,7 +60,9 @@ int main(void)
 			for(j=0; j<NB_TARGET; j++) {
 				
 				// Configure Response MOb
-				for(i=0; i<DATA_BUFFER_SIZE; i++) {response_buffer[i] = 0;} // clear message object data buffer
+				for (i=0; i<DATA_BUFFER_SIZE; i++) {
+					response_buffer[i] = 0; // clear message object data buffer
+				}
 				response_msg.id.std = ID_TAG_BASE + j; // This message object only accepts frames from Target IDs (0x80) to (0x80 + NB_TARGET)
 				response_msg.ctrl.ide = 0; // This message object accepts only standard (2.0A) CAN frames
 				response_msg.ctrl.rtr = 0; // this message object is not requesting a remote node to transmit data back
@@ -69,17 +70,19 @@ int main(void)
 				response_msg.cmd = CMD_RX_DATA_MASKED; // assign this as a "Receive Standard (2.0A) CAN frame" message object
 				
 				while(can_cmd(&response_msg) != CAN_CMD_ACCEPTED); // Wait for MOb to configure (Must re-configure MOb for every transaction)
-			
+				
 				// Configure Remote Tx MOb
-				for(i=0; i<DATA_BUFFER_SIZE; i++) {tx_remote_buffer[i]=0;} // clear message object data buffer
+				for(i=0; i<DATA_BUFFER_SIZE; i++) {
+					tx_remote_buffer[i]=0; // clear message object data buffer
+				}
 				tx_remote_msg.id.std = ID_TAG_BASE + j; // This message object only sends frames to Target IDs (0x80) to (0x80 + NB_TARGET)
 				tx_remote_msg.ctrl.ide = 0; // This message object sends standard (2.0A) CAN frames
 				tx_remote_msg.ctrl.rtr = 1; // This message object is requesting a remote node to transmit data back
 				tx_remote_msg.dlc = DATA_BUFFER_SIZE; // Number of data bytes (8 max) requested from remote node
 				tx_remote_msg.cmd = CMD_TX_REMOTE; // assign this as a "Request Standard (2.0A) Remote Data Frame" message object
-
+				
 				while(can_cmd(&tx_remote_msg) != CAN_CMD_ACCEPTED); // Wait for MOb to configure (Must re-configure MOb for every transaction) and send request
-
+				
 				while(can_get_status(&tx_remote_msg) == CAN_STATUS_NOT_COMPLETED); // Wait for Tx to complete
 			
 				delay_ms(50); // Wait 50ms for a response
@@ -97,7 +100,7 @@ int main(void)
 					response_msg.cmd = CMD_ABORT;
 					while (can_cmd(&response_msg) != CAN_CMD_ACCEPTED);
 				}
-			}				
+			}
 		}
     }
 }
