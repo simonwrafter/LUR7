@@ -1,14 +1,5 @@
 /*
  * can_lib.h
- * 
- * Author: Simon Wrafter
- * 
- * Adaptions for Lund University Formula Student team LURacing
- * 
- */
-
-/*
- * can_lib.h
  *
  * Created: 10/18/2013 11:38:16 AM
  *  Author: Scott_Schmit
@@ -20,7 +11,7 @@
  */
 
 
-/******************************************************************************
+//******************************************************************************
 //! @file $RCSfile: can_lib.h,v $
 //!
 //! Copyright (c) 2007 Atmel.
@@ -40,7 +31,7 @@
 //!
 //! @todo
 //! @bug
-//******************************************************************************/
+//******************************************************************************
 
 #ifndef _CAN_LIB_H_
 #define _CAN_LIB_H_
@@ -128,7 +119,7 @@ typedef struct{
 
 //_____ D E C L A R A T I O N S ________________________________________________
 
-/*------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  @fn can_init
 //!
 //! CAN macro initialization. Reset the CAN peripheral, initialize the bit
@@ -138,14 +129,18 @@ typedef struct{
 //! @warning The CAN macro will be enable after seen on CAN bus a receceive
 //!          level as long as of an inter frame (hardware feature).
 //!
-//! @param  none.
+//! @param  Mode (for "can_fixed_baudrate" param not used)
+//!         ==0: start CAN bit timing evaluation from faster baudrate
+//!         ==1: start CAN bit timing evaluation with CANBTx registers
+//!              contents
 //!
-//! @return none.
+//! @return Baudrate Status
+//!         ==0: research of bit timing configuration failed
+//!         ==1: baudrate performed
 //!
-//-----------------------------------------------------------------------------*/
-extern void can_init(void);
+extern uint8_t can_init(uint8_t mode);
 
-/*------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  @fn can_cmd
 //!
 //! This function takes a CAN descriptor, analyses the action to do:
@@ -163,10 +158,9 @@ extern void can_init(void);
 //! @return CAN_CMD_ACCEPTED - command is accepted
 //!         CAN_CMD_REFUSED  - command is refused
 //!
-//-----------------------------------------------------------------------------*/
 extern uint8_t can_cmd (st_cmd_t *);
 
-/*------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  @fn can_get_status
 //!
 //! This function allows to return if the command has been performed or not.
@@ -181,7 +175,6 @@ extern uint8_t can_cmd (st_cmd_t *);
 //!         CAN_STATUS_ERROR         - Error in configuration or in the
 //!                                    CAN communication
 //!
-//-----------------------------------------------------------------------------*/
 extern uint8_t can_get_status (st_cmd_t *);
 
 //______________________________________________________________________________

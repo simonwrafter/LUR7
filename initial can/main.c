@@ -6,11 +6,15 @@ st_cmd_t received_cmd;
 uint8_t send_data;
 uint8_t rec_data;
 
-void main(void) {
+void loop(void);
+void setup(void);
+
+int main(void) {
 	setup();
 	while(1) {
 		loop();
 	}
+	return(0);
 }
 
 inline void setup() {
@@ -22,7 +26,7 @@ inline void setup() {
 	PCICR = 1<<PCIE0; // set pin change interrupt enable for pcint0:7 in Pin Change Interrupt Control Register
 	PCMSK0 = 1<<PCINT2; // set pin change interrupt active for PCINT2 (PB2, pin16) in Pin Change Mask Register 0
 	
-	can_init(0); //init the CAN bus
+	can_init(); //init the CAN bus
 	CANGIE = (1<<ENTX) | (1<<ENRX); //enable RX and TX interrupts
 	
 	send_data = 0xFF; // data to send
@@ -55,12 +59,12 @@ ISR(PCINT0_vect) {
 ISR(CAN_INT_vect) {
 	if (CANSTMOB & 1<<TXOK) {
 		PINB = 1<<PINB3; //toggle light to indicate TXOK
-		can_get_status(send_data);
-		send_data ~= send_data;
+		can_get_status(&send_cmd);
+		send_data ^= send_data;
 	}
 	
 	if (CANSTMOB & 1<<RXOK) {
-		can_get_status(received_cmd);
-		PORTB = (received_cmd.pt_data* ? 1 : 0)<<PORTB4;
+		can_get_status(&received_cmd);
+		PORTB = (*(received_cmd.pt_data) ? 1 : 0)<<PORTB4;
 	}
 }

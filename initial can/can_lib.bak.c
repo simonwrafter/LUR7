@@ -1,14 +1,5 @@
 /*
  * can_lib.c
- * 
- * Author: Simon Wrafter
- * 
- * Adaptions for Lund University Formula Student team LURacing
- * 
- */
-
-/*
- * can_lib.c
  *
  * Created: 10/18/2013 11:37:43 AM
  *  Author: Scott_Schmit
@@ -19,7 +10,7 @@
 
  */
 
-/*******************************************************************************
+//******************************************************************************
 //! @file $RCSfile: can_lib.c,v $
 //!
 //! Copyright (c) 2007 Atmel.
@@ -38,7 +29,7 @@
 //!
 //! @todo
 //! @bug
-//*****************************************************************************/
+//******************************************************************************
 
 //_____ I N C L U D E S ________________________________________________________
 #include "config.h"
@@ -49,7 +40,7 @@
 
 //_____ F U N C T I O N S ______________________________________________________
 
-/*------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  @fn can_init
 //!
 //! CAN macro initialization. Reset the CAN peripheral, initialize the bit
@@ -59,18 +50,26 @@
 //! @warning The CAN macro will be enable after seen on CAN bus a receceive
 //!          level as long as of an inter frame (hardware feature).
 //!
-//! @param  none.
+//! @param  Mode (for "can_fixed_baudrate" param not used)
+//!         ==0: start CAN bit timing evaluation from faster baudrate
+//!         ==1: start CAN bit timing evaluation with CANBTx registers
+//!              contents
 //!
-//! @return none.
+//! @return Baudrate Status
+//!         ==0: research of bit timing configuration failed
+//!         ==1: baudrate performed
 //!
-//-----------------------------------------------------------------------------*/
-void can_init() {
-	Can_bit_timing();	 // c.f. macro in "can_drv.h"
-	can_clear_all_mob(); // c.f. function in "can_drv.c"
-	Can_enable();		 // c.f. macro in "can_drv.h"
+//------------------------------------------------------------------------------
+uint8_t can_init(uint8_t mode) {
+	if ((Can_bit_timing(mode)) == 0) {
+		return (0);  // c.f. macro in "can_drv.h"
+	}
+	can_clear_all_mob();                        // c.f. function in "can_drv.c"
+	Can_enable();                               // c.f. macro in "can_drv.h"
+	return (1);
 }
 
-/*------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  @fn can_cmd
 //!
 //! This function takes a CAN descriptor, analyses the action to do:
@@ -88,7 +87,7 @@ void can_init() {
 //! @return CAN_CMD_ACCEPTED - command is accepted
 //!         CAN_CMD_REFUSED  - command is refused
 //!
-//-----------------------------------------------------------------------------*/
+//------------------------------------------------------------------------------
 uint8_t can_cmd(st_cmd_t* cmd) {
 	uint8_t mob_handle;
 	uint8_t cpt;
@@ -289,7 +288,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 	return CAN_CMD_ACCEPTED;
 }
 
-/*------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  @fn can_get_status
 //!
 //! This function allows to return if the command has been performed or not.
@@ -304,7 +303,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 //!         CAN_STATUS_ERROR         - Error in configuration or in the
 //!                                    CAN communication
 //!
-//-----------------------------------------------------------------------------*/
+//------------------------------------------------------------------------------
 uint8_t can_get_status (st_cmd_t* cmd) {
 	uint8_t a_status;
 	uint8_t rtn_val;

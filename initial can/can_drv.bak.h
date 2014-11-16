@@ -1,13 +1,4 @@
 /*
- * can_drv.h
- * 
- * Author: Simon Wrafter
- * 
- * Adaptions for Lund University Formula Student team LURacing
- * 
- */
-
-/*
  * CAN_driver.h
  *
  * Created: 10/17/2013 2:49:16 PM
@@ -58,6 +49,7 @@
 #ifndef CAN_BAUDRATE
 #  error  You must define CAN_BAUDRATE in "config.h" file
 #endif
+#define CAN_AUTOBAUD    0
     // ----------
 #if FOSC == 16000             //!< Fclkio = 16 MHz, Tclkio = 62.5 ns
 #   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
@@ -166,7 +158,11 @@
     //! "can_bit_timing()" lets the CAN controller disable
     //! "can_bit_timing()" returns 1 if the setting of CANBTx registers is available
     //!                and returns 0 if the setting of CANBTx registers is wrong
-#define Can_bit_timing()  (can_fixed_baudrate())
+#if     CAN_BAUDRATE == CAN_AUTOBAUD
+#   define Can_bit_timing(mode)  (can_auto_baudrate(mode) )
+#else
+#   define Can_bit_timing(mode)  (can_fixed_baudrate(mode))
+#endif
     // ----------
 #define CAN_PORT_IN     PINC // edited for ATmegaxxM1
 #define CAN_PORT_DIR    DDRC // edited for ATmegaxxM1
@@ -213,6 +209,7 @@
 #define SJW_MIN     1       //! Synchro jump width
 #define SJW_MAX     4
     // ----------
+//#define NB_MOB       15
 #define NB_MOB       6 // edited for ATmegaxxM1
 #define NB_DATA_MAX  8
 #define LAST_MOB_NB  (NB_MOB-1)
@@ -405,6 +402,25 @@ extern  uint8_t can_get_mob_status(void);
 extern  void can_get_data(uint8_t* p_can_message_data);
 
 //------------------------------------------------------------------------------
+//  @fn can_auto_baudrate
+//!
+//! This function programs itself the CANBTx registers if there is some
+//! communication (activity) on the CAN bus.
+//!
+//! @warning complex function not yet implemented
+//!
+//! @param  Evaluation needed
+//!         ==0: start the evaluation from faster baudrate
+//!         ==1: (re)start an evaluation with CANBTx registers contents
+//!
+//! @return Baudrate Status
+//!         ==0: research of bit timing configuration failed
+//!         ==1: baudrate performed
+//!
+extern  uint8_t can_auto_baudrate(uint8_t eval);
+
+
+//------------------------------------------------------------------------------
 //  @fn can_fixed_baudrate
 //!
 //! This function programs the CANBTx registers with the predefined values
@@ -412,11 +428,12 @@ extern  void can_get_data(uint8_t* p_can_message_data);
 //!
 //! @warning
 //!
-//! @param none.
+//! @param (unused!)
 //!
-//! @return none.
+//! @return Baudrate Status
+//!         fixed = 1: baudrate performed
 //!
-extern void can_fixed_baudrate(void);
+extern uint8_t can_fixed_baudrate(uint8_t eval);
 
 //______________________________________________________________________________
 
