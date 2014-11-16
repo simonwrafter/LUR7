@@ -20,7 +20,7 @@ void loop() {
 }
 
 ISR(PCINT0_vect) { // activated if there is change to PCINT0
-	//if (PINB & _BV(PINB3)) { // if PINB3 is high after interrupt
+	if (PINB & _BV(PINB3)) { // if PINB3 is high after interrupt
 		PINC = 1<<PINC3; // toggle output to PINC3
-//	}
+	}
 }
