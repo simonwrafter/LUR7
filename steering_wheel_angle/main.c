@@ -34,11 +34,7 @@ void loop() {
 	;
 }
 
-ISR(ADC_vect) { 
-	_delay_ms(500);
+ISR(ADC_vect) {
 	DataPort = ADCH;
 	ADCSRA |= 1<<ADSC;
-
-
-
 }
