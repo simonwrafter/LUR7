@@ -5,7 +5,7 @@
 MCU = atmega32m1
 FORMAT = ihex
 TARGET = main
-SRC = $(TARGET).c can_lib.c can_drv.c
+SRC = $(TARGET).c
 ASRC = 
 OPT = s
 
