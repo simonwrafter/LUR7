@@ -5,8 +5,9 @@
 
 int main (void) {
 	DDRC = 1 << DDC3;
+	
 	while (1) {
 		PINC = 1 << PINC3;
-		_delay_ms(500);
+		_delay_ms(550);
 	}
 }
