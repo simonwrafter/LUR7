@@ -1,5 +1,6 @@
 #include "config.h"
 #include "can_lib.h"
+#include <util/delay.h>
 
 st_cmd_t send_cmd;
 st_cmd_t received_cmd;
@@ -25,9 +26,10 @@ inline void setup() {
 	
 	PCICR = 1<<PCIE0; // set pin change interrupt enable for pcint0:7 in Pin Change Interrupt Control Register
 	PCMSK0 = 1<<PCINT2; // set pin change interrupt active for PCINT2 (PB2, pin16) in Pin Change Mask Register 0
+	PORTB = 1<<PORTB2; //pull up resistor on PB2
 	
 	can_init(); //init the CAN bus
-	CANGIE = (1<<ENTX) | (1<<ENRX); //enable RX and TX interrupts
+	CANGIE = 0xFF; // (1<<ENIT) | (1<<ENTX) | (1<<ENRX); //enable RX and TX interrupts
 	
 	send_data = 0xFF; // data to send
 	
@@ -35,12 +37,15 @@ inline void setup() {
 	send_cmd.pt_data = &send_data;
 	send_cmd.ctrl.ide = 0;
 	send_cmd.dlc = 1;
-	send_cmd.id.std = 0x80;
+	send_cmd.id.std = 0x81;
 	send_cmd.cmd = CMD_TX_DATA;
 	
 	//set up receiver
 	received_cmd.pt_data = &rec_data;
-	
+	received_cmd.ctrl.ide = 0;
+	received_cmd.dlc = 1;
+	received_cmd.id.std = 0x80;
+	received_cmd.cmd = CMD_RX_DATA;
 	
 	sei();
 }
@@ -50,7 +55,8 @@ inline void loop() {
 }
 
 ISR(PCINT0_vect) {
-	if (PINB & 1<<PINB3) {
+	if (PINB & 1<<PINB2) {
+		PINB = 1<<PINB3;
 		can_cmd(&send_cmd);
 	}
 }
@@ -61,10 +67,13 @@ ISR(CAN_INT_vect) {
 		PINB = 1<<PINB3; //toggle light to indicate TXOK
 		can_get_status(&send_cmd);
 		send_data ^= send_data;
-	}
-	
-	if (CANSTMOB & 1<<RXOK) {
+	} else if (CANSTMOB & 1<<RXOK) {
 		can_get_status(&received_cmd);
-		PORTB = (*(received_cmd.pt_data) ? 1 : 0)<<PORTB4;
+		PORTB = (rec_data ? 1 : 0)<<PORTB4;
+	} else {
+		while (1) {
+			PINB = 1<<PINB3;
+			_delay_ms(300);
+		}
 	}
 }
