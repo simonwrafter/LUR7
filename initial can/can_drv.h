@@ -84,10 +84,6 @@
 #       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 125 ns
 #       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
 #       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == CAN_AUTOBAUD  // Treated later in the file
-#       define CONF_CANBT1  0x00       // Unused
-#       define CONF_CANBT2  0x00       // Unused
-#       define CONF_CANBT3  0x00       // Unused
 #   else
 #       error This CAN_BAUDRATE value is not in "CAN_driver.h" file
 #   endif
@@ -117,10 +113,6 @@
 #       define CONF_CANBT1  0x00       // Tscl  = 1x Tclkio = 83.333 ns
 #       define CONF_CANBT2  0x08       // Tsync = 1x Tscl, Tprs = 5x Tscl, Tsjw = 1x Tscl
 #       define CONF_CANBT3  0x25       // Tpsh1 = 3x Tscl, Tpsh2 = 3x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == CAN_AUTOBAUD  // Treated later in the file
-#       define CONF_CANBT1  0x00       // Unused
-#       define CONF_CANBT2  0x00       // Unused
-#       define CONF_CANBT3  0x00       // Unused
 #   else
 #       error This CAN_BAUDRATE value is not in "can_drv.h" file
 #   endif
@@ -150,10 +142,6 @@
 #       define CONF_CANBT1  0x00       // Tscl  = 1x Tclkio = 125 ns
 #       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
 #       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == CAN_AUTOBAUD  // Treated later in the file
-#       define CONF_CANBT1  0x00       // Unused
-#       define CONF_CANBT2  0x00       // Unused
-#       define CONF_CANBT3  0x00       // Unused
 #   else
 #       error This CAN_BAUDRATE value is not in "can_drv.h" file
 #   endif
@@ -331,7 +319,7 @@ typedef enum {
 
 //_____ D E C L A R A T I O N S ________________________________________________
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 //  @fn can_clear_all_mob
 //!
 //! This function clears the Mailbox content.
@@ -344,9 +332,10 @@ typedef enum {
 //!
 //! @return none.
 //!
+*/
 extern  void can_clear_all_mob(void);
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 //  @fn can_get_mob_free
 //!
 //! This function returns the number of the first MOb available or 0xFF if
@@ -360,9 +349,10 @@ extern  void can_clear_all_mob(void);
 //!          - MOb[0] upto MOb[LAST_MOB_NB]
 //!          - 0xFF if no MOb
 //!
+*/
 extern  uint8_t can_get_mob_free(void);
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 //  @fn can_get_mob_status
 //!
 //! This function returns information "MOB completed its job"
@@ -388,9 +378,10 @@ extern  uint8_t can_get_mob_free(void);
 //!          -  MOB_STUFF_ERROR
 //!          -  MOB_BIT_ERROR
 //!
+*/
 extern  uint8_t can_get_mob_status(void);
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 //  @fn can_get_data
 //!
 //! This function copy the data from the selected MOb to the address
@@ -402,9 +393,10 @@ extern  uint8_t can_get_mob_status(void);
 //!
 //! @return none.
 //!
+*/
 extern  void can_get_data(uint8_t* p_can_message_data);
 
-//------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
 //  @fn can_fixed_baudrate
 //!
 //! This function programs the CANBTx registers with the predefined values
@@ -416,6 +408,7 @@ extern  void can_get_data(uint8_t* p_can_message_data);
 //!
 //! @return none.
 //!
+*/
 extern void can_fixed_baudrate(void);
 
 //______________________________________________________________________________
