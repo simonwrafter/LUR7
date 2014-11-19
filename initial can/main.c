@@ -30,7 +30,7 @@ inline void setup() {
 	PORTB = 1<<PORTB2; //pull up resistor on PB2
 	
 	can_init(); //init the CAN bus
-	CANGIE = 0xFF; // (1<<ENIT) | (1<<ENTX) | (1<<ENRX); //enable RX and TX interrupts
+	CANGIE = (1<<ENTX) | (1<<ENRX); //enable RX and TX interrupts
 	
 	send_data = 0xFF; // data to send
 	
@@ -38,15 +38,15 @@ inline void setup() {
 	send_cmd.pt_data = &send_data;
 	send_cmd.ctrl.ide = 0;
 	send_cmd.dlc = 1;
-	send_cmd.id.std = 0x81;
+	send_cmd.id.std = 0x80;
 	send_cmd.cmd = CMD_TX_DATA;
 	
 	//set up receiver
 	received_cmd.pt_data = &rec_data;
 	received_cmd.ctrl.ide = 0;
 	received_cmd.dlc = 1;
-	received_cmd.id.std = 0x80;
-	received_cmd.cmd = CMD_RX_DATA_MASKED;
+	received_cmd.id.std = 0x81;
+	received_cmd.cmd = CMD_RX_DATA;
 	
 	sei();
 }
@@ -68,11 +68,10 @@ ISR(CAN_INT_vect) {
 		can_get_status(&send_cmd);
 	} else if (CANSTMOB & 1<<RXOK) {
 		can_get_status(&received_cmd);
-		PINB = (rec_data ? 1 : 0)<<PORTB4;
+		PINB = 1<<PINB4;
 	} else {
 		//while (1) {
 			PINB = 1<<PINB3;
-			_delay_ms(1000);
 			can_get_status(&send_cmd);
 			can_get_status(&received_cmd);
 		//}
