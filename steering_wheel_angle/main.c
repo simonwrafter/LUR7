@@ -27,7 +27,6 @@ void setup() {
 	ADCSRB = 0x00;
 	sei();
 	ADCSRA |= 1<<ADSC;
-
 }
 
 void loop() {
