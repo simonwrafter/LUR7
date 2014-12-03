@@ -303,24 +303,24 @@ uint8_t can_get_status (st_cmd_t* cmd) {
 		// Status field of descriptor: 0x20 if Rx completed
 		// Status field of descriptor: 0xA0 if Rx completed with DLCWarning
 		cmd->status = a_status;
-		Can_mob_abort();				// Freed the MOB
-		Can_clear_status_mob(); //	 and reset MOb status
+		Can_mob_abort();		// Freed the MOB
+		Can_clear_status_mob(); // and reset MOb status
 		rtn_val = CAN_STATUS_COMPLETED;
 		break;
 	//---------------
 	case MOB_TX_COMPLETED:
 		// Status field of descriptor: 0x40 if Tx completed
 		cmd->status = a_status;
-		Can_mob_abort();				// Freed the MOB
-		Can_clear_status_mob(); //	 and reset MOb status
+		Can_mob_abort();		// Freed the MOB
+		Can_clear_status_mob(); // and reset MOb status
 		rtn_val = CAN_STATUS_COMPLETED;
 		break;
 	//---------------
 	default:
 		// Status field of descriptor: (bin)000b.scfa if MOb error
 		cmd->status = a_status;
-		Can_mob_abort();				// Freed the MOB
-		Can_clear_status_mob(); //	 and reset MOb status
+		Can_mob_abort();		// Freed the MOB
+		Can_clear_status_mob(); // and reset MOb status
 		rtn_val = CAN_STATUS_ERROR;
 		break;
 	} // switch (a_status...
