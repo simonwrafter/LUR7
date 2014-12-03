@@ -24,18 +24,8 @@ void init_io(void) {
 	}
 }
 
-/*
- * #define ADPS0 0
- * #define ADPS1 1
- * #define ADPS2 2
- #define ADIE 3
- #define ADIF 4
- #define ADATE 5
- #define ADSC 6
- #define ADEN 7
- */
 void init_adc(void) {
-	ADMUX = (1<<REFS0) | (1<<ADLAR) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0); 
+	ADMUX = (1<<REFS0) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0);
 	ADCSRA = (1<<ADEN) | (1<<ADPS1) | (1<<ADPS0);
 	ASCSRB = (1<<ADHSM);
 }
@@ -61,8 +51,13 @@ uint8_t get_input(uint8_t port) {
 }
 
 uint16_t get_analog(uint8_t analog_port) {
-	//START CONV.
-	while (adif = 0) {}
-	adif = 0;
-	return 
+	ADMUX &= ~((1<<MUX4) | (1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0));
+	ADMUX |= analog_port;
+	ADCSRA = (1<<ADSC);
+	
+	while (!(ADCSRA & (1<<ADIF))) {
+		;
+	}
+	ADCSRA |= (1<<ADIF);
+	return (ADCH<<8) | ADCL;
 }
