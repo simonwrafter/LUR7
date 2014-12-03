@@ -35,8 +35,9 @@ void init_io(void) {
  #define ADEN 7
  */
 void init_adc(void) {
-	ADMUX = (1<<REFS0) | (1<<ADLAR) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0);
-	ADCSRA = 
+	ADMUX = (1<<REFS0) | (1<<ADLAR) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0); 
+	ADCSRA = (1<<ADEN) | (1<<ADPS1) | (1<<ADPS0);
+	ASCSRB = (1<<ADHSM);
 }
 
 uint8_t set_output(uint8_t port, uint8_t data) {
@@ -59,6 +60,9 @@ uint8_t get_input(uint8_t port) {
 	return (PINX[port] & _BV(PINXn[port]) ? 1 : 0);
 }
 
-uint16_t get_analog(uint8_t port, uint8_t ) {
-	if (port)
+uint16_t get_analog(uint8_t analog_port) {
+	//START CONV.
+	while (adif = 0) {}
+	adif = 0;
+	return 
 }

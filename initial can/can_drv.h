@@ -3,7 +3,7 @@
  * 
  * Author: Simon Wrafter
  * 
- * Adaptions for Lund University Formula Student team LURacing
+ * Adaptions for Lund University Formula Student Engineering
  * 
  */
 

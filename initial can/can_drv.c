@@ -3,7 +3,7 @@
  * 
  * Author: Simon Wrafter
  * 
- * Adaptions for Lund University Formula Student team LURacing
+ * Adaptions for Lund University Formula Student Engineering
  * 
  */
 
@@ -140,9 +140,7 @@ uint8_t can_get_mob_status(void) {
 	// - MOb Status = 0x40 then MOB_TX_COMPLETED
 	// - MOb Status = 0xA0 then MOB_RX_COMPLETED_DLCW
 	mob_status = canstmob_copy & ((1<<DLCW)|(1<<TXOK)|(1<<RXOK));
-	if ((mob_status==MOB_RX_COMPLETED) || \
-			(mob_status==MOB_TX_COMPLETED) || \
-			(mob_status==MOB_RX_COMPLETED_DLCW)) {
+	if ((mob_status==MOB_RX_COMPLETED) || (mob_status==MOB_TX_COMPLETED) || (mob_status==MOB_RX_COMPLETED_DLCW)) {
 		return(mob_status);
 	}
 	// If MOb is ENABLE & NOT_COMPLETED, test if MOb is in ERROR
