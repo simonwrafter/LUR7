@@ -118,7 +118,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				for (cpt=0; cpt<cmd->dlc; cpt++) {
 					CANMSG = *(cmd->pt_data + cpt);
 				}
-				if (cmd->ctrl.rtr) {
+				if (cmd->rtr) {
 					Can_set_rtr();
 				} else {
 					Can_clear_rtr();
@@ -132,7 +132,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				for (cpt = 0; cpt < cmd->dlc; cpt++) {
 					CANMSG = *(cmd->pt_data + cpt);
 				}
-				cmd->ctrl.rtr = 0;
+				cmd->rtr = 0;
 				Can_clear_rtr();
 				Can_set_dlc(cmd->dlc);
 				Can_config_tx();
@@ -140,7 +140,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 			//------------
 			case CMD_TX_REMOTE:
 				Can_set_ext_id(cmd->id.ext);
-				cmd->ctrl.rtr = 1;
+				cmd->rtr = 1;
 				Can_set_rtr();
 				Can_set_dlc(cmd->dlc);
 				Can_config_tx();
@@ -159,7 +159,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				u32_temp = 0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
-				cmd->ctrl.rtr = 0;
+				cmd->rtr = 0;
 				Can_set_rtrmsk();
 				Can_clear_rtr();
 				Can_clear_idemsk();
@@ -170,7 +170,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				u32_temp = 0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
-				cmd->ctrl.rtr = 1;
+				cmd->rtr = 1;
 				Can_set_rtrmsk();
 				Can_set_rtr();
 				Can_clear_rplv();
@@ -193,7 +193,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				u32_temp = ~0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
-				cmd->ctrl.rtr = 0;
+				cmd->rtr = 0;
 				Can_set_rtrmsk();
 				Can_clear_rtr();
 				Can_set_idemsk();
@@ -205,7 +205,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				u32_temp = ~0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
-				cmd->ctrl.rtr = 1;
+				cmd->rtr = 1;
 				Can_set_rtrmsk();
 				Can_set_rtr();
 				Can_clear_rplv();
@@ -220,7 +220,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				u32_temp = 0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
-				cmd->ctrl.rtr = 1;
+				cmd->rtr = 1;
 				Can_set_rtrmsk();
 				Can_set_rtr();
 				Can_set_rplv();
@@ -236,7 +236,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				u32_temp = ~0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
-				cmd->ctrl.rtr = 1;
+				cmd->rtr = 1;
 				Can_set_rtrmsk();
 				Can_set_rtr();
 				Can_set_rplv();
@@ -298,8 +298,7 @@ uint8_t can_get_status (st_cmd_t* cmd) {
 	case MOB_RX_COMPLETED_DLCW:
 		cmd->dlc = Can_get_dlc();
 		can_get_data(cmd->pt_data);
-		cmd->ctrl.rtr = Can_get_rtr();
-		cmd->ctrl.ide = 1; // assume extended frame
+		cmd->rtr = Can_get_rtr();
 		Can_get_ext_id(cmd->id.ext);
 		// Status field of descriptor: 0x20 if Rx completed
 		// Status field of descriptor: 0xA0 if Rx completed with DLCWarning

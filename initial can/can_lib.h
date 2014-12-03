@@ -90,17 +90,8 @@ typedef enum {
 // standard, extended or through a table. */
 typedef union{
 	uint32_t ext;
-	uint16_t std;
 	uint8_t  tab[4];
 } can_id_t;
-
-/* ----------
-// @brief This structure defines some specific information as RTR bit and
-// IDE bit */
-typedef struct{
-	Bool rtr;
-	Bool ide;
-} can_ctrl_t;
 
 /* ----------
 // @brief This structure allows to define a specific action on CAN network.
@@ -115,13 +106,13 @@ typedef struct{
 // 6) status : manage by the library.
 // 7) ctrl   : field ide to signal a extended frame. */
 typedef struct{
-	uint8_t    handle;
-	can_cmd_t  cmd;
-	can_id_t   id;
-	uint8_t    dlc;
-	uint8_t*   pt_data;
-	uint8_t    status;
-	can_ctrl_t ctrl;
+	uint8_t		handle;
+	can_cmd_t	cmd;
+	can_id_t	id;
+	uint8_t		dlc;
+	uint8_t*	pt_data;
+	uint8_t		status;
+	Bool		rtr;
 } st_cmd_t;
 
 
