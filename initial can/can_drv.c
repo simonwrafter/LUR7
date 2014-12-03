@@ -135,20 +135,20 @@ uint8_t can_get_mob_status(void) {
 		return(MOB_DISABLE);
 	}
 	canstmob_copy = CANSTMOB; // Copy for test integrity
-	// If MOb is ENABLE, test if MOb is COMPLETED
+	/* If MOb is ENABLE, test if MOb is COMPLETED
 	// - MOb Status = 0x20 then MOB_RX_COMPLETED
 	// - MOb Status = 0x40 then MOB_TX_COMPLETED
-	// - MOb Status = 0xA0 then MOB_RX_COMPLETED_DLCW
+	// - MOb Status = 0xA0 then MOB_RX_COMPLETED_DLCW */
 	mob_status = canstmob_copy & ((1<<DLCW)|(1<<TXOK)|(1<<RXOK));
 	if ((mob_status==MOB_RX_COMPLETED) || (mob_status==MOB_TX_COMPLETED) || (mob_status==MOB_RX_COMPLETED_DLCW)) {
 		return(mob_status);
 	}
-	// If MOb is ENABLE & NOT_COMPLETED, test if MOb is in ERROR
+	/* If MOb is ENABLE & NOT_COMPLETED, test if MOb is in ERROR
 	// - MOb Status bit_0 = MOB_ACK_ERROR
 	// - MOb Status bit_1 = MOB_FORM_ERROR
 	// - MOb Status bit_2 = MOB_CRC_ERROR
 	// - MOb Status bit_3 = MOB_STUFF_ERROR
-	// - MOb Status bit_4 = MOB_BIT_ERROR
+	// - MOb Status bit_4 = MOB_BIT_ERROR */
 	mob_status = canstmob_copy & ERR_MOB_MSK;
 	if (mob_status != 0) {
 		return(mob_status);

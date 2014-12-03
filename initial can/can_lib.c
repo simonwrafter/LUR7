@@ -38,7 +38,7 @@
 //!
 //! @todo
 //! @bug
-//*****************************************************************************/
+*******************************************************************************/
 
 //_____ I N C L U D E S ________________________________________________________
 #include "config.h"
@@ -65,7 +65,7 @@
 //!
 //-----------------------------------------------------------------------------*/
 void can_init() {
-	Can_bit_timing();	 // c.f. macro in "can_drv.h"
+	can_fixed_baudrate();	 // c.f. macro in "can_drv.h"
 	can_clear_all_mob(); // c.f. function in "can_drv.c"
 	Can_enable();		 // c.f. macro in "can_drv.h"
 }
@@ -110,15 +110,11 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 			cmd->handle = mob_handle;
 			Can_set_mob(mob_handle);
 			Can_clear_mob();
-
+			
 			switch (cmd->cmd) {
 			//------------
 			case CMD_TX:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				} else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				for (cpt=0; cpt<cmd->dlc; cpt++) {
 					CANMSG = *(cmd->pt_data + cpt);
 				}
@@ -132,11 +128,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				break;
 			//------------
 			case CMD_TX_DATA:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				} else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				for (cpt = 0; cpt < cmd->dlc; cpt++) {
 					CANMSG = *(cmd->pt_data + cpt);
 				}
@@ -147,12 +139,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				break;
 			//------------
 			case CMD_TX_REMOTE:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				}
-				else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				cmd->ctrl.rtr = 1;
 				Can_set_rtr();
 				Can_set_dlc(cmd->dlc);
@@ -192,11 +179,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				break;
 			//------------
 			case CMD_RX_MASKED:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				} else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				u32_temp = ~0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
@@ -206,11 +189,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				break;
 			//------------
 			case CMD_RX_DATA_MASKED:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				} else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				u32_temp = ~0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
@@ -222,11 +201,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				break;
 			//------------
 			case CMD_RX_REMOTE_MASKED:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				} else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				u32_temp = ~0;
 				Can_set_ext_msk(u32_temp);
 				Can_set_dlc(cmd->dlc);
@@ -254,11 +229,7 @@ uint8_t can_cmd(st_cmd_t* cmd) {
 				break;
 			//------------
 			case CMD_REPLY_MASKED:
-				if (cmd->ctrl.ide) {
-					Can_set_ext_id(cmd->id.ext);
-				} else {
-					Can_set_std_id(cmd->id.std);
-				}
+				Can_set_ext_id(cmd->id.ext);
 				for (cpt = 0; cpt < cmd->dlc; cpt++) {
 					CANMSG = *(cmd->pt_data + cpt);
 				}
@@ -328,13 +299,8 @@ uint8_t can_get_status (st_cmd_t* cmd) {
 		cmd->dlc = Can_get_dlc();
 		can_get_data(cmd->pt_data);
 		cmd->ctrl.rtr = Can_get_rtr();
-		if (Can_get_ide()) { // if extended frame
-			cmd->ctrl.ide = 1; // extended frame
-			Can_get_ext_id(cmd->id.ext);
-		} else { // else standard frame
-			cmd->ctrl.ide = 0;
-			Can_get_std_id(cmd->id.std);
-		}
+		cmd->ctrl.ide = 1; // assume extended frame
+		Can_get_ext_id(cmd->id.ext);
 		// Status field of descriptor: 0x20 if Rx completed
 		// Status field of descriptor: 0xA0 if Rx completed with DLCWarning
 		cmd->status = a_status;

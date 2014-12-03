@@ -19,7 +19,7 @@
 
  */
 
-//******************************************************************************
+/******************************************************************************
 //! @file $RCSfile: can_drv.h,v $
 //!
 //! Copyright (c) 2007 Atmel.
@@ -39,7 +39,7 @@
 //!
 //! @todo
 //! @bug
-//******************************************************************************
+*******************************************************************************/
 
 #ifndef _CAN_DRV_H_
 #define _CAN_DRV_H_
@@ -150,12 +150,6 @@
 #   error This FOSC value is not in "can_drv.h" file
 #endif
     // ----------
-    //! The first action of "can_bit_timing()" is to reset the CAN controller
-    //! "can_bit_timing()" lets the CAN controller disable
-    //! "can_bit_timing()" returns 1 if the setting of CANBTx registers is available
-    //!                and returns 0 if the setting of CANBTx registers is wrong
-#define Can_bit_timing()  (can_fixed_baudrate())
-    // ----------
 #define CAN_PORT_IN     PINC // edited for ATmegaxxM1
 #define CAN_PORT_DIR    DDRC // edited for ATmegaxxM1
 #define CAN_PORT_OUT    PORTC // edited for ATmegaxxM1
@@ -242,8 +236,8 @@ typedef enum {
 #define Can_conf_bt()     { CANBT1=CONF_CANBT1; CANBT2=CONF_CANBT2; CANBT3=CONF_CANBT3; }
     // ----------
 #define Can_set_mob(mob)       { CANPAGE = ((mob) << 4);}
-#define Can_set_mask_mob()     {  CANIDM4=0xFF; CANIDM3=0xFF; CANIDM2=0xFF; CANIDM1=0xFF; }
-#define Can_clear_mask_mob()   {  CANIDM4=0x00; CANIDM3=0x00; CANIDM2=0x00; CANIDM1=0x00; }
+#define Can_set_mask_mob()     { CANIDM4=0xFF; CANIDM3=0xFF; CANIDM2=0xFF; CANIDM1=0xFF; }
+#define Can_clear_mask_mob()   { CANIDM4=0x00; CANIDM3=0x00; CANIDM2=0x00; CANIDM1=0x00; }
 #define Can_clear_status_mob() { CANSTMOB=0x00; }
 #define Can_clear_mob()        { uint8_t  volatile *__i_; for (__i_=&CANSTMOB; __i_<&CANSTML; __i_++) { *__i_=0x00 ;}}
     // ----------
@@ -274,28 +268,11 @@ typedef enum {
 #define Can_clear_rtrmsk() ( CANIDM4 &= ~(1<<RTRMSK) )
 #define Can_clear_idemsk() ( CANIDM4 &= ~(1<<IDEMSK) )
     // ----------
-                //!< STD ID TAG Reading
-#define Can_get_std_id(identifier)  { *((uint8_t *)(&(identifier))+1) =  CANIDT1>>5              ; \
-                                      *((uint8_t *)(&(identifier))  ) = (CANIDT2>>5)+(CANIDT1<<3); }
-    // ----------
                 //!< EXT ID TAG Reading
 #define Can_get_ext_id(identifier)  { *((uint8_t *)(&(identifier))+3) =  CANIDT1>>3              ; \
                                       *((uint8_t *)(&(identifier))+2) = (CANIDT2>>3)+(CANIDT1<<5); \
                                       *((uint8_t *)(&(identifier))+1) = (CANIDT3>>3)+(CANIDT2<<5); \
                                       *((uint8_t *)(&(identifier))  ) = (CANIDT4>>3)+(CANIDT3<<5); }
-    // ----------
-                //!< STD ID Construction
-#define CAN_SET_STD_ID_10_4(identifier)  (((*((uint8_t *)(&(identifier))+1))<<5)+((* (uint8_t *)(&(identifier)))>>3))
-#define CAN_SET_STD_ID_3_0( identifier)  (( * (uint8_t *)(&(identifier))   )<<5)
-    // ----------
-                //!< STD ID TAG writing
-#define Can_set_std_id(identifier)  { CANIDT1   = CAN_SET_STD_ID_10_4(identifier); \
-                                      CANIDT2   = CAN_SET_STD_ID_3_0( identifier); \
-                                      CANCDMOB &= (~(1<<IDE))                    ; }
-    // ----------
-                //!< STD ID MASK writing
-#define Can_set_std_msk(mask)       { CANIDM1   = CAN_SET_STD_ID_10_4(mask); \
-                                      CANIDM2   = CAN_SET_STD_ID_3_0( mask); }
     // ----------
                 //!< EXT ID Construction
 #define CAN_SET_EXT_ID_28_21(identifier)  (((*((uint8_t *)(&(identifier))+3))<<3)+((*((uint8_t *)(&(identifier))+2))>>5))

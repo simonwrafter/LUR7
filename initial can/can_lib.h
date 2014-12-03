@@ -19,7 +19,6 @@
 
  */
 
-
 /******************************************************************************
 //! @file $RCSfile: can_lib.h,v $
 //!
@@ -40,7 +39,7 @@
 //!
 //! @todo
 //! @bug
-//******************************************************************************/
+********************************************************************************/
 
 #ifndef _CAN_LIB_H_
 #define _CAN_LIB_H_
@@ -50,26 +49,26 @@
 
 //_____ D E F I N I T I O N S __________________________________________________
 
-// ----------
-// @brief This constant is used as return value for "can_cmd" function.
+/* ----------
+// @brief This constant is used as return value for "can_cmd" function. */
 #define CAN_CMD_REFUSED  0xFF
-// ----------
-// @brief This constant is used as return value for "can_cmd" function.
+/* ----------
+// @brief This constant is used as return value for "can_cmd" function. */
 #define CAN_CMD_ACCEPTED         0x00
 
-// ----------
-// @brief This constant is used as return value for "can_get_status" function.
+/* ----------
+// @brief This constant is used as return value for "can_get_status" function. */
 #define CAN_STATUS_COMPLETED     0x00
-// ----------
-// @brief This constant is used as return value for "can_get_status" function.
+/* ----------
+// @brief This constant is used as return value for "can_get_status" function. */
 #define CAN_STATUS_NOT_COMPLETED 0x01
-// ----------
-// @brief This constant is used as return value for "can_get_status" function.
+/* ----------
+// @brief This constant is used as return value for "can_get_status" function. */
 #define CAN_STATUS_ERROR         0x02
 
-// ----------
+/* ----------
 // @brief This enumeration is used to select an action for a specific message
-// declared in st_cmd_t structure.
+// declared in st_cmd_t structure. */
 typedef enum {
 	CMD_NONE,
 	CMD_TX,
@@ -86,24 +85,24 @@ typedef enum {
 	CMD_ABORT
 } can_cmd_t;
 
-// ----------
+/* ----------
 // @brief This union defines a CAN identifier and allows to access it in mode
-// standard, extended or through a table.
+// standard, extended or through a table. */
 typedef union{
 	uint32_t ext;
 	uint16_t std;
 	uint8_t  tab[4];
 } can_id_t;
 
-// ----------
+/* ----------
 // @brief This structure defines some specific information as RTR bit and
-// IDE bit
+// IDE bit */
 typedef struct{
 	Bool rtr;
 	Bool ide;
 } can_ctrl_t;
 
-// ----------
+/* ----------
 // @brief This structure allows to define a specific action on CAN network.
 // 1) handle : manage by the library.
 // 2) cmd    : initialize by the application to select the operation.
@@ -114,7 +113,7 @@ typedef struct{
 // 5) pt_data: pointer on the table which contains the data to send or
 //             received.
 // 6) status : manage by the library.
-// 7) ctrl   : field ide to signal a extended frame .
+// 7) ctrl   : field ide to signal a extended frame. */
 typedef struct{
 	uint8_t    handle;
 	can_cmd_t  cmd;
