@@ -88,35 +88,6 @@
 #       error This CAN_BAUDRATE value is not in "CAN_driver.h" file
 #   endif
 
-#elif FOSC == 12000           //!< Fclkio = 12 MHz, Tclkio = 83.333 ns
-#   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 20x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x0A       // Tscl  = 6x Tclkio = 500 ns
-#       define CONF_CANBT2  0x0E       // Tsync = 1x Tscl, Tprs = 8x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x4B       // Tpsh1 = 6x Tscl, Tpsh2 = 5x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 125       //!< -- 125Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x0A       // Tscl  = 6x Tclkio = 500 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 200       //!< -- 200Kb/s, 20x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x04       // Tscl  = 3x Tclkio = 250 ns
-#       define CONF_CANBT2  0x0E       // Tsync = 1x Tscl, Tprs = 8x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x4B       // Tpsh1 = 6x Tscl, Tpsh2 = 5x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 250       //!< -- 250Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x04       // Tscl  = 3x Tclkio = 250 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 500       //!< -- 500Kb/s, 12x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 166.666 ns
-#       define CONF_CANBT2  0x08       // Tsync = 1x Tscl, Tprs = 5x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x25       // Tpsh1 = 3x Tscl, Tpsh2 = 3x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 1000      //!< -- 1 Mb/s, 12x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x00       // Tscl  = 1x Tclkio = 83.333 ns
-#       define CONF_CANBT2  0x08       // Tsync = 1x Tscl, Tprs = 5x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x25       // Tpsh1 = 3x Tscl, Tpsh2 = 3x Tscl, 3 sample points
-#   else
-#       error This CAN_BAUDRATE value is not in "can_drv.h" file
-#   endif
-
 #elif FOSC == 8000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
 #   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
 #       define CONF_CANBT1  0x08       // Tscl  = 5x Tclkio = 625 ns
