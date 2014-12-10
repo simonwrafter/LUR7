@@ -51,7 +51,7 @@ const uint8_t ADC_AN2 = 4;
 const uint8_t ADC_TEMP = 11;
 const uint8_t ADC_SUPPLY = 0x10;
 
-const uint8_t DDX[] = {
+const uint8_t* DDX[] = {
 	DDRD, //IN1
 	DDRD, //IN2
 	DDRD, //IN3
@@ -91,7 +91,7 @@ const uint8_t DDXn[] = {
 	DDB4 //OUT8
 };
 
-const uint8_t PORTX[] = {
+const uint8_t* PORTX[] = {
 	PORTD, //IN1
 	PORTD, //IN2
 	PORTD, //IN3
@@ -131,7 +131,7 @@ const uint8_t PORTXn[] = {
 	PORTB4 //OUT8
 };
 
-const uint8_t PINX[] = {
+const uint8_t* PINX[] = {
 	PIND, //IN1
 	PIND, //IN2
 	PIND, //IN3
