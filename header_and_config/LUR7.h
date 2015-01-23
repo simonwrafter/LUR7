@@ -1,22 +1,23 @@
 /*
  * / LUR7.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
- * / 
+ * /
  * / This program is free software: you can redistribute it and/or modify
  * / it under the terms of the GNU General Public License as published by
  * / the Free Software Foundation, either version 3 of the License, or
  * / (at your option) any later version.
- * / 
+ * /
  * / This program is distributed in the hope that it will be useful,
  * / but WITHOUT ANY WARRANTY; without even the implied warranty of
  * / MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * / GNU General Public License for more details.
- * / 
+ * /
  * / You should have received a copy of the GNU General Public License
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <avr/io.h> 
+#ifndef _LUR7_H_
+#define _LUR7_H_
 
 const uint8_t NBR_OF_IO = 17;
 
@@ -51,27 +52,27 @@ const uint8_t ADC_AN2 = 4;
 const uint8_t ADC_TEMP = 11;
 const uint8_t ADC_SUPPLY = 0x10;
 
-const uint8_t* DDX[] = {
-	DDRD, //IN1
-	DDRD, //IN2
-	DDRD, //IN3
-	DDRB, //IN4
-	DDRC, //IN5
-	DDRB, //IN6
-	DDRD, //IN7
-	DDRB, //IN8
-	DDRB, //IN9
-	DDRB, //OUT1
-	DDRB, //OUT2
-	DDRD, //OUT3
-	DDRC, //OUT4
-	DDRC, //OUT5
-	DDRC, //OUT6
-	DDRB, //OUT7
-	DDRB //OUT8
+volatile uint8_t * DDX[] = {
+	&DDRD, //IN1
+	&DDRD, //IN2
+	&DDRD, //IN3
+	&DDRB, //IN4
+	&DDRC, //IN5
+	&DDRB, //IN6
+	&DDRD, //IN7
+	&DDRB, //IN8
+	&DDRB, //IN9
+	&DDRB, //OUT1
+	&DDRB, //OUT2
+	&DDRD, //OUT3
+	&DDRC, //OUT4
+	&DDRC, //OUT5
+	&DDRC, //OUT6
+	&DDRB, //OUT7
+	&DDRB //OUT8
 };
 
-const uint8_t DDXn[] = {
+uint8_t DDXn[] = {
 	DDD3, //IN1
 	DDD2, //IN2
 	DDD1, //IN3
@@ -91,27 +92,27 @@ const uint8_t DDXn[] = {
 	DDB4 //OUT8
 };
 
-const uint8_t* PORTX[] = {
-	PORTD, //IN1
-	PORTD, //IN2
-	PORTD, //IN3
-	PORTB, //IN4
-	PORTC, //IN5
-	PORTB, //IN6
-	PORTD, //IN7
-	PORTB, //IN8
-	PORTB, //IN9
-	PORTB, //OUT1
-	PORTB, //OUT2
-	PORTD, //OUT3
-	PORTC, //OUT4
-	PORTC, //OUT5
-	PORTC, //OUT6
-	PORTB, //OUT7
-	PORTB //OUT8
+volatile uint8_t * PORTX[] = {
+	&PORTD, //IN1
+	&PORTD, //IN2
+	&PORTD, //IN3
+	&PORTB, //IN4
+	&PORTC, //IN5
+	&PORTB, //IN6
+	&PORTD, //IN7
+	&PORTB, //IN8
+	&PORTB, //IN9
+	&PORTB, //OUT1
+	&PORTB, //OUT2
+	&PORTD, //OUT3
+	&PORTC, //OUT4
+	&PORTC, //OUT5
+	&PORTC, //OUT6
+	&PORTB, //OUT7
+	&PORTB //OUT8
 };
 
-const uint8_t PORTXn[] = {
+uint8_t PORTXn[] = {
 	PORTD3, //IN1
 	PORTD2, //IN2
 	PORTD1, //IN3
@@ -131,27 +132,27 @@ const uint8_t PORTXn[] = {
 	PORTB4 //OUT8
 };
 
-const uint8_t* PINX[] = {
-	PIND, //IN1
-	PIND, //IN2
-	PIND, //IN3
-	PINB, //IN4
-	PINC, //IN5
-	PINB, //IN6
-	PIND, //IN7
-	PINB, //IN8
-	PINB, //IN9
-	PINB, //OUT1
-	PINB, //OUT2
-	PIND, //OUT3
-	PINC, //OUT4
-	PINC, //OUT5
-	PINC, //OUT6
-	PINB, //OUT7
-	PINB //OUT8
+volatile uint8_t * PINX[] = {
+	&PIND, //IN1
+	&PIND, //IN2
+	&PIND, //IN3
+	&PINB, //IN4
+	&PINC, //IN5
+	&PINB, //IN6
+	&PIND, //IN7
+	&PINB, //IN8
+	&PINB, //IN9
+	&PINB, //OUT1
+	&PINB, //OUT2
+	&PIND, //OUT3
+	&PINC, //OUT4
+	&PINC, //OUT5
+	&PINC, //OUT6
+	&PINB, //OUT7
+	&PINB //OUT8
 };
 
-const uint8_t PINXn[] = {
+uint8_t PINXn[] = {
 	PIND3, //IN1
 	PIND2, //IN2
 	PIND1, //IN3
@@ -171,8 +172,6 @@ const uint8_t PINXn[] = {
 	PINB4 //OUT8
 };
 
-
-
 void init_io(void);
 void init_adc(void);
 
@@ -182,3 +181,6 @@ uint8_t toggle_output(uint8_t);
 
 uint8_t get_input(uint8_t);
 uint16_t get_analog(uint8_t);
+
+#endif  // _LUR7_H_
+
