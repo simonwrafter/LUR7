@@ -20,9 +20,22 @@
 
 void setup() {
 	init_io();
+	/*
+	 * Space for more setup code
+	 * This code will be run once.
+	 */
+}
+
+void loop() {
+	/*
+	 * Space for main code
+	 * This code will be run repeatedly.
+	 */
 }
 
 void main() {
 	setup();
-	loop();
+	while (1) {
+		loop();
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * / LUR7.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * / main.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
  * / 
  * / This program is free software: you can redistribute it and/or modify
@@ -16,4 +16,26 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../header_and_config/config.h"
 
+void setup() {
+	init_io();
+	/*
+	 * Space for more setup code
+	 * This code will be run once.
+	 */
+}
+
+void loop() {
+	/*
+	 * Space for main code
+	 * This code will be run repeatedly.
+	 */
+}
+
+void main() {
+	setup();
+	while (1) {
+		loop();
+	}
+}
