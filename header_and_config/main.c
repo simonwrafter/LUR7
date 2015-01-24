@@ -16,7 +16,7 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../header_and_config/config.h"
+#include "../header_and_config/LUR7.h"
 
 void setup() {
 	init_io();

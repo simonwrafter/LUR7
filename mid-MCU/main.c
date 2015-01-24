@@ -18,24 +18,21 @@
 
 #include "../header_and_config/config.h"
 
-void setup() {
+void setup(void) {
 	init_io();
-	/*
-	 * Space for more setup code
-	 * This code will be run once.
-	 */
+	// Space for more setup code
+	// This code will be run once.
 }
 
-void loop() {
-	/*
-	 * Space for main code
-	 * This code will be run repeatedly.
-	 */
+void loop(void) {
+	// Space for main code
+	// This code will be run repeatedly.
 }
 
-void main() {
+int main(void) {
 	setup();
 	while (1) {
 		loop();
 	}
+	return 0;
 }
