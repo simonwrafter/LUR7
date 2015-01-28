@@ -16,7 +16,6 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <avr/io.h>
 #include "../header_and_config/LUR7.h"
 
 void setup(void) {
