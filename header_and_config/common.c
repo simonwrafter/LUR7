@@ -16,6 +16,9 @@
 / along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <avr/io.h>
+#include <avr/cpufunc.h>
+#include <stdint.h>
 #include "common.h"
 
 //Init functions
@@ -23,14 +26,14 @@
 void init_io(void) {
 	int i;
 	for (i=OUT1; i<NBR_OF_IO; i++) { //set DDXn=1 for all outputs
-		*DDX[i] |= (1<<DDXn);
+		*DDX[i] |= (1<<DDXn[i]);
 	}
 }
 
 void init_adc(void) {
 	ADMUX = (1<<REFS0) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0);
 	ADCSRA = (1<<ADEN) | (1<<ADPS1) | (1<<ADPS0);
-	ASCSRB = (1<<ADHSM);
+	ADCSRB = (1<<ADHSM);
 }
 
 //other functions
@@ -38,8 +41,10 @@ void init_adc(void) {
 uint8_t set_output(uint8_t port, uint8_t data) {
 	if (data) {
 		*PORTX[port] |= (1 << PORTXn[port]);
+		return 1;
 	} else {
 		*PORTX[port] &= ~(1 << PORTXn[port]);
+		return 0;
 	}
 }
 
@@ -49,10 +54,12 @@ uint8_t get_output(uint8_t port) {
 
 uint8_t toggle_output(uint8_t port){
 	*PINX[port] = (1 << PINXn[port]);
+	_NOP();
+	return get_input(port);
 }
 
 uint8_t get_input(uint8_t port) {
-	return (*PINX[port] & _BV(PINXn[port]) ? 1 : 0);
+	return (*PINX[port] & (1 << PINXn[port]) ? 1 : 0);
 }
 
 uint16_t get_analog(uint8_t analog_port) {

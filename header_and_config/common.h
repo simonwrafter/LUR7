@@ -17,7 +17,7 @@
  */
 
 #ifndef _COMMON_H_
-#define _COMMON_H_
+#define _COMMON_H_ 1
 
 const uint8_t NBR_OF_IO = 17;
 
