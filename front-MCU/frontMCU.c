@@ -1,6 +1,6 @@
 /*
- * / main.c - A collection of functions to setup and ease the use of the LUR7 PCB
- * / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * / frontMCU.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  * /
  * / This program is free software: you can redistribute it and/or modify
  * / it under the terms of the GNU General Public License as published by
@@ -17,25 +17,29 @@
  */
 
 #include "../header_and_config/LUR7.h"
+#include "frontMCU.h"
 
-void setup(void) {
-	init_io();
-	/*
-	 * Space for more setup code
-	 * This code will be run once.
-	 */
+static volatile uint16_t speed_l = 0;
+static volatile uint16_t speed_r = 0;
+static volatile uint16_t susp_l = 0;
+static volatile uint16_t susp_r = 0;
+static volatile uint16_t steering = 0;
+
+void init_interrupt(void) {
+	EICRA = (1<<ISC30) | (1<<ISC10); //logical change to INT1 and INT3
+	EIMSK = (1<<INT1) | (1<<INT3);
 }
 
-void loop(void) {
-	/*
-	 * Space for main code
-	 * This code will be run repeatedly.
-	 */
+void update_analog(void) {
+	susp_l = get_analog(SUSPENSION_L);
+	susp_r = get_analog(SUSPENSION_R);
+	steering = get_analog(STEERING_WHEEL);
 }
 
-int main(void) {
-	setup();
-	while (1) {
-		loop();
-	}
+ISR(INT3_vect) { // SPEED_L
+	;
+}
+
+ISR(INT1_vect) { // SPEED_R
+	;
 }

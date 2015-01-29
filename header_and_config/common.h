@@ -35,6 +35,8 @@
 //analog inputs
 #define AN1 4
 #define AN2 6
+#define AN3 8
+#define AN4 9
 
 //digital outputs
 #define OUT1 9
@@ -47,8 +49,10 @@
 #define OUT8 16
 
 // ADC
-#define ADC_AN1 0x07
-#define ADC_AN2 0x04
+#define ADC_AN1 0x04
+#define ADC_AN2 0x07
+#define ADC_AN3 0x06
+#define ADC_AN4 0x05
 #define ADC_TEMP 0x0B
 #define ADC_SUPPLY 0x10
 

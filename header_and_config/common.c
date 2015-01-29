@@ -17,7 +17,7 @@
 */
 
 #include <avr/io.h>
-#include <avr/cpufunc.h>
+#include <avr/cpufunc.h> //included for _NOP()
 #include <stdint.h>
 #include "common.h"
 
