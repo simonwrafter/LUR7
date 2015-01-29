@@ -25,7 +25,7 @@ int main(void) {
 	init_interrupt();
 	sei();
 	while (1) {
-		uppdate_analog(); // Better to call from a timer interrupt, perhaps together with CAN send
+		update_analog(); // Better to call from a timer interrupt, perhaps together with CAN send
 	}
 	return 0;
 }

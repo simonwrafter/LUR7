@@ -142,7 +142,6 @@ static uint8_t PINXn[] = {
 	PINB4  //OUT8
 };
 
-
 //Init functions
 
 void init_io(void) {

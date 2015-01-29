@@ -27,8 +27,8 @@
 //_____ D E F I N I T I O N S __________________________________________________
 
     // -------------- MCU LIB CONFIGURATION
-#define FOSC           8000        // 8Mhz external clock
-#define F_CPU          8000000     // Need for AVR GCC
+#define FOSC           16000        // 16Mhz external clock
+#define F_CPU          16000000     // Needed for delay
 
 #include <util/delay.h>
 

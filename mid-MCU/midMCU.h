@@ -19,6 +19,8 @@
 #ifndef _MIDMCU_H_
 #define _MIDMCU_H_
 
-void midMCU_main(void);
+#define SHIFT_DATA		OUT1
+#define SHIFT_CLK		OUT2
+#define SHIFT_STROBE	OUT3
 
 #endif // _MIDMCU_H_

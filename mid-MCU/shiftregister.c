@@ -19,7 +19,3 @@
 #include "../header_and_config/LUR7.h"
 #include "shiftregister.h"
 
-uint8_t convert_revs_to_bar(uint16_t revs) {
-	return (revs - REV_MIN) / (REV_MAX - REV_MIN) * BAR_MAX + BAR_MIN;
-}
-

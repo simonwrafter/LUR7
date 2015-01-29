@@ -21,6 +21,10 @@
 
 int main(void) {
 	init_io();
-	midMCU_main();
+	init_adc();
+	
+	while (1) {
+		;
+	}
 	return 0;
 }

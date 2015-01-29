@@ -19,17 +19,21 @@
 #include "../header_and_config/LUR7.h"
 #include "midMCU.h"
 
-void midMCU_main() {
-	volatile uint16_t revs = 0;
-	volatile uint16_t gear = 0;
-	volatile uint16_t speed = 0;
-	volatile uint16_t log_id = 0;
-	volatile uint16_t temp = 0;
-	
-	
-	
-	while (1) {
-		;
-	}
+static volatile uint16_t revs = 0;
+static volatile uint16_t gear = 0;
+static volatile uint16_t speed = 0;
+static volatile uint16_t log_id = 0;
+static volatile uint16_t temperature = 0;
+
+uint8_t convert_revs_to_bar() {
+	return (revs - REV_MIN) / (REV_MAX - REV_MIN) * BAR_MAX + BAR_MIN;
 }
 
+void shift_bit(uint8_t value) {
+	set_output(SHIFT_DATA, (value>0));
+	_delay_us(1);
+	set_output(SHIFT_CLK, 1);
+	_delay_us(1);
+	set_output(SHIFT_CLK, 1);
+	_delay_us(1);
+}
