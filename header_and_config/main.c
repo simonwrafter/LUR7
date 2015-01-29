@@ -16,7 +16,7 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LUR7.h"
+#include "../header_and_config/LUFSEN.h"
 
 void setup(void) {
 	init_io();

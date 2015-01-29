@@ -1,5 +1,5 @@
 /*
-/ LUR7.c - A collection of functions to setup and ease the use of the LUR7 PCB
+/ common.c - A collection of functions to setup and ease the use of the LUR7 PCB
 / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
 /
 / This program is free software: you can redistribute it and/or modify

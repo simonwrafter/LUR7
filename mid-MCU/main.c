@@ -17,22 +17,10 @@
  */
 
 #include "../header_and_config/LUR7.h"
-
-void setup(void) {
-	init_io();
-	// Space for more setup code
-	// This code will be run once.
-}
-
-void loop(void) {
-	// Space for main code
-	// This code will be run repeatedly.
-}
+#include "midMCU.h"
 
 int main(void) {
-	setup();
-	while (1) {
-		loop();
-	}
+	init_io();
+	midMCU_main();
 	return 0;
 }
