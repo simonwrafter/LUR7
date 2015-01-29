@@ -37,9 +37,9 @@ void update_analog(void) {
 }
 
 ISR(INT3_vect) { // SPEED_L
-	;
+	speed_l++; //for now...
 }
 
 ISR(INT1_vect) { // SPEED_R
-	;
+	speed_r++; //for now...
 }

@@ -19,8 +19,8 @@
 #ifndef _FRONTMCU_H_
 #define _FRONTMCU_H_
 
-#define WHEEL_SPEED_L	IN5
-#define WHEEL_SPEED_R	IN9 //also analog port AN4
+#define WHEEL_SPEED_L	IN5 //INT3
+#define WHEEL_SPEED_R	IN9 //INT1, (also AN4, not used)
 #define SUSPENSION_L	ADC_AN1 //IN4
 #define SUSPENSION_R	ADC_AN2 //IN6
 #define STEERING_WHEEL	ADC_AN3 //IN8
