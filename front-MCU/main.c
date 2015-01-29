@@ -1,6 +1,6 @@
 /*
  * / main.c - A collection of functions to setup and ease the use of the LUR7 PCB
- * / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  * /
  * / This program is free software: you can redistribute it and/or modify
  * / it under the terms of the GNU General Public License as published by
@@ -17,25 +17,15 @@
  */
 
 #include "../header_and_config/LUR7.h"
-
-void setup(void) {
-	init_io();
-	/*
-	 * Space for more setup code
-	 * This code will be run once.
-	 */
-}
-
-void loop(void) {
-	/*
-	 * Space for main code
-	 * This code will be run repeatedly.
-	 */
-}
+#include "frontMCU.h"
 
 int main(void) {
-	setup();
+	init_io();
+	init_adc();
+	init_interrupt();
+	sei();
 	while (1) {
-		loop();
+		uppdate_analog(); // Better to call from a timer interrupt, perhaps together with CAN send
 	}
+	return 0;
 }

@@ -1,6 +1,6 @@
 /*
- * / main.c - A collection of functions to setup and ease the use of the LUR7 PCB
- * / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * / frontMCU.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  * /
  * / This program is free software: you can redistribute it and/or modify
  * / it under the terms of the GNU General Public License as published by
@@ -16,26 +16,16 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../header_and_config/LUR7.h"
+#ifndef _FRONTMCU_H_
+#define _FRONTMCU_H_
 
-void setup(void) {
-	init_io();
-	/*
-	 * Space for more setup code
-	 * This code will be run once.
-	 */
-}
+#define WHEEL_SPEED_L	IN5 //INT3
+#define WHEEL_SPEED_R	IN9 //INT1, (also AN4, not used)
+#define SUSPENSION_L	ADC_AN1 //IN4
+#define SUSPENSION_R	ADC_AN2 //IN6
+#define STEERING_WHEEL	ADC_AN3 //IN8
 
-void loop(void) {
-	/*
-	 * Space for main code
-	 * This code will be run repeatedly.
-	 */
-}
+void init_interrupt(void);
+void update_analog(void);
 
-int main(void) {
-	setup();
-	while (1) {
-		loop();
-	}
-}
+#endif  // _FRONTMCU_H_
