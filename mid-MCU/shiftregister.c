@@ -19,3 +19,32 @@
 #include "../header_and_config/LUR7.h"
 #include "shiftregister.h"
 
+void shift_byte(uint8_t value) {
+	for (uint8_t i= 0; i<8; i++) {
+		shift_bit(value & (1<<i));
+	}
+}
+
+void shift_bar(uint8_t led_on, uint8_t length) {
+	uint8_t led_off = length - led_on;
+	for (uint8_t on=0; on<led_on; on++) {
+		shift_bit(1);
+	}
+	for (uint8_t off=0; off<led_off; off++) {
+		shift_bit(0);
+	}
+}
+
+void shift_bit(uint8_t value) {
+	set_output(SHIFT_DATA, (value>0));
+	_delay_us(1);
+	set_output(SHIFT_CLK, 1);
+	_delay_us(1);
+	set_output(SHIFT_CLK, 0);
+}
+
+void shift_strobe(void) {
+	set_output(SHIFT_STROBE, 1);
+	_delay_us(1);
+	set_output(SHIFT_STROBE, 0);
+}

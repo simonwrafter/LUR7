@@ -16,7 +16,12 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define REV_LOW 6000
-#define REV_HIGH 10500
-#define BAR_LOW 1
-#define BAR_HIGH 22
+#ifndef _MIDMCU_H_
+#define _MIDMCU_H_
+
+void shift_byte(uint8_t);
+void shift_bar(uint8_t, uint8_t);
+static void shift_bit(uint8_t);
+void shift_strobe(void);
+
+#endif // _MIDMCU_H_

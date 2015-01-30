@@ -26,14 +26,22 @@ static volatile uint16_t log_id = 0;
 static volatile uint16_t temperature = 0;
 
 uint8_t convert_revs_to_bar() {
-	return (revs - REV_MIN) / (REV_MAX - REV_MIN) * BAR_MAX + BAR_MIN;
+	uint8_t return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * BAR_HIGH + BAR_LOW;
+	if (return_val < BAR_LOW) {
+		return 0;
+	} else if (return_val > BAR_HIGH) {
+		return BAR_HIGH;
+	}
+	return return_val;
 }
 
-void shift_bit(uint8_t value) {
-	set_output(SHIFT_DATA, (value>0));
-	_delay_us(1);
-	set_output(SHIFT_CLK, 1);
-	_delay_us(1);
-	set_output(SHIFT_CLK, 1);
-	_delay_us(1);
+uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
+	if (binary >= 0 && binary <= 10) {
+		if (!dp) {
+			return sev_seg[binary];
+		} else {
+			return sev_seg_dp[binary];
+		}
+	}
+	return sev_seg[10];
 }

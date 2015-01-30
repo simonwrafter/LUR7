@@ -17,12 +17,14 @@
  */
 
 #include "../header_and_config/LUR7.h"
+#include "main.h"
 #include "midMCU.h"
+#include "shiftregister.h"
 
 int main(void) {
 	init_io();
 	init_adc();
-	
+
 	while (1) {
 		;
 	}

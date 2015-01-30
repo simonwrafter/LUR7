@@ -120,7 +120,7 @@ static volatile uint8_t * PINX[] = {
 	&PINC, //OUT6
 	&PINB, //OUT7
 	&PINB  //OUT8
-};
+};binary
 
 static uint8_t PINXn[] = {
 	PIND3, //IN1
