@@ -1,6 +1,6 @@
 /*
- * / main.c - A collection of functions to setup and ease the use of the LUR7 PCB
- * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
+ * / config.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
  * /
  * / This program is free software: you can redistribute it and/or modify
  * / it under the terms of the GNU General Public License as published by
@@ -16,17 +16,11 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../header_and_config/LUR7.h"
-#include "config.h"
-#include "midMCU.h"
-#include "shiftregister.h"
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
 
-int main(void) {
-	init_io();
-	init_adc();
-	
-	while (1) {
-		;
-	}
-	return 0;
-}
+#define SHIFT_DATA		OUT1
+#define SHIFT_CLK		OUT2
+#define SHIFT_STROBE	OUT3
+
+#endif // _CONFIG_H_

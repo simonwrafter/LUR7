@@ -39,22 +39,7 @@ static const uint8_t sev_seg[11] = {
 	0b00000000	//blank
 };
 
-static const uint8_t sev_seg_dp[11] = {
-	// a b c d e f g dp
-	0b11111101,	//0
-	0b01100001,	//1
-	0b11011011,	//2
-	0b11110011,	//3
-	0b01100111,	//4
-	0b10110111,	//5
-	0b10111111,	//6
-	0b11100001,	//7
-	0b11111111,	//8
-	0b11110111,	//9
-	0b00000001	//blank
-};
-
-uint8_t convert_revs_to_bar();
+uint8_t convert_revs_to_bar(void);
 
 uint8_t bin_to_7seg(uint8_t, uint8_t);
 

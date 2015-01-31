@@ -1,5 +1,5 @@
 /*
-/ common.c - A collection of functions to setup and ease the use of the LUR7 PCB
+/ LUR7_io.c - A collection of functions to setup and ease the use of the LUR7 PCB
 / Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
 /
 / This program is free software: you can redistribute it and/or modify
@@ -18,11 +18,12 @@
 
 #include <avr/io.h>
 #include <avr/cpufunc.h> //included for _NOP()
-#include <stdint.h>
-#include "common.h"
+//#include <stdint.h>
+#include "LUR7.h"
+#include "LUR7_io.h"
 
 // vectors of ports as used on PCB, used localy only!
-static volatile uint8_t * DDX[] = {
+static volatile uint8_t * DDX[19] = {
 	&DDRD, //IN1
 	&DDRD, //IN2
 	&DDRD, //IN3
@@ -42,7 +43,7 @@ static volatile uint8_t * DDX[] = {
 	&DDRB  //OUT8
 };
 
-static uint8_t DDXn[] = {
+static uint8_t DDXn[19] = {
 	DDD3, //IN1
 	DDD2, //IN2
 	DDD1, //IN3
@@ -62,7 +63,7 @@ static uint8_t DDXn[] = {
 	DDB4  //OUT8
 };
 
-static volatile uint8_t * PORTX[] = {
+static volatile uint8_t * PORTX[19] = {
 	&PORTD, //IN1
 	&PORTD, //IN2
 	&PORTD, //IN3
@@ -82,7 +83,7 @@ static volatile uint8_t * PORTX[] = {
 	&PORTB  //OUT8
 };
 
-static uint8_t PORTXn[] = {
+static uint8_t PORTXn[19] = {
 	PORTD3, //IN1
 	PORTD2, //IN2
 	PORTD1, //IN3
@@ -102,7 +103,7 @@ static uint8_t PORTXn[] = {
 	PORTB4  //OUT8
 };
 
-static volatile uint8_t * PINX[] = {
+static volatile uint8_t * PINX[19] = {
 	&PIND, //IN1
 	&PIND, //IN2
 	&PIND, //IN3
@@ -120,9 +121,9 @@ static volatile uint8_t * PINX[] = {
 	&PINC, //OUT6
 	&PINB, //OUT7
 	&PINB  //OUT8
-};binary
+};
 
-static uint8_t PINXn[] = {
+static uint8_t PINXn[19] = {
 	PIND3, //IN1
 	PIND2, //IN2
 	PIND1, //IN3
@@ -193,4 +194,3 @@ uint16_t get_analog(uint8_t analog_port) {
 	ADCSRA |= (1<<ADIF);
 	return (ADCH<<8) | ADCL;
 }
-

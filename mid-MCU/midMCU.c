@@ -40,8 +40,18 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 		if (!dp) {
 			return sev_seg[binary];
 		} else {
-			return sev_seg_dp[binary];
+			return sev_seg[binary] + 1;
 		}
 	}
 	return sev_seg[10];
 }
+
+void pcISR_in1(void) {}
+void pcISR_in2(void) {}
+void pcISR_in3(void) {}
+void pcISR_in4(void) {}
+void pcISR_in5(void) {}
+void pcISR_in6(void) {}
+void pcISR_in7(void) {}
+void pcISR_in8(void) {}
+void pcISR_in9(void) {}

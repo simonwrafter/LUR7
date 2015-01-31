@@ -17,6 +17,7 @@
  */
 
 #include "../header_and_config/LUR7.h"
+#include "config.h"
 #include "shiftregister.h"
 
 void shift_byte(uint8_t value) {

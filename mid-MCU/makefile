@@ -5,7 +5,7 @@
 MCU = atmega32m1
 FORMAT = ihex
 TARGET = main
-SRC = $(TARGET).c ../header_and_config/common.c midMCU.c
+SRC = $(TARGET).c ../header_and_config/LUR7_io.c ../header_and_config/LUR7_interrupt.c midMCU.c shiftregister.c
 ASRC =
 OPT = s
 

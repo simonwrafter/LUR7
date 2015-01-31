@@ -19,24 +19,61 @@
 #ifndef _LUR7_H_
 #define _LUR7_H_
 
-//_____ I N C L U D E S ________________________________________________________
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "common.h"
+#include <stdint.h>
 
-//_____ D E F I N I T I O N S __________________________________________________
-
-    // -------------- MCU LIB CONFIGURATION
+// CLOCK SETTINGS AND DELAY
 #define FOSC           16000        // 16Mhz external clock
 #define F_CPU          16000000     // Needed for delay
-
 #include <util/delay.h>
 
-    // -------------- CAN LIB CONFIGURATION
+// CAN LIB CONFIGURATION
 #define CAN_BAUDRATE   100        // in kBit
 
-    // -------------- MISCELLANEOUS
+// SYSTEM DEFINITION
+//digital inputs
+#define IN1 0 //PD3
+#define IN2 1 //PD2
+#define IN3 2 //PD1
+#define IN4 3 //PB7
+#define IN5 4 //PC0
+#define IN6 5 //PB6
+#define IN7 6 //PD0
+#define IN8 7 //PB5
+#define IN9 8 //PB2
 
-//_____ E N D __________________________________________________________________
+//analog inputs
+#define AN1 4 //PC0
+#define AN2 6 //PD0
+#define AN3 7 //PB5
+#define AN4 8 //PB2
+
+//digital outputs
+#define OUT1 9  //PB0
+#define OUT2 10 //PB1
+#define OUT3 11 //PD7
+#define OUT4 12 //PC4
+#define OUT5 13 //PC5
+#define OUT6 14 //PC6
+#define OUT7 15 //PB3
+#define OUT8 16 //PB4
+
+// ADC
+#define ADC_AN1 0x04 //PC0
+#define ADC_AN2 0x07 //PD0
+#define ADC_AN3 0x06 //PB5
+#define ADC_AN4 0x05 //PB2
+#define ADC_TEMP 0x0B
+#define ADC_SUPPLY 0x10
+
+// INTERRUPTS
+
+
+
+
+// SYSTEM FUNCTIONS
+#include "LUR7_io.h"
+#include "LUR7_interrupt.h"
 
 #endif  // _LUR7_H_
