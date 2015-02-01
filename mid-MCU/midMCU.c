@@ -35,6 +35,32 @@ uint8_t convert_revs_to_bar() {
 	return return_val;
 }
 
+uint8_t temp_to_bar() {
+	if (temp < TEMP_LVL_1) {
+		return 0;
+	} else if (temp < TEMP_LVL_2) {
+		return 1;
+	} else if (temp < TEMP_LVL_3) {
+		return 2;
+	} else if (temp < TEMP_LVL_4) {
+		return 3;
+	} else if (temp < TEMP_LVL_5) {
+		return 4;
+	} else if (temp < TEMP_LVL_6) {
+		return 5;
+	} else if (temp < TEMP_LVL_7) {
+		return 6;
+	} else if (temp < TEMP_LVL_8) {
+		return 7;
+	} else if (temp < TEMP_LVL_9) {
+		return 8;
+	} else if (temp < TEMP_LVL_10) {
+		return 9;
+	} else {
+		return 10;
+	}
+}
+
 uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 	if (binary >= 0 && binary <= 10) {
 		if (!dp) {
@@ -46,6 +72,8 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 	return sev_seg[10];
 }
 
+
+//unused interrupts
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
 void pcISR_in3(void) {}
