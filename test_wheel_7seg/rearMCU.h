@@ -1,5 +1,5 @@
 /*
- * / rearMCU.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * / rearMCU.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  * /
  * / This program is free software: you can redistribute it and/or modify
@@ -16,29 +16,32 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../header_and_config/LUR7.h"
-#include "rearMCU.h"
+#ifndef _REARMCU_H_
+#define _REARMCU_H_
 
-static volatile uint16_t speed_l = 0;
-static volatile uint16_t speed_r = 0;
-static volatile uint16_t susp_l = 0;
-static volatile uint16_t susp_r = 0;
+#define WHEEL_SPEED_L	IN5 //INT3
+#define WHEEL_SPEED_R	IN9 //INT1, (also AN4, not used)
+#define SUSPENSION_L	ADC_AN1 //IN4
+#define SUSPENSION_R	ADC_AN2 //IN6
 
-void init_interrupt(void) {
-	ext_int_on(IN5, 0, 1);
-	ext_int_on(IN8, 0, 1);
-}
+void init_interrupt(void);
+void update_analog(void);
+void update7seg(void);
+uint8_t bin_to_7seg(uint8_t, uint8_t);
 
-void update_analog(void) {
-	susp_l = get_analog(SUSPENSION_L);
-	susp_r = get_analog(SUSPENSION_R);
-	steering = get_analog(STEERING_WHEEL);
-}
+static const uint8_t sev_seg[11] = {
+	// a b c d e f g dp
+	0b11111100,	//0
+	0b01100000,	//1
+	0b11011010,	//2
+	0b11110010,	//3
+	0b01100110,	//4
+	0b10110110,	//5
+	0b10111110,	//6
+	0b11100000,	//7
+	0b11111110,	//8
+	0b11110110,	//9
+	0b00000000	//blank
+};
 
-ISR(INT3_vect) { // SPEED_L
-	speed_l++; //for now...
-}
-
-ISR(INT1_vect) { // SPEED_R
-	speed_r++; //for now...
-}
+#endif  // _REARMCU_H_

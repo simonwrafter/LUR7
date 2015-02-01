@@ -19,11 +19,6 @@
 #include "../header_and_config/LUR7.h"
 #include "rearMCU.h"
 
-uint32_t volatile overflowTimeCounter = 0;
-uint32_t volatile velocity_l = 0;
-uint32_t volatile velocity_r = 0;
-
-
 int main(void) {
 	init_io();
 	init_adc();
@@ -34,13 +29,8 @@ int main(void) {
     TCCR1B |= (1 << CS12);  // Set CS12 prescaler (100). Prescaler set to 256. 16 000 000 CPU speed / 256 = 62 500. Each bit is 1/62500 s = 16 us
     interrupts_on();
 	while (1) {
-		update_analog(); // Better to call from a timer interrupt, perhaps together with CAN send
+		update7seg();
 	}
 	return 0;
 }
 
-//With each bit change 16 us, TIMER1 will overflow each 1,048576 s
-ISR(TIMER1_OVF_vect){
-	overflowTimeCounter += 1;
-	velocity_l = speed_l*0.04;
-}
