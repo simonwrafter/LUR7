@@ -21,8 +21,19 @@
 
 #define REV_MIN 6000
 #define REV_MAX 10500
-#define BAR_LOW 1
-#define BAR_HIGH 22
+#define REV_BAR_LOW 1
+#define REV_BAR_HIGH 22
+
+#define TEMP_LVL_1 20
+#define TEMP_LVL_2 40
+#define TEMP_LVL_3 50
+#define TEMP_LVL_4 60
+#define TEMP_LVL_5 70
+#define TEMP_LVL_6 80
+#define TEMP_LVL_7 85
+#define TEMP_LVL_8 90
+#define TEMP_LVL_9 95
+#define TEMP_LVL_10 100
 
 static const uint8_t sev_seg[11] = {
 	// a b c d e f g dp

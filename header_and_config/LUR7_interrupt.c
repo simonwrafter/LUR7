@@ -134,7 +134,7 @@ void pc_int_off(uint8_t port) {
 	update_pcint_data();
 }
 
-
+//General
 void interrupts_on() {
 	update_pcint_data();
 	sei();
@@ -144,8 +144,10 @@ void interrupts_off() {
 	cli();
 }
 
+//INTERRUPT HANDLERS
 ISR(PCINT0_vect) {
 	uint8_t change_finder = (PINB & PCMSK0) ^ pcint0_data;
+	update_pcint_data();
 	
 	if(change_finder & (1<<PCINTn[IN4])) {
 		pcISR_in4();
@@ -167,7 +169,7 @@ ISR(PCINT1_vect) {
 
 ISR(PCINT2_vect) {
 	uint8_t change_finder = (PIND & PCMSK2) ^ pcint2_data;
-	
+	update_pcint_data();
 	if(change_finder & (1<<PCINTn[IN1])) {
 		pcISR_in1();
 	}

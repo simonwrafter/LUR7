@@ -18,7 +18,6 @@
 
 #include <avr/io.h>
 #include <avr/cpufunc.h> //included for _NOP()
-//#include <stdint.h>
 #include "LUR7.h"
 #include "LUR7_io.h"
 
