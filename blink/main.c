@@ -4,10 +4,10 @@
 #include <util/delay.h>
 
 int main (void) {
-	DDRC = 1 << DDC3;
-	
+	DDRC = 1 << DDC4;
+
 	while (1) {
-		PINC = 1 << PINC3;
+		PINC = 1 << PINC4;
 		_delay_ms(550);
 	}
 }

@@ -24,9 +24,20 @@
 int main(void) {
 	init_io();
 	init_adc();
-	
+	uint8_t val = 7;
+	uint8_t seg = 0;
+
 	while (1) {
-		;
+		seg = bin_to_7_seg(val);
+		set_output(OUT1, seg & (1<<0));
+		set_output(OUT2, seg & _BV(1));
+		set_output(OUT3, seg & _BV(2));
+		set_output(OUT4, seg & _BV(3));
+		set_output(OUT5, seg & _BV(4));
+		set_output(OUT6, seg & _BV(5));
+		set_output(OUT7, seg & _BV(6));
+		set_output(OUT8, seg & _BV(7));
 	}
 	return 0;
 }
+
