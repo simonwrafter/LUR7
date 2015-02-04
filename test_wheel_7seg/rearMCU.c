@@ -18,11 +18,17 @@
 
 #include "../header_and_config/LUR7.h"
 #include "rearMCU.h"
+#include "../header_and_config/LUR7_io.h"
+
 
 static volatile uint16_t speed_l = 0;
 static volatile uint16_t speed_r = 0;
 static volatile uint16_t susp_l = 0;
 static volatile uint16_t susp_r = 0;
+volatile uint32_t overflowTimeCounter = 0;
+volatile uint32_t velocity_l = 0;
+volatile uint32_t velocity_r = 0;
+uint8_t seg = 0;
 
 void init_interrupt(void) {
 	ext_int_on(IN5, 0, 1);
@@ -30,9 +36,9 @@ void init_interrupt(void) {
 }
 
 void update_analog(void) {
-	susp_l = get_analog(SUSPENSION_L);
-	susp_r = get_analog(SUSPENSION_R);
-	steering = get_analog(STEERING_WHEEL);
+	//susp_l = get_analog(SUSPENSION_L);
+	//susp_r = get_analog(SUSPENSION_R);
+	//steering = get_analog(STEERING_WHEEL);
 }
 
 ISR(INT3_vect) { // SPEED_L
@@ -42,3 +48,44 @@ ISR(INT3_vect) { // SPEED_L
 ISR(INT1_vect) { // SPEED_R
 	speed_r++; //for now...
 }
+
+//With each bit change 16 us, TIMER1 will overflow each 1,048576 s
+ISR(TIMER1_OVF_vect){
+	overflowTimeCounter += 1;
+	velocity_l = speed_l;
+	speed_l = 0;
+}
+
+void update7seg(void){
+	seg = bin_to_7seg(velocity_l, 0);
+	set_output(OUT1, seg & _BV(0));
+	set_output(OUT2, seg & _BV(1));
+	set_output(OUT3, seg & _BV(2));
+	set_output(OUT4, seg & _BV(3));
+	set_output(OUT5, seg & _BV(4));
+	set_output(OUT6, seg & _BV(5));
+	set_output(OUT7, seg & _BV(6));
+	set_output(OUT8, seg & _BV(7));
+}
+
+uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
+	if (binary >= 0 && binary <= 10) {
+		if (!dp) {
+			return sev_seg[binary];
+		} else {
+			return sev_seg[binary] + 1;
+		}
+	}
+	return sev_seg[10];
+}
+
+void pcISR_in1(){}
+void pcISR_in2(){}
+void pcISR_in3(){}
+void pcISR_in4(){}
+void pcISR_in5(){}
+void pcISR_in6(){}
+void pcISR_in7(){}
+void pcISR_in8(){}
+void pcISR_in9(){}
+
