@@ -21,8 +21,8 @@
 
 #define REV_MIN 6000
 #define REV_MAX 10500
-#define REV_BAR_LOW 1
-#define REV_BAR_HIGH 22
+#define REV_BAR_MIN 1
+#define REV_BAR_MAX 22
 
 #define TEMP_LVL_1 20
 #define TEMP_LVL_2 40
@@ -50,8 +50,11 @@ static const uint8_t sev_seg[11] = {
 	0b00000000	//blank
 };
 
-uint8_t convert_revs_to_bar(void);
+void update_display(void);
 
-uint8_t bin_to_7seg(uint8_t, uint8_t);
+static uint8_t revs_to_bar(void);
+static uint8_t temp_to_bar(void);
+static uint8_t bin_to_7seg(uint8_t, uint8_t);
+
 
 #endif // _MIDMCU_H_

@@ -18,43 +18,6 @@
 
 #include "../header_and_config/LUR7.h"
 
-static const uint8_t sev_seg[11] = {
-	// a b c d e f g dp
-	0b11111100,	//0
-	0b01100000,	//1
-	0b11011010,	//2
-	0b11110010,	//3
-	0b01100110,	//4
-	0b10110110,	//5
-	0b10111110,	//6
-	0b11100000,	//7
-	0b11111110,	//8
-	0b11110110,	//9
-	0b00000000	//blank
-};
-
-uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
-	if (binary >= 0 && binary <= 10) {
-		if (!dp) {
-			return sev_seg[binary];
-		} else {
-			return sev_seg[binary] + 1;
-		}
-	}
-	return sev_seg[10];
-}
-
-void output_sev(uint8_t sev) {
-	set_output(OUT1, sev & (1<<0)); //a
-	set_output(OUT2, sev & (1<<1)); //b
-	set_output(OUT3, sev & (1<<2)); //c
-	set_output(OUT4, sev & (1<<3)); //d
-	set_output(OUT5, sev & (1<<4)); //e
-	set_output(OUT6, sev & (1<<5)); //f
-	set_output(OUT7, sev & (1<<6)); //g
-	set_output(OUT8, sev & (1<<7)); //dp
-}
-
 int main(void) {
 	init_io();
 
@@ -68,29 +31,14 @@ int main(void) {
 	//pc_int_on(IN8);
 	//pc_int_on(IN9);
 
-	//interrupts_on();
+	interrupts_off();
 
 	while (1) {
-		output_sev(sev_seg[1]);
-		_delay_ms(700);
-		output_sev(sev_seg[2]);
-		_delay_ms(700);
-		output_sev(sev_seg[3]);
-		_delay_ms(700);
-		output_sev(sev_seg[4]);
-		_delay_ms(700);
-		output_sev(sev_seg[5]);
-		_delay_ms(700);
-		output_sev(sev_seg[6]);
-		_delay_ms(700);
-		output_sev(sev_seg[7]);
-		_delay_ms(700);
-		output_sev(sev_seg[8]);
-		_delay_ms(700);
-		output_sev(sev_seg[9]);
-		_delay_ms(700);
-		output_sev(sev_seg[10]);
-		_delay_ms(700);
+		set_output(OUT1, HIGH);
+		_delay_ms(500);
+
+		set_output(OUT1, LOW);
+		_delay_ms(500);
 	}
 	return 0;
 }
