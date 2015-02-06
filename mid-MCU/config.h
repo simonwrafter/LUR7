@@ -19,8 +19,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define SHIFT_DATA		OUT1
-#define SHIFT_CLK		OUT2
-#define SHIFT_STROBE	OUT3
+#define SHIFT_STROBE	OUT2
+#define SHIFT_DATA		OUT3
+#define SHIFT_CLK		OUT4
 
 #endif // _CONFIG_H_

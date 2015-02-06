@@ -29,23 +29,23 @@ void shift_byte(uint8_t value) {
 void shift_bar(uint8_t led_on, uint8_t length) {
 	uint8_t led_off = length - led_on;
 	for (uint8_t on=0; on<led_on; on++) {
-		shift_bit(1);
+		shift_bit(ON);
 	}
 	for (uint8_t off=0; off<led_off; off++) {
-		shift_bit(0);
+		shift_bit(OFF);
 	}
 }
 
 void shift_bit(uint8_t value) {
 	set_output(SHIFT_DATA, (value>0));
-	_delay_us(1);
-	set_output(SHIFT_CLK, 1);
-	_delay_us(1);
-	set_output(SHIFT_CLK, 0);
+	_delay_us(PULSE_TIME);
+	set_output(SHIFT_CLK, HIGH);
+	_delay_us(PULSE_TIME);
+	set_output(SHIFT_CLK, LOW);
 }
 
 void shift_strobe(void) {
-	set_output(SHIFT_STROBE, 1);
-	_delay_us(1);
-	set_output(SHIFT_STROBE, 0);
+	set_output(SHIFT_STROBE, HIGH);
+	_delay_us(PULSE_TIME);
+	set_output(SHIFT_STROBE, LOW);
 }
