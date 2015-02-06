@@ -57,23 +57,22 @@ ISR(TIMER1_OVF_vect){
 }
 
 void update7seg(void){
-	seg = bin_to_7seg(velocity_l, 0);
-	set_output(OUT1, seg & _BV(0));
-	set_output(OUT2, seg & _BV(1));
-	set_output(OUT3, seg & _BV(2));
-	set_output(OUT4, seg & _BV(3));
-	set_output(OUT5, seg & _BV(4));
-	set_output(OUT6, seg & _BV(5));
-	set_output(OUT7, seg & _BV(6));
-	set_output(OUT8, seg & _BV(7));
+	seg = bin_to_7seg(7, 0);
+	set_output(OUT1, seg & _BV(7));
+	set_output(OUT2, seg & _BV(6));
+	set_output(OUT3, seg & _BV(5));
+	set_output(OUT4, seg & _BV(4));
+	set_output(OUT5, seg & _BV(3));
+	set_output(OUT6, seg & _BV(2));
+	set_output(OUT7, seg & _BV(1));
 }
 
 void blink(uint8_t bo){
 	if(bo){
-		set_output(OUT1, 1);
+		set_output(OUT2, 1);
 	}
 	else{
-				set_output(OUT1, 0);
+		set_output(OUT2, 0);
 
 	}
 }

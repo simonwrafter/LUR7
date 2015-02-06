@@ -29,7 +29,8 @@ int main(void) {
     TCCR1B |= (1 << CS12);  // Set CS12 prescaler (100). Prescaler set to 256. 16 000 000 CPU speed / 256 = 62 500. Each bit is 1/62500 s = 16 us
     interrupts_on();
 	while (1) {
-		blink(get_input(IN1));
+		update7seg();
+		//bin_to_7seg(2, 0);
 	}
 	return 0;
 }
