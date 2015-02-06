@@ -68,6 +68,16 @@ void update7seg(void){
 	set_output(OUT8, seg & _BV(7));
 }
 
+void blink(uint8_t bo){
+	if(bo){
+		set_output(OUT1, 1);
+	}
+	else{
+				set_output(OUT1, 0);
+
+	}
+}
+
 uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 	if (binary >= 0 && binary <= 10) {
 		if (!dp) {
