@@ -43,9 +43,17 @@ void can_init(void) {
 	for (uint8_t mob_number = 0; mob_number < NBR_OF_MOB; mob_number++) {
 		CANPAGE = (mob_number << 4);	// select each MOb in turn
 		
-		for (uint8_t volatile *can_reg=&CANSTMOB; can_reg<&CANSTML; can_reg++) {
-			*can_reg=0x00; // go through all registers and set to zero
-		}
+		//initiate everything to zero
+		CANSTMOB = 0x00;
+		CANCDMOB = 0x00;
+		CANIDT4 = 0x00;
+		CANIDT3 = 0x00;
+		CANIDT2 = 0x00;
+		CANIDT1 = 0x00;
+		CANIDM4 = 0x00;
+		CANIDM3 = 0x00;
+		CANIDM2 = 0x00;
+		CANIDM1 = 0x00;
 	}
 }
 
