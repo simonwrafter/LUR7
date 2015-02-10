@@ -50,11 +50,11 @@
 
     // ----------
 #ifndef FOSC
-#  error  You must define FOSC in "config.h" file
+#  error  You must define FOSC in "LUR7.h" file
 #endif
     // ----------
 #ifndef CAN_BAUDRATE
-#  error  You must define CAN_BAUDRATE in "config.h" file
+#  error  You must define CAN_BAUDRATE in "LUR7.h" file
 #endif
     // ----------
 #if FOSC == 16000             //!< Fclkio = 16 MHz, Tclkio = 62.5 ns
@@ -83,7 +83,7 @@
 #       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
 #       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
 #   else
-#       error This CAN_BAUDRATE value is not in "CAN_driver.h" file
+#       error This CAN_BAUDRATE value is not in "can_drv.h" file
 #   endif
 
 #elif FOSC == 8000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
