@@ -26,7 +26,9 @@ int main(void) {
 	init_adc();
 
 	while (1) {
-		update_display();
+		//update_display();
+		shift_bar(50, 64);
+		shift_strobe();
 	}
 	return 0;
 }

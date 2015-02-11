@@ -20,11 +20,11 @@
 #include "midMCU.h"
 #include "shiftregister.h"
 
-static volatile uint16_t revs = 0;
-static volatile uint8_t  gear = 0;
-static volatile uint16_t speed = 0;
+static volatile uint16_t revs = 8000;
+static volatile uint8_t  gear = 2;
+static volatile uint16_t speed = 88;
 static volatile uint16_t log_id = 0;
-static volatile uint16_t temperature = 0;
+static volatile uint16_t temperature = 70;
 static volatile uint8_t  bcd_vect[3] = {0,0,0};
 
 uint8_t revs_to_bar() {

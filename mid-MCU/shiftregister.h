@@ -16,12 +16,14 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MIDMCU_H_
-#define _MIDMCU_H_
+#ifndef _SHIFTREG_H_
+#define _SHIFTREG_H_
+
+#define PULSE_TIME 1000
 
 void shift_byte(uint8_t);
 void shift_bar(uint8_t, uint8_t);
-static void shift_bit(uint8_t);
+void shift_bit(uint8_t);
 void shift_strobe(void);
 
-#endif // _MIDMCU_H_
+#endif // _SHIFTREG_H_

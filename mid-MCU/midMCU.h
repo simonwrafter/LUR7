@@ -50,11 +50,10 @@ static const uint8_t sev_seg[11] = {
 	0b00000000	//blank
 };
 
+uint8_t revs_to_bar(void);
+uint8_t temp_to_bar(void);
+void bcd_speed(void);
+uint8_t bin_to_7seg(uint8_t, uint8_t);
 void update_display(void);
-
-static uint8_t revs_to_bar(void);
-static uint8_t temp_to_bar(void);
-static uint8_t bin_to_7seg(uint8_t, uint8_t);
-
 
 #endif // _MIDMCU_H_
