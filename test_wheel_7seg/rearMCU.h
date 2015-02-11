@@ -26,7 +26,7 @@
 
 void init_interrupt(void);
 void update_analog(void);
-void update7seg(void);
+void update7seg(uint8_t);
 uint8_t bin_to_7seg(uint8_t, uint8_t);
 void blink (uint8_t);
 
