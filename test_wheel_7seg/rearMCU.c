@@ -41,39 +41,41 @@ void update_analog(void) {
 	//steering = get_analog(STEERING_WHEEL);
 }
 
-ISR(INT3_vect) { // SPEED_L
+ISR(INT_IN5_vect) { // SPEED_L
 	speed_l++; //for now...
+	//update7seg(overflowTimeCounter);
+
 }
 
-ISR(INT1_vect) { // SPEED_R
-	speed_r++; //for now...
-}
+//ISR(INT1_vect) { // SPEED_R
+//	speed_r++; //for now...
+//}
 
 //With each bit change 16 us, TIMER1 will overflow each 1,048576 s
 ISR(TIMER1_OVF_vect){
-	overflowTimeCounter += 1;
+	overflowTimeCounter++;
 	velocity_l = speed_l;
-	speed_l = 0;
+	//speed_l = 0;
+	update7seg(overflowTimeCounter);
 }
 
-void update7seg(void){
-	seg = bin_to_7seg(velocity_l, 0);
-	set_output(OUT1, seg & _BV(0));
-	set_output(OUT2, seg & _BV(1));
-	set_output(OUT3, seg & _BV(2));
-	set_output(OUT4, seg & _BV(3));
-	set_output(OUT5, seg & _BV(4));
-	set_output(OUT6, seg & _BV(5));
-	set_output(OUT7, seg & _BV(6));
-	set_output(OUT8, seg & _BV(7));
+void update7seg(uint8_t i){
+	seg = bin_to_7seg(i, 0);
+	set_output(OUT1, !(seg & _BV(7)));
+	set_output(OUT2, !(seg & _BV(6)));
+	set_output(OUT3, !(seg & _BV(5)));
+	set_output(OUT4, !(seg & _BV(4)));
+	set_output(OUT5, !(seg & _BV(3)));
+	set_output(OUT6, !(seg & _BV(2)));
+	set_output(OUT7, !(seg & _BV(1)));
 }
 
 void blink(uint8_t bo){
 	if(bo){
-		set_output(OUT1, 1);
+		set_output(OUT2, 1);
 	}
 	else{
-				set_output(OUT1, 0);
+		set_output(OUT2, 0);
 
 	}
 }
