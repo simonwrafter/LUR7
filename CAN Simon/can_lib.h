@@ -99,7 +99,8 @@
  * public api
  ******************************************************************************/
 void can_init(void);
-void can_setup_rx(uint8_t mob_nbr, uint32_t mob_id, uint32_t mob_msk, uint8_t mob_rtr, uint8_t mob_dlc);
+void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
+void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
 void can_enable();
 void can_disable();
 
@@ -109,6 +110,7 @@ void can_disable();
 static uint32_t _can_get_id();
 static void _can_set_id(uint32_t identifier, uint8_t rtr_id);
 static void _can_set_msk(uint32_t mask);
+static uint8_t _can_get_free_mob(void);
 static void _can_handle_RXOK();
 static void _can_handle_TXOK();
 
@@ -117,5 +119,6 @@ static void _can_handle_TXOK();
  ******************************************************************************/
 
 extern void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+extern void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data);
 
 #endif // _CAN_LIB_H_
