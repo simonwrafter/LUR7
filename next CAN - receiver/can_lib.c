@@ -1,328 +1,218 @@
 /*
- * can_lib.c
+ * can_lib.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
- * Author: Simon Wrafter
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Adaptions for Lund University Formula Student Engineering
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include "../header_and_config/LUR7.h"
+#include "can_lib.h"
+
+/*******************************************************************************x
+ * public api
+ ******************************************************************************/
 
 /*
- * can_lib.c
- *
- * Created: 10/18/2013 11:37:43 AM
- *  Author: Scott_Schmit
-
-	The contents of this file were copy & pasted from the CAN Software Library
-	on Atmel.com. The library was written for AT90CANxx devices, but was modified
-	as an ATmegaxxM1 library.
-
+ * To start using CAN run this function during the setup phase of the code.
+ * It activates TXOK and RXOK interrupts on all 6 MObs.
  */
+void can_init(void) {
+	CANGCON = (1<<SWRES); // reset CAN
+	CANTCON = 0x00; //set timing prescaler to zero
+
+	CANBT1 = CONF_CANBT1; // set baudrate, CONF_CANBT1 defined in .h file
+	CANBT2 = CONF_CANBT2; // set baudrate, CONF_CANBT2 defined in .h file
+	CANBT3 = CONF_CANBT3; // set baudrate, CONF_CANBT3 defined in .h file
+
+	CANGIE = (1<<ENIT) | (1<<ENRX) | (1<<ENTX); //enable TXOK an RXOK interrupts
+	CANIE1 = 0; // for compatibility
+	CANIE2 = (1<<IEMOB5) | (1<<IEMOB4) | (1<<IEMOB3) | (1<<IEMOB2) | (1<<IEMOB1) | (1<<IEMOB0); // enable interrupts on all MOb
+
+	//clear all MOb
+	for (uint8_t mob_number = 0; mob_number < NBR_OF_MOB; mob_number++) {
+		CANPAGE = (mob_number << 4);	// select each MOb in turn
+
+		//initiate everything to zero
+		CANSTMOB = 0x00;
+		CANCDMOB = 0x00;
+		CANIDT4 = 0x00;
+		CANIDT3 = 0x00;
+		CANIDT2 = 0x00;
+		CANIDT1 = 0x00;
+		CANIDM4 = 0x00;
+		CANIDM3 = 0x00;
+		CANIDM2 = 0x00;
+		CANIDM1 = 0x00;
+	}
+}
+
+/*
+ * After the init function, run this function to setup receiving messages.
+ */
+void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
+	uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
+	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+
+	_can_set_id(mob_id); //id to compare against
+	_can_set_msk(mob_msk); //mask for comparing id
+
+	mob_dlc = (mob_dlc > 8) ? 8 : mob_dlc; // expected number of data bytes
+
+	CANCDMOB = (1 << CONMOB1) | (mob_dlc << DLC0); // configure MOb for reception of mob_dlc number of data bytes
+
+	CANPAGE = save_CANPAGE; //restore CANPAGE
+}
+
+/*
+ * send message with id = mob_id, data = *mob_data and dlc = mob_dlc
+ * run once per message. use CAN_ISR_TXOK() for additional actions on send completion
+ */
+void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
+	uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
+	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+
+	CANSTMOB = 0x00; //clear MOb status
+
+	_can_set_id(mob_id);
+
+	for (uint8_t i = 0; i < mob_dlc; i++) {
+		CANMSG = mob_data[i]; // set data
+	}
+
+	CANCDMOB = (1<<CONMOB0) | (mob_dlc << DLC0); // enable transmission and set DLC
+
+	CANPAGE = save_CANPAGE; //restore CANPAGE
+}
+
+/*
+ * run this function at the end of the setup procedure.
+ */
+void can_enable() {
+	CANGCON |= (1 << ENASTB); //enable CAN
+}
+
+/*
+ * for completeness
+ */
+void can_disable() {
+	CANGCON &= ~(1 << ENASTB); //disable CAN
+}
 
 /*******************************************************************************
-//! @file $RCSfile: can_lib.c,v $
-//!
-//! Copyright (c) 2007 Atmel.
-//!
-//! Use of this program is subject to Atmel's End User License Agreement.
-//! Please read file license.txt for copyright notice.
-//!
-//! @brief This file contains the library of functions of:
-//!             - CAN (Controller Array Network)
-//!             - AT90CAN128/64/32
-//!
-//! This file can be parsed by Doxygen for automatic documentation generation.
-//! This file has been validated with AVRStudio-413528/WinAVR-20070122.
-//!
-//! @version $Revision: 3.20 $ $Name: jtellier $
-//!
-//! @todo
-//! @bug
-*******************************************************************************/
+ * static functions
+ ******************************************************************************/
 
-//_____ I N C L U D E S ________________________________________________________
-#include "can_lib.h"
-#include "can_drv.h"
-
-//_____ D E F I N I T I O N S __________________________________________________
-
-//_____ F U N C T I O N S ______________________________________________________
-
-/*------------------------------------------------------------------------------
-//  @fn can_init
-//!
-//! CAN macro initialization. Reset the CAN peripheral, initialize the bit
-//! timing, initialize all the registers mapped in SRAM to put MObs in
-//! inactive state and enable the CAN macro.
-//!
-//! @warning The CAN macro will be enable after seen on CAN bus a receceive
-//!          level as long as of an inter frame (hardware feature).
-//!
-//! @param  none.
-//!
-//! @return none.
-//!
-//-----------------------------------------------------------------------------*/
-void can_init() {
-	can_fixed_baudrate();	 // c.f. macro in "can_drv.h"
-	can_clear_all_mob(); // c.f. function in "can_drv.c"
-	Can_enable();		 // c.f. macro in "can_drv.h"
+/*
+ * rebuilds the message identifier
+ */
+uint32_t _can_get_id() {
+	return (CANIDT4 >> 3) | ((uint32_t)CANIDT3 << 5) | ((uint32_t)CANIDT2 << 13) | ((uint32_t)CANIDT1 << 21);
 }
 
-/*------------------------------------------------------------------------------
-//  @fn can_cmd
-//!
-//! This function takes a CAN descriptor, analyses the action to do:
-//! transmit, receive or abort.
-//! This function returns a status (CAN_CMD_ACCEPTED or CAN_CMD_REFUSED) if
-//! a MOb for Rx or Tx has been found. If no MOB has been found, the
-//! application must be retry at a later date.
-//! This function also updates the CAN descriptor status (MOB_PENDING or
-//! MOB_NOT_REACHED) if a MOb for Rx or Tx has been found. If aborting
-//! is performed, the CAN descriptor status will be set to STATUS_CLEARED.
-//!
-//! @param  st_cmd_t* - Can_descriptor pointer on CAN descriptor structure
-//!         to select the action to do.
-//!
-//! @return CAN_CMD_ACCEPTED - command is accepted
-//!         CAN_CMD_REFUSED  - command is refused
-//!
-//-----------------------------------------------------------------------------*/
-uint8_t can_cmd(st_cmd_t* cmd) {
-	uint8_t mob_handle;
-	uint8_t cpt;
-	uint32_t u32_temp;
+/*
+ * set ID registers and RTR bit
+ */
+void _can_set_id(uint32_t identifier) {
+	uint32_t id_v = (identifier << 3);
 
-	if (cmd->cmd == CMD_ABORT) {
-		if (cmd->status == MOB_PENDING) {
-			// Rx or Tx not yet performed
-			Can_set_mob(cmd->handle);
-			Can_mob_abort();
-			Can_clear_status_mob();       // To be sure !
-			cmd->handle = 0;
-		}
-		cmd->status = STATUS_CLEARED;
-	} else  {
-		mob_handle = can_get_mob_free();
-		if (mob_handle != NO_MOB) {
-			cmd->status = MOB_PENDING;
-			cmd->handle = mob_handle;
-			Can_set_mob(mob_handle);
-			Can_clear_mob();
-
-			switch (cmd->cmd) {
-			//------------
-			case CMD_TX:
-				Can_set_ext_id(cmd->id.ext);
-				for (cpt=0; cpt<cmd->dlc; cpt++) {
-					CANMSG = *(cmd->pt_data + cpt);
-				}
-				if (cmd->rtr) {
-					Can_set_rtr();
-				} else {
-					Can_clear_rtr();
-				}
-				Can_set_dlc(cmd->dlc);
-				Can_config_tx();
-				break;
-			//------------
-			case CMD_TX_DATA:
-				Can_set_ext_id(cmd->id.ext);
-				for (cpt = 0; cpt < cmd->dlc; cpt++) {
-					CANMSG = *(cmd->pt_data + cpt);
-				}
-				cmd->rtr = 0;
-				Can_clear_rtr();
-				Can_set_dlc(cmd->dlc);
-				Can_config_tx();
-				break;
-			//------------
-			case CMD_TX_REMOTE:
-				Can_set_ext_id(cmd->id.ext);
-				cmd->rtr = 1;
-				Can_set_rtr();
-				Can_set_dlc(cmd->dlc);
-				Can_config_tx();
-				break;
-			//------------
-			case CMD_RX:
-				u32_temp = 0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				Can_clear_rtrmsk();
-				Can_clear_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_RX_DATA:
-				u32_temp = 0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				cmd->rtr = 0;
-				Can_set_rtrmsk();
-				Can_clear_rtr();
-				Can_clear_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_RX_REMOTE:
-				u32_temp = 0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				cmd->rtr = 1;
-				Can_set_rtrmsk();
-				Can_set_rtr();
-				Can_clear_rplv();
-				Can_clear_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_RX_MASKED:
-				Can_set_ext_id(cmd->id.ext);
-				u32_temp = ~0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				Can_clear_rtrmsk();
-				Can_set_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_RX_DATA_MASKED:
-				Can_set_ext_id(cmd->id.ext);
-				u32_temp = ~0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				cmd->rtr = 0;
-				Can_set_rtrmsk();
-				Can_clear_rtr();
-				Can_set_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_RX_REMOTE_MASKED:
-				Can_set_ext_id(cmd->id.ext);
-				u32_temp = ~0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				cmd->rtr = 1;
-				Can_set_rtrmsk();
-				Can_set_rtr();
-				Can_clear_rplv();
-				Can_set_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_REPLY:
-				for (cpt = 0; cpt < cmd->dlc; cpt++) {
-					CANMSG = *(cmd->pt_data + cpt);
-				}
-				u32_temp = 0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				cmd->rtr = 1;
-				Can_set_rtrmsk();
-				Can_set_rtr();
-				Can_set_rplv();
-				Can_clear_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			case CMD_REPLY_MASKED:
-				Can_set_ext_id(cmd->id.ext);
-				for (cpt = 0; cpt < cmd->dlc; cpt++) {
-					CANMSG = *(cmd->pt_data + cpt);
-				}
-				u32_temp = ~0;
-				Can_set_ext_msk(u32_temp);
-				Can_set_dlc(cmd->dlc);
-				cmd->rtr = 1;
-				Can_set_rtrmsk();
-				Can_set_rtr();
-				Can_set_rplv();
-				Can_set_idemsk();
-				Can_config_rx();
-				break;
-			//------------
-			default:
-				// case CMD_NONE or not implemented command
-				cmd->status = STATUS_CLEARED;
-				break;
-			//------------
-			} // switch (cmd ...
-		} // if (mob_handle ...
-		else
-		{
-			cmd->status = MOB_NOT_REACHED;
-			return CAN_CMD_REFUSED;
-		}
-	} // else of no CMD_ABORT
-	return CAN_CMD_ACCEPTED;
+	CANIDT1 = *((uint8_t *) &id_v + 3);
+	CANIDT2 = *((uint8_t *) &id_v + 2);
+	CANIDT3 = *((uint8_t *) &id_v + 1);
+	CANIDT4 = *((uint8_t *) &id_v + 0);
 }
 
-/*------------------------------------------------------------------------------
-//  @fn can_get_status
-//!
-//! This function allows to return if the command has been performed or not.
-//! In an reception case, all the CAN message is stored in the structure.
-//! This function also updates the CAN descriptor status (MOB_TX_COMPLETED,
-//!  MOB_RX_COMPLETED, MOB_RX_COMPLETED_DLCW or MOB_???_ERROR).
-//!
-//! @param  st_cmd_t* pointer on CAN descriptor structure.
-//!
-//! @return CAN_STATUS_COMPLETED     - Rx or Tx is completed
-//!         CAN_STATUS_NOT_COMPLETED - Rx or Tx is not completed
-//!         CAN_STATUS_ERROR         - Error in configuration or in the
-//!                                    CAN communication
-//!
-//-----------------------------------------------------------------------------*/
-uint8_t can_get_status (st_cmd_t* cmd) {
-	uint8_t a_status;
-	uint8_t rtn_val;
+/*
+ * set mask registers
+ */
+void _can_set_msk(uint32_t mask) {
+	uint32_t mask_v = (mask << 3);
+	CANIDM1 = *((uint8_t *) &mask_v + 3);
+	CANIDM2 = *((uint8_t *) &mask_v + 2);
+	CANIDM3 = *((uint8_t *) &mask_v + 1);
+	CANIDM4 = *((uint8_t *) &mask_v + 0) | (1<<RTRMSK) | (1<<IDEMSK);
+}
 
-	a_status = cmd->status;
-	if ((a_status == STATUS_CLEARED) || (a_status == MOB_NOT_REACHED) || (a_status == MOB_DISABLE)) {
-		return CAN_STATUS_ERROR;
+/*
+ * Returns the number of the first free MOb, 0xFF if no free MOb is found
+ */
+uint8_t _can_get_free_mob() {
+	for (uint8_t mob = 0; mob < NBR_OF_MOB; mob++) {
+		if (CANEN2 & (1 << mob)) {
+			return mob;
+		}
 	}
-	Can_set_mob(cmd->handle);
-	a_status = can_get_mob_status();
-
-	switch (a_status) {
-	//---------------
-	case MOB_NOT_COMPLETED:
-		// cmd->status not updated
-		rtn_val = CAN_STATUS_NOT_COMPLETED;
-		break;
-	//---------------
-	case MOB_RX_COMPLETED:
-	case MOB_RX_COMPLETED_DLCW:
-		cmd->dlc = Can_get_dlc();
-		can_get_data(cmd->pt_data);
-		cmd->rtr = Can_get_rtr();
-		Can_get_ext_id(cmd->id.ext);
-		// Status field of descriptor: 0x20 if Rx completed
-		// Status field of descriptor: 0xA0 if Rx completed with DLCWarning
-		cmd->status = a_status;
-		Can_mob_abort();		// Freed the MOB
-		Can_clear_status_mob(); // and reset MOb status
-		rtn_val = CAN_STATUS_COMPLETED;
-		break;
-	//---------------
-	case MOB_TX_COMPLETED:
-		// Status field of descriptor: 0x40 if Tx completed
-		cmd->status = a_status;
-		Can_mob_abort();		// Freed the MOB
-		Can_clear_status_mob(); // and reset MOb status
-		rtn_val = CAN_STATUS_COMPLETED;
-		break;
-	//---------------
-	default:
-		// Status field of descriptor: (bin)000b.scfa if MOb error
-		cmd->status = a_status;
-		Can_mob_abort();		// Freed the MOB
-		Can_clear_status_mob(); // and reset MOb status
-		rtn_val = CAN_STATUS_ERROR;
-		break;
-	} // switch (a_status...
-	return (rtn_val);
+	return 0xFF;
 }
 
+/*******************************************************************************
+ * Interrupt handling
+ ******************************************************************************/
+
+ISR (CAN_INT_vect) {
+	uint8_t save_SREG = SREG; // save SREG
+	uint8_t save_CANPAGE = CANPAGE; // save CANPAGE
+
+	CANPAGE = CANHPMOB & 0xF0; // select MOb with highest priority interrupt
+
+	if (CANSTMOB & (1 << RXOK)) {
+		CANSTMOB &= ~(1 << RXOK); //clear interrupt flag
+		_can_handle_RXOK();
+	} else if (CANSTMOB & (1 << TXOK)) {
+		CANSTMOB &= ~(1 << TXOK); //clear interrupt flag
+		_can_handle_TXOK();
+	} else {
+		CANSTMOB = 0x00; //clear interrupt flag, FIXME: errors not handled
+	}
+
+	CANPAGE = save_CANPAGE; //restore CANPAGE
+	SREG = save_SREG; //restore SREG
+}
+
+/*
+ * helper function for ISR receiving messages, relies on external function
+ * implemented in application.
+ */
+void _can_handle_RXOK() {
+	uint32_t id = _can_get_id(); // get id
+	uint8_t dlc = CANCDMOB & 0x0F; // get dlc
+	uint8_t data[dlc]; // create vector for data
+
+	//read data
+	for (int i = 0; i < dlc; i++) {
+		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
+	}
+
+	// send information to extern function in application to act on information
+	CAN_ISR_RXOK(id, dlc, data);
+
+	CANCDMOB |= (1 << CONMOB1); // reenable reception
+}
+
+/*
+ * helper function for ISR sending messages, relies on external function
+ * implemented in application.
+ */
+void _can_handle_TXOK() {
+	uint32_t id = _can_get_id(); // get id
+	uint8_t dlc = CANCDMOB & 0x0F; // get dlc
+	uint8_t data[dlc]; // create vector for data
+
+	//read data
+	for (int i = 0; i < dlc; i++) {
+		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
+	}
+
+	CAN_ISR_TXOK(id, dlc, data); // extern function if more actions are required after TXOK
+	CANCDMOB = 0x00; // clear control register
+}

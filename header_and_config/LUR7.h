@@ -24,8 +24,8 @@
 #include <stdint.h>
 
 // CLOCK SETTINGS AND DELAY
-#define FOSC	16000        // 16Mhz external clock
-#define F_CPU	16000000     // Needed for delay
+#define FOSC	16000UL        // 16Mhz external clock
+#define F_CPU	16000000UL     // Needed for delay
 #include <util/delay.h>
 
 // CAN LIB CONFIGURATION

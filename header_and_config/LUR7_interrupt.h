@@ -26,6 +26,9 @@
 #define INT_IN8_vect INT2_vect //PB5 - IN8
 #define INT_IN9_vect INT1_vect //PB2 - IN9
 
+//interrupt functions
+//   pin change interrupts
+
 extern void pcISR_in1(void);
 extern void pcISR_in2(void);
 extern void pcISR_in3(void);

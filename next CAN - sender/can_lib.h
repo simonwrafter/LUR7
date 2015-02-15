@@ -1,179 +1,125 @@
 /*
- * can_lib.h
+ * can_lib.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
- * Author: Simon Wrafter
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Adaptions for Lund University Formula Student Engineering
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-/*
- * can_lib.h
- *
- * Created: 10/18/2013 11:38:16 AM
- *  Author: Scott_Schmit
-
-	The contents of this file were copy & pasted from the CAN Software Library
-	on Atmel.com. The library was written for AT90CANxx devices, but was modified
-	as an ATmegaxxM1 library.
-
- */
-
-/******************************************************************************
-//! @file $RCSfile: can_lib.h,v $
-//!
-//! Copyright (c) 2007 Atmel.
-//!
-//! Use of this program is subject to Atmel's End User License Agreement.
-//! Please read file license.txt for copyright notice.
-//!
-//! @brief This file contains the prototypes and the macros of the
-//!        library of functions of:
-//!             - CAN (Controller Array Network)
-//!             - for AT90CAN128/64/32.
-//!
-//! This file can be parsed by Doxygen for automatic documentation generation.
-//! This file has been validated with AVRStudio-413528/WinAVR-20070122.
-//!
-//! @version $Revision: 3.20 $ $Name: jtellier $
-//!
-//! @todo
-//! @bug
-********************************************************************************/
 
 #ifndef _CAN_LIB_H_
 #define _CAN_LIB_H_
 
-//_____ I N C L U D E S ________________________________________________________
-#include "can_drv.h"
+// - Baud rate definitions
+#ifndef FOSC
+#  error  FOSC not defined in LUR7.h
+#endif
+// ----------
+#ifndef CAN_BAUDRATE
+#  error  CAN_BAUDRATE not defined in LUR7.h
+#endif
+// ----------
+#if FOSC == 16000             //!< Fclkio = 16 MHz, Tclkio = 62.5 ns
+#   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x12       // Tscl  = 10x Tclkio = 625 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 125       //!< -- 125Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x0E       // Tscl  = 8x Tclkio = 500 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 200       //!< -- 200Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x08       // Tscl  = 5x Tclkio = 312.5 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 250       //!< -- 250Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x06       // Tscl  = 4x Tclkio = 250 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 500       //!< -- 500Kb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x06       // Tscl = 4x Tclkio = 250 ns
+#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 1000      //!< -- 1 Mb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 125 ns
+#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#   else
+#       error This CAN_BAUDRATE value is not in "can_lib.h" file
+#   endif
 
-//_____ D E F I N I T I O N S __________________________________________________
+#elif FOSC == 8000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
+#   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x08       // Tscl  = 5x Tclkio = 625 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 125       //!< -- 125Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x06       // Tscl  = 4x Tclkio = 500 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 200       //!< -- 200Kb/s, 20x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 250 ns
+#       define CONF_CANBT2  0x0E       // Tsync = 1x Tscl, Tprs = 8x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x4B       // Tpsh1 = 6x Tscl, Tpsh2 = 5x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 250       //!< -- 250Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 250 ns
+#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 500       //!< -- 500Kb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 250 ns
+#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 1000      //!< -- 1 Mb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x00       // Tscl  = 1x Tclkio = 125 ns
+#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#   else
+#       error This CAN_BAUDRATE value is not in "can_lib.h" file
+#   endif
 
-/* ----------
-// @brief This constant is used as return value for "can_cmd" function. */
-#define CAN_CMD_REFUSED  0xFF
-/* ----------
-// @brief This constant is used as return value for "can_cmd" function. */
-#define CAN_CMD_ACCEPTED         0x00
+#else
+#   error This FOSC value is not in "can_lib.h" file
+#endif
 
-/* ----------
-// @brief This constant is used as return value for "can_get_status" function. */
-#define CAN_STATUS_COMPLETED     0x00
-/* ----------
-// @brief This constant is used as return value for "can_get_status" function. */
-#define CAN_STATUS_NOT_COMPLETED 0x01
-/* ----------
-// @brief This constant is used as return value for "can_get_status" function. */
-#define CAN_STATUS_ERROR         0x02
+// - system definitions
+#define NBR_OF_MOB 6
 
-/* ----------
-// @brief This enumeration is used to select an action for a specific message
-// declared in st_cmd_t structure. */
-typedef enum {
-	CMD_NONE,
-	CMD_TX,
-	CMD_TX_DATA,
-	CMD_TX_REMOTE,
-	CMD_RX,
-	CMD_RX_DATA,
-	CMD_RX_REMOTE,
-	CMD_RX_MASKED,
-	CMD_RX_DATA_MASKED,
-	CMD_RX_REMOTE_MASKED,
-	CMD_REPLY,
-	CMD_REPLY_MASKED,
-	CMD_ABORT
-} can_cmd_t;
+// - function declarations
 
-/* ----------
-// @brief This union defines a CAN identifier and allows to access it in mode
-// standard, extended or through a table. */
-typedef union{
-	uint32_t ext;
-	uint8_t  tab[4];
-} can_id_t;
+/*******************************************************************************
+ * public api
+ ******************************************************************************/
+void can_init(void);
+void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
+void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
+void can_enable(void);
+void can_disable(void);
 
-/* ----------
-// @brief This structure allows to define a specific action on CAN network.
-// 1) handle : manage by the library.
-// 2) cmd    : initialize by the application to select the operation.
-// 3) id     : initialize by the application in transmission
-//             complete by the library in reception.
-// 4) dlc    : initialize by the application to give the number of data to
-//             transmit complete by the library in reception.
-// 5) pt_data: pointer on the table which contains the data to send or
-//             received.
-// 6) status : manage by the library.
-// 7) ctrl   : field ide to signal a extended frame. */
-typedef struct{
-	uint8_t		handle;
-	can_cmd_t	cmd;
-	can_id_t	id;
-	uint8_t		dlc;
-	uint8_t*	pt_data;
-	uint8_t		status;
-	uint8_t		rtr;
-} st_cmd_t;
+/*******************************************************************************
+ * static functions
+ ******************************************************************************/
+uint32_t _can_get_id(void);
+void _can_set_id(uint32_t identifier);
+void _can_set_msk(uint32_t mask);
+uint8_t _can_get_free_mob(void);
+void _can_handle_RXOK(void);
+void _can_handle_TXOK(void);
 
+/*******************************************************************************
+ * extern functions
+ ******************************************************************************/
 
-//_____ D E C L A R A T I O N S ________________________________________________
-
-/*------------------------------------------------------------------------------
-//  @fn can_init
-//!
-//! CAN macro initialization. Reset the CAN peripheral, initialize the bit
-//! timing, initialize all the registers mapped in SRAM to put MObs in
-//! inactive state and enable the CAN macro.
-//!
-//! @warning The CAN macro will be enable after seen on CAN bus a receceive
-//!          level as long as of an inter frame (hardware feature).
-//!
-//! @param  none.
-//!
-//! @return none.
-//!
-//-----------------------------------------------------------------------------*/
-extern void can_init(void);
-
-/*------------------------------------------------------------------------------
-//  @fn can_cmd
-//!
-//! This function takes a CAN descriptor, analyses the action to do:
-//! transmit, receive or abort.
-//! This function returns a status (CAN_CMD_ACCEPTED or CAN_CMD_REFUSED) if
-//! a MOb for Rx or Tx has been found. If no MOB has been found, the
-//! application must be retry at a later date.
-//! This function also updates the CAN descriptor status (MOB_PENDING or
-//! MOB_NOT_REACHED) if a MOb for Rx or Tx has been found. If aborting
-//! is performed, the CAN descriptor status will be set to STATUS_CLEARED.
-//!
-//! @param  st_cmd_t* - Can_descriptor pointer on CAN descriptor structure
-//!         to select the action to do.
-//!
-//! @return CAN_CMD_ACCEPTED - command is accepted
-//!         CAN_CMD_REFUSED  - command is refused
-//!
-//-----------------------------------------------------------------------------*/
-extern uint8_t can_cmd (st_cmd_t *);
-
-/*------------------------------------------------------------------------------
-//  @fn can_get_status
-//!
-//! This function allows to return if the command has been performed or not.
-//! In an reception case, all the CAN message is stored in the structure.
-//! This function also updates the CAN descriptor status (MOB_TX_COMPLETED,
-//!  MOB_RX_COMPLETED, MOB_RX_COMPLETED_DLCW or MOB_???_ERROR).
-//!
-//! @param  st_cmd_t* pointer on CAN descriptor structure.
-//!
-//! @return CAN_STATUS_COMPLETED     - Rx or Tx is completed
-//!         CAN_STATUS_NOT_COMPLETED - Rx or Tx is not completed
-//!         CAN_STATUS_ERROR         - Error in configuration or in the
-//!                                    CAN communication
-//!
-//-----------------------------------------------------------------------------*/
-extern uint8_t can_get_status (st_cmd_t *);
-
-//______________________________________________________________________________
+extern void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+extern void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+extern void CAN_ISR_OTHER(void);
 
 #endif // _CAN_LIB_H_
