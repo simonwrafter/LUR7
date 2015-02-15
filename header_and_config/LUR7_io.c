@@ -49,7 +49,7 @@ static uint8_t DDXn[19] = {
 	DDB7, //IN4
 	DDC0, //IN5
 	DDB6, //IN6
-	DDD7, //IN7
+	DDD0, //IN7
 	DDB5, //IN8
 	DDB2, //IN9
 	DDB0, //OUT1
@@ -89,7 +89,7 @@ static uint8_t PORTXn[19] = {
 	PORTB7, //IN4
 	PORTC0, //IN5
 	PORTB6, //IN6
-	PORTD7, //IN7
+	PORTD0, //IN7
 	PORTB5, //IN8
 	PORTB2, //IN9
 	PORTB0, //OUT1
@@ -129,7 +129,7 @@ static uint8_t PINXn[19] = {
 	PINB7, //IN4
 	PINC0, //IN5
 	PINB6, //IN6
-	PIND7, //IN7
+	PIND0, //IN7
 	PINB5, //IN8
 	PINB2, //IN9
 	PINB0, //OUT1
