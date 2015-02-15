@@ -60,16 +60,37 @@ void can_init(void) {
 /*
  * After the init function, run this function to setup receiving messages.
  */
-void can_setup_rx(uint8_t mob_nbr, uint32_t mob_id, uint32_t mob_msk, uint8_t mob_rtr, uint8_t mob_dlc) {
+void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 	uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
-	CANPAGE = mob_nbr << MOBNB0; // put mob_nbr in MOb Number bits
+	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
 	
-	_can_set_id(mob_id, mob_rtr);
-	_can_set_msk(mob_msk);
+	_can_set_id(mob_id); //id to compare against
+	_can_set_msk(mob_msk); //mask for comparing id
 	
-	mob_dlc = (mob_dlc > 8) ? 8 : mob_dlc;
+	mob_dlc = (mob_dlc > 8) ? 8 : mob_dlc; // expected number of data bytes
 	
-	CONCDMOB = (1 << CONMOB1) | (mob_dlc << DLC0);
+	CONCDMOB = (1 << CONMOB1) | (mob_dlc << DLC0); // configure MOb for reception of mob_dlc number of data bytes
+	
+	CANPAGE = save_CANPAGE; //restore CANPAGE
+}
+
+/*
+ * send message with id = mob_id, data = *mob_data and dlc = mob_dlc
+ * run once per message. use CAN_ISR_TXOK() for additional actions on send completion
+ */
+void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
+	uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
+	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+	
+	CANSTMOB = 0x00; //clear MOb status
+	
+	_can_set_id(mob_id);
+	
+	for (uint8_t i = 0; i < mob_dlc; i++) {
+		CANMSG = mob_data[i]; // set data
+	}
+	
+	CANCDMOB = (1<<CONMOB0) | (mob_dlc << DLC0); // enable transmission and set DLC
 	
 	CANPAGE = save_CANPAGE; //restore CANPAGE
 }
@@ -102,12 +123,12 @@ uint32_t _can_get_id() {
 /*
  * set ID registers and RTR bit
  */
-void _can_set_id(uint32_t identifier, uint8_t rtr_id) {
+void _can_set_id(uint32_t identifier) {
 	uint8_t id_v[4] = (uint8_t *) (identifier << 3);
 	CANIDT1 = id_v[3];
 	CANIDT2 = id_v[2];
 	CANIDT3 = id_v[1];
-	CANIDT4 = id_v[0] | ((rtr_id ? 1 : 0) << RTRTAG);
+	CANIDT4 = id_v[0];
 }
 
 /*
@@ -119,6 +140,18 @@ void _can_set_msk(uint32_t mask) {
 	CANIDM2 = mask_v[2];
 	CANIDM3 = mask_v[1];
 	CANIDM4 = mask_v[0] | (1<<RTRMSK) | (1<<IDEMSK);
+}
+
+/*
+ * Returns the number of the first free MOb, 0xFF if no free MOb is found
+ */
+uint8_t _can_get_free_mob() {
+	for (uint8_t mob = 0; mob < NBR_OF_MOB; mob++) {
+		if (CANEN2 & (1 << mob)) {
+			return mob;
+		}
+	}
+	return 0xFF;
 }
 
 /*******************************************************************************
@@ -138,7 +171,7 @@ ISR (CAN_INT_vect) {
 		CANSTMOB &= ~(1 << TXOK); //clear interrupt flag
 		_can_handle_TXOK();
 	} else {
-		CANSTMOB = 0x00;
+		CANSTMOB = 0x00; //clear interrupt flag, FIXME: errors not handled
 	}
 	
 	CANPAGE = save_CANPAGE; //restore CANPAGE
@@ -150,15 +183,19 @@ ISR (CAN_INT_vect) {
  * implemented in application.
  */
 void _can_handle_RXOK() {
-	uint32_t id = _can_get_id();
-	uint8_t dlc = CACDMOB & 0x0F;
-	uint8_t data[dlc];
+	uint32_t id = _can_get_id(); // get id
+	uint8_t dlc = CACDMOB & 0x0F; // get dlc
+	uint8_t data[dlc]; // create vector for data
 	
+	//read data
 	for (int i = 0; i < dlc; i++) {
 		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
 	}
 	
+	// send information to extern function in application to act on information
 	CAN_ISR_RXOK(id, dlc, data);
+	
+	CONCDMOB |= (1 << CONMOB1); // reenable reception
 }
 
 /*
@@ -166,6 +203,15 @@ void _can_handle_RXOK() {
  * implemented in application.
  */
 void _can_handle_TXOK() {
-	;
+	uint32_t id = _can_get_id(); // get id
+	uint8_t dlc = CACDMOB & 0x0F; // get dlc
+	uint8_t data[dlc]; // create vector for data
+	
+	//read data
+	for (int i = 0; i < dlc; i++) {
+		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
+	}
+	
+	CAN_ISR_TXOK(id, dlc, data); // extern function if more actions are required after TXOK
+	CANCDMOB = 0x00; // clear control register
 }
-
