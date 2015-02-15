@@ -18,24 +18,32 @@
 
 #include "../header_and_config/LUR7.h"
 
-void setup(void) {
+
+int main(void) {
 	init_io();
 	/*
 	 * Space for more setup code
 	 * This code will be run once.
 	 */
-}
 
-void loop(void) {
-	/*
-	 * Space for main code
-	 * This code will be run repeatedly.
-	 */
-}
-
-int main(void) {
-	setup();
 	while (1) {
-		loop();
+		/*
+		 * Space for main code
+		 * This code will be run repeatedly.
+		 */
 	}
 }
+
+void pcISR_in1(void) {}
+void pcISR_in2(void) {}
+void pcISR_in3(void) {}
+void pcISR_in4(void) {}
+void pcISR_in5(void) {}
+void pcISR_in6(void) {}
+void pcISR_in7(void) {}
+void pcISR_in8(void) {}
+void pcISR_in9(void) {}
+
+void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+void CAN_ISR_OTHER(void);

@@ -81,5 +81,6 @@
 // SYSTEM FUNCTIONS
 #include "LUR7_io.h"
 #include "LUR7_interrupt.h"
+#include "LUR7_can.h"
 
 #endif  // _LUR7_H_
