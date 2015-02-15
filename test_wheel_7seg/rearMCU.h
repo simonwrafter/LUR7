@@ -29,6 +29,7 @@ void update_analog(void);
 void update7seg(uint8_t);
 uint8_t bin_to_7seg(uint8_t, uint8_t);
 void blink (uint8_t);
+void lightAll(void);
 
 static const uint8_t sev_seg[11] = {
 	// a b c d e f g dp

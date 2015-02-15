@@ -28,10 +28,10 @@ int main(void) {
     TIMSK1 = (1 << TOIE1);  // enable Timer1 overflow interrupt
     TCCR1B |= (1 << CS12);  // Set CS12 prescaler (100). Prescaler set to 256. 16 000 000 CPU speed / 256 = 62 500. Each bit is 1/62500 s = 16 us
     interrupts_on();
+
 	while (1) {
 		;;
-		int local = 1337;
-		local++;
+		lightAll();
 		//update7seg(0);
 		//bin_to_7seg(2, 0);
 

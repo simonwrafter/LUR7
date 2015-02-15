@@ -18,7 +18,7 @@
 
 #include "../header_and_config/LUR7.h"
 #include "rearMCU.h"
-#include "../header_and_config/LUR7_io.h"
+//#include "../header_and_config/LUR7_io.h"
 
 
 static volatile uint16_t speed_l = 0;
@@ -33,6 +33,7 @@ uint8_t seg = 0;
 void init_interrupt(void) {
 	ext_int_on(IN5, 0, 1);
 	ext_int_on(IN8, 0, 1);
+	ext_int_on(IN9, 0, 1);
 }
 
 void update_analog(void) {
@@ -41,9 +42,9 @@ void update_analog(void) {
 	//steering = get_analog(STEERING_WHEEL);
 }
 
-ISR(INT_IN5_vect) { // SPEED_L
+ISR(INT_IN9_vect) { // SPEED_L
 	speed_l++; //for now...
-	//update7seg(overflowTimeCounter);
+	//update7seg(speed_l);
 
 }
 
@@ -55,8 +56,8 @@ ISR(INT_IN5_vect) { // SPEED_L
 ISR(TIMER1_OVF_vect){
 	overflowTimeCounter++;
 	velocity_l = speed_l;
-	//speed_l = 0;
-	update7seg(overflowTimeCounter);
+	speed_l = 0;
+	update7seg(velocity_l);
 }
 
 void update7seg(uint8_t i){
@@ -68,6 +69,28 @@ void update7seg(uint8_t i){
 	set_output(OUT5, !(seg & _BV(3)));
 	set_output(OUT6, !(seg & _BV(2)));
 	set_output(OUT7, !(seg & _BV(1)));
+}
+
+void lightAll(){
+	if(get_input(IN8)){
+		set_output(OUT1, 0);
+		set_output(OUT2, 0);
+		set_output(OUT3, 0);
+		set_output(OUT4, 0);
+		set_output(OUT5, 0);
+		set_output(OUT6, 0);
+		set_output(OUT7, 0);
+		set_output(OUT8, 0);
+	} else{
+		set_output(OUT1, 1);
+		set_output(OUT2, 1);
+		set_output(OUT3, 1);
+		set_output(OUT4, 1);
+		set_output(OUT5, 1);
+		set_output(OUT6, 1);
+		set_output(OUT7, 1);
+		set_output(OUT8, 1);
+	}
 }
 
 void blink(uint8_t bo){
