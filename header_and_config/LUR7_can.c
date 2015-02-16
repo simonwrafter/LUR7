@@ -35,7 +35,7 @@ void can_init(void) {
 	CANBT2 = CONF_CANBT2; // set baudrate, CONF_CANBT2 defined in .h file
 	CANBT3 = CONF_CANBT3; // set baudrate, CONF_CANBT3 defined in .h file
 
-	CANGIE = 0b10000010;// (1<<ENIT) | (1<<ENRX) | (1<<ENTX); //enable TXOK an RXOK interrupts
+	CANGIE = 0xFF;// (1<<ENIT) | (1<<ENRX) | (1<<ENTX); //enable TXOK an RXOK interrupts
 	CANIE1 = 0; // for compatibility
 	CANIE2 = (1<<IEMOB5) | (1<<IEMOB4) | (1<<IEMOB3) | (1<<IEMOB2) | (1<<IEMOB1) | (1<<IEMOB0); // enable interrupts on all MOb
 

@@ -1,5 +1,4 @@
 #include "../header_and_config/LUR7.h"
-#include "can_lib.h"
 
 uint8_t flag = 0;
 

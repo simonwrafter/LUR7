@@ -1,5 +1,4 @@
 #include "../header_and_config/LUR7.h"
-#include "can_lib.h"
 
 uint8_t string_test(uint8_t *, uint8_t *, uint8_t);
 
@@ -48,3 +47,4 @@ void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
 }
 
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_OTHER() {}
