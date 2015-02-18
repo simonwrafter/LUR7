@@ -159,7 +159,7 @@ void init_adc(void) {
 //other functions
 
 uint8_t set_output(uint8_t port, uint8_t data) {
-	if (data) {
+	if (!data) {
 		*PORTX[port] |= (1 << PORTXn[port]);
 		return 1;
 	} else {
