@@ -4,8 +4,7 @@ uint8_t er_flag = 0;
 uint8_t txok_flag = 1;
 
 int main(void) {
-	init_io();
-	DDRC |= 1<<DDC2;
+	init_io(
 	set_output(OUT1, OFF);
 	set_output(OUT2, OFF);
 	can_init();
