@@ -1,22 +1,27 @@
 #include "../header_and_config/LUR7.h"
 
-uint8_t flag = 0;
+uint8_t er_flag = 0;
+uint8_t txok_flag = 1;
 
 int main(void) {
 	init_io();
+	DDRC |= 1<<DDC2;
 	set_output(OUT1, OFF);
+	set_output(OUT2, OFF);
 	can_init();
 
 	interrupts_on();
 	can_enable();
 
 	while(1) {
-		if (flag == 1) {
-			//set_output(OUT1, ON);
+		if (er_flag != 0) {
+			set_output(OUT2, ON);
 		}
-		toggle_output(OUT2);
-		can_setup_tx(0x000f0f00, '\0', 0);
-		_delay_ms(1000);
+		if (txok_flag == 1) {
+			set_output(OUT1, OFF);
+			can_setup_tx(0x000f0f00, '\0', 0);
+			txok_flag = 0;
+		}
 	}
 	return(0);
 }
@@ -35,10 +40,11 @@ void pcISR_in9(void) {}
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
-	toggle_output(OUT1);
+	set_output(OUT1, OFF);
+	txok_flag = 1;
 }
 
 void CAN_ISR_OTHER() {
 	CANGIT = 0x00;
-	flag = 1;
+	er_flag = 1;
 }

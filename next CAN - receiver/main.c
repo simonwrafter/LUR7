@@ -11,6 +11,8 @@ int main(void) {
 	interrupts_on();
 	can_enable();
 
+	set_output(OUT1, OFF);
+
 	while(1) {
 		;
 	}
@@ -40,9 +42,9 @@ void pcISR_in9(void) {}
 
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
 	if (string_test(data, (uint8_t *) "onononon", 8)) {
-		set_output(OUT6, ON);
+		set_output(OUT5, ON);
 	} else if (string_test(data, (uint8_t *) "offoffof", 8)) {
-		set_output(OUT6, OFF);
+		set_output(OUT5, OFF);
 	}
 }
 
