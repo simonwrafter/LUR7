@@ -29,7 +29,7 @@
  */
 void can_init(void) {
 	CANGCON = (1<<SWRES); // reset CAN
-	CANTCON = 0x00; //set timing prescaler to zero
+	//CANTCON = 0x00; //set timing prescaler to zero
 
 	CANBT1 = CONF_CANBT1; // set baudrate, CONF_CANBT1 defined in .h file
 	CANBT2 = CONF_CANBT2; // set baudrate, CONF_CANBT2 defined in .h file
@@ -41,19 +41,20 @@ void can_init(void) {
 
 	//clear all MOb
 	for (uint8_t mob_number = 0; mob_number < NBR_OF_MOB; mob_number++) {
-		CANPAGE = (mob_number << 4);	// select each MOb in turn
+		CANPAGE = (mob_number << 4); // select each MOb in turn
 
 		//initiate everything to zero
 		CANSTMOB = 0x00;
 		CANCDMOB = 0x00;
-		CANIDT4 = 0x00;
-		CANIDT3 = 0x00;
-		CANIDT2 = 0x00;
-		CANIDT1 = 0x00;
-		CANIDM4 = 0x00;
-		CANIDM3 = 0x00;
-		CANIDM2 = 0x00;
-		CANIDM1 = 0x00;
+		
+		//CANIDT4 = 0x00;
+		//CANIDT3 = 0x00;
+		//CANIDT2 = 0x00;
+		//CANIDT1 = 0x00;
+		//CANIDM4 = 0x00;
+		//CANIDM3 = 0x00;
+		//CANIDM2 = 0x00;
+		//CANIDM1 = 0x00;
 	}
 }
 
@@ -61,7 +62,7 @@ void can_init(void) {
  * After the init function, run this function to setup receiving messages.
  */
 void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
-	uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
+	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
 	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
 
 	_can_set_id(mob_id); //id to compare against
@@ -69,9 +70,9 @@ void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 
 	mob_dlc = (mob_dlc > 8) ? 8 : mob_dlc; // expected number of data bytes
 
-	CANCDMOB = (1 << CONMOB1) | (mob_dlc << DLC0); // configure MOb for reception of mob_dlc number of data bytes
+	CANCDMOB = (1 << CONMOB1) | (1 << IDE) | (mob_dlc << DLC0); // configure MOb for reception of mob_dlc number of data bytes
 
-	CANPAGE = save_CANPAGE; //restore CANPAGE
+	//CANPAGE = save_CANPAGE; //restore CANPAGE
 }
 
 /*
@@ -79,9 +80,9 @@ void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
  * run once per message. use CAN_ISR_TXOK() for additional actions on send completion
  */
 void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
-	uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
+	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
 	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
-
+	
 	CANSTMOB = 0x00; //clear MOb status
 
 	_can_set_id(mob_id);
@@ -90,9 +91,9 @@ void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 		CANMSG = mob_data[i]; // set data
 	}
 
-	CANCDMOB = (1<<CONMOB0) | (mob_dlc << DLC0); // enable transmission and set DLC
+	CANCDMOB = (1<<CONMOB0) | (1 << IDE) | (mob_dlc << DLC0); // enable transmission and set DLC
 
-	CANPAGE = save_CANPAGE; //restore CANPAGE
+	//CANPAGE = save_CANPAGE; //restore CANPAGE
 }
 
 /*
