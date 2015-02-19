@@ -4,8 +4,8 @@ uint8_t er_flag = 0;
 uint8_t txok_flag = 1;
 
 int main(void) {
-	init_io(
-	set_output(OUT1, OFF);
+	init_io();
+	set_output(OUT1, ON);
 	set_output(OUT2, OFF);
 	can_init();
 
@@ -39,7 +39,7 @@ void pcISR_in9(void) {}
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
-	set_output(OUT1, OFF);
+	set_output(OUT1, ON);
 	txok_flag = 1;
 }
 

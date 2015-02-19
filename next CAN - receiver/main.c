@@ -6,7 +6,7 @@ int main(void) {
 	init_io();
 
 	can_init();
-	can_setup_rx(0x000f0f00, 0xffffff00, 8);
+	can_setup_rx(0x000f0f00, 0xffffff00, 0);
 
 	interrupts_on();
 	can_enable();
@@ -41,11 +41,12 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
-	if (string_test(data, (uint8_t *) "onononon", 8)) {
+	/*if (string_test(data, (uint8_t *) "onononon", 8)) {
 		set_output(OUT5, ON);
 	} else if (string_test(data, (uint8_t *) "offoffof", 8)) {
 		set_output(OUT5, OFF);
-	}
+	}*/
+	toggle_output(OUT5);
 }
 
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}

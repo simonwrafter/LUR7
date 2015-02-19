@@ -35,7 +35,7 @@ void can_init(void) {
 	CANBT2 = CONF_CANBT2; // set baudrate, CONF_CANBT2 defined in .h file
 	CANBT3 = CONF_CANBT3; // set baudrate, CONF_CANBT3 defined in .h file
 
-	CANGIE = 0xFF;// (1<<ENIT) | (1<<ENRX) | (1<<ENTX); //enable TXOK an RXOK interrupts
+	CANGIE = 0xFE; // (1<<ENIT) | (1<<ENRX) | (1<<ENTX); //enable TXOK an RXOK interrupts
 	CANIE1 = 0; // for compatibility
 	CANIE2 = (1<<IEMOB5) | (1<<IEMOB4) | (1<<IEMOB3) | (1<<IEMOB2) | (1<<IEMOB1) | (1<<IEMOB0); // enable interrupts on all MOb
 
@@ -46,7 +46,7 @@ void can_init(void) {
 		//initiate everything to zero
 		CANSTMOB = 0x00;
 		CANCDMOB = 0x00;
-		
+
 		//CANIDT4 = 0x00;
 		//CANIDT3 = 0x00;
 		//CANIDT2 = 0x00;
@@ -82,7 +82,7 @@ void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
 	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
-	
+
 	CANSTMOB = 0x00; //clear MOb status
 
 	_can_set_id(mob_id);
