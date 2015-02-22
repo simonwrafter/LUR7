@@ -82,5 +82,7 @@
 #include "LUR7_io.h"
 #include "LUR7_interrupt.h"
 #include "LUR7_can.h"
+#include "LUR7_timer0.h"
+#include "LUR7_timer1.h"
 
 #endif  // _LUR7_H_

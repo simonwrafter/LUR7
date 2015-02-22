@@ -54,7 +54,7 @@
 #       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
 #       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
 #   else
-#       error This CAN_BAUDRATE value is not in "can_lib.h" file
+#       error This CAN_BAUDRATE value is not in "LUR7_can.h" file
 #   endif
 
 #elif FOSC == 8000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
@@ -83,11 +83,11 @@
 #       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
 #       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
 #   else
-#       error This CAN_BAUDRATE value is not in "can_lib.h" file
+#       error This CAN_BAUDRATE value is not in "LUR7_can.h" file
 #   endif
 
 #else
-#   error This FOSC value is not in "can_lib.h" file
+#   error This FOSC value is not in "LUR7_can.h" file
 #endif
 
 // - system definitions

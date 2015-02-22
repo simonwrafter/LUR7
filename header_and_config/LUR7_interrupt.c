@@ -17,6 +17,7 @@
  */
 
 #include "LUR7.h"
+#include "LUR7_interrupt.h"
 
 //EXTERNAL INTERRUPTS
 static uint8_t ISCn0[9] = {
@@ -148,7 +149,7 @@ void interrupts_off() {
 ISR(PCINT0_vect) {
 	uint8_t change_finder = (PINB & PCMSK0) ^ pcint0_data;
 	update_pcint_data();
-	
+
 	if(change_finder & (1<<PCINTn[IN4])) {
 		pcISR_in4();
 	}
