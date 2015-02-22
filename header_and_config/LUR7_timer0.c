@@ -29,12 +29,14 @@ void timer0_init(void) {
 	 * OCR0A  = 0b11011001; // OCR0A = 217 => 36,0023 Hz.
 	 * OCR0A  = 0b10011011; // OCR0A = 155 => 50,080 Hz,
 	 * OCR0A  = 0b01111101; // OCR0A = 125 => 62,004 Hz.
-	 * OCR0A  = 0b01001110; // OCR0A = 78 => 98,892 Hz.
+	 * OCR0A  = 0b01001101; // OCR0A = 77 => 100,160 Hz.
 	 */
-	TIMSK0 = (1 << OCIE0A)
+	TIMSK0 = (1 << OCIE0A);
 }
 
 ISR(TIMER0_COMPA_vect) {
 	timer0_isr_50Hz(interrupt_nbr++);
-	interrupt_nbr = interrupt_nbr ? interrupt_nbr : 0;
+	if (interrupt_nbr >= 50) {
+		interrupt_nbr = 0;
+	}
 }

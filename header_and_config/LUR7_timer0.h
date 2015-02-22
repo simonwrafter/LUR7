@@ -21,6 +21,6 @@
 
 void timer0_init(void);
 
-extern timer0_isr(uint8_t interrupt_nbr);
+extern void timer0_isr_50Hz(uint8_t interrupt_nbr);
 
 #endif //_TIMER0_H_
