@@ -20,11 +20,11 @@
 #include "LUR7_ancomp.h"
 
 void ancomp_init(void) {
-	AC0CON = (1 << AC0EN) | (1 << AC0IE) | (1 << AC0M2) | (1 << AC0M1);
+	AC0C2N = (1 << AC2EN) | (1 << AC2IE) | (1 << AC2M2) | (1 << AC2M1);
 }
 
-ISR(ANACOMP0_vect) {
-	if (ACSR & (1 << AC0O)) {
+ISR(ANACOMP2_vect) {
+	if (ACSR & (1 << AC2O)) {
 		early_bod_warning_ISR();
 	} else {
 		early_bod_safe_ISR();
