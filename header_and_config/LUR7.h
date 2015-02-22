@@ -84,5 +84,6 @@
 #include "LUR7_can.h"
 #include "LUR7_timer0.h"
 #include "LUR7_timer1.h"
+#include "LUR7_ancomp.h"
 
 #endif  // _LUR7_H_
