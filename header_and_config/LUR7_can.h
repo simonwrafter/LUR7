@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CAN_LIB_H_
-#define _CAN_LIB_H_
+#ifndef _LUR7_CAN_LIB_H_
+#define _LUR7_CAN_LIB_H_
 
 // - Baud rate definitions
 #ifndef FOSC
@@ -122,4 +122,4 @@ extern void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
 extern void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data);
 extern void CAN_ISR_OTHER(void);
 
-#endif // _CAN_LIB_H_
+#endif // _LUR7_CAN_LIB_H_

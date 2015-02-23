@@ -1,5 +1,5 @@
 /*
- * LUR7_timer0.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * LUR7_adc.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,12 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LUR7_TIMER1_H_
-#define _LUR7_TIMER1_H_
+#ifndef _LUR7_ADC_H_
+#define _LUR7_ADC_H_
 
-void timer1_init(void);
-void set_pwm_output(uint16_t);
+void adc_init(void);
 
-// extern void timer1_isr_400Hz(uint8_t);
+uint16_t adc_get(uint8_t);
 
-#endif //_LUR7_TIMER1_H_
+#endif  // _LUR7_ADC_H_
