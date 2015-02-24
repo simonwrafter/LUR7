@@ -16,7 +16,6 @@
 / along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <avr/io.h>
 #include <avr/cpufunc.h> //included for _NOP()
 #include "LUR7.h"
 #include "LUR7_io.h"
@@ -142,24 +141,18 @@ static uint8_t PINXn[19] = {
 	PINB4  //OUT8
 };
 
-//Init functions
+//Init function
 
-void init_io(void) {
+void io_init(void) {
 	for (uint8_t i = OUT1; i<NBR_OF_IO; i++) { //set DDXn=1 for all outputs
 		*DDX[i] |= (1<<DDXn[i]);
 	}
 }
 
-void init_adc(void) {
-	ADMUX = (1<<REFS0) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0);
-	ADCSRA = (1<<ADEN) | (1<<ADPS1) | (1<<ADPS0);
-	ADCSRB = (1<<ADHSM);
-}
-
 //other functions
 
 uint8_t set_output(uint8_t port, uint8_t data) {
-	if (data) {
+	if (!data) {
 		*PORTX[port] |= (1 << PORTXn[port]);
 		return 1;
 	} else {
@@ -180,16 +173,4 @@ uint8_t toggle_output(uint8_t port){
 
 uint8_t get_input(uint8_t port) {
 	return (*PINX[port] & (1 << PINXn[port]) ? 1 : 0);
-}
-
-uint16_t get_analog(uint8_t analog_port) {
-	ADMUX &= ~((1<<MUX4) | (1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0));
-	ADMUX |= analog_port;
-	ADCSRA = (1<<ADSC);
-
-	while (!(ADCSRA & (1<<ADIF))) {
-		;
-	}
-	ADCSRA |= (1<<ADIF);
-	return (ADCH<<8) | ADCL;
 }

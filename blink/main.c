@@ -8,6 +8,6 @@ int main (void) {
 
 	while (1) {
 		PINC = 1 << PINC4;
-		_delay_ms(550);
+		_delay_ms(500);
 	}
 }

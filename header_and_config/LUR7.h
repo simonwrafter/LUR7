@@ -1,19 +1,19 @@
 /*
- * / LUR7.h - A collection of functions to setup and ease the use of the LUR7 PCB
- * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
- * /
- * / This program is free software: you can redistribute it and/or modify
- * / it under the terms of the GNU General Public License as published by
- * / the Free Software Foundation, either version 3 of the License, or
- * / (at your option) any later version.
- * /
- * / This program is distributed in the hope that it will be useful,
- * / but WITHOUT ANY WARRANTY; without even the implied warranty of
- * / MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * / GNU General Public License for more details.
- * /
- * / You should have received a copy of the GNU General Public License
- * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * LUR7.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef _LUR7_H_
@@ -24,8 +24,8 @@
 #include <stdint.h>
 
 // CLOCK SETTINGS AND DELAY
-#define FOSC	16000        // 16Mhz external clock
-#define F_CPU	16000000     // Needed for delay
+#define FOSC	16000UL        // 16Mhz external clock
+#define F_CPU	16000000UL     // Needed for delay
 #include <util/delay.h>
 
 // CAN LIB CONFIGURATION
@@ -60,12 +60,13 @@
 #define OUT8	16 //PB4
 
 // ADC
-#define ADC_AN1		0x04 //PC0
-#define ADC_AN2		0x07 //PD0
-#define ADC_AN3		0x06 //PB5
-#define ADC_AN4		0x05 //PB2
-#define ADC_TEMP	0x0B
-#define ADC_SUPPLY	0x10
+#define ADC_AN1			0x04 //PC0, IN5
+#define ADC_AN2			0x07 //PD0, IN7
+#define ADC_AN3			0x06 //PB5, IN8
+#define ADC_AN4			0x05 //PB2, IN9
+#define ADC_TEMP		0x0B
+#define ADC_SUPPLY_P	0x02 //PD5, Capacitor bank
+#define ADC_SUPPLY_N	0x03 //PD6, 12V main
 
 // LOGIC
 #define TRUE	1
@@ -80,6 +81,12 @@
 
 // SYSTEM FUNCTIONS
 #include "LUR7_io.h"
+#include "LUR7_adc.h"
+#include "LUR7_ancomp.h"
+#include "LUR7_can.h"
 #include "LUR7_interrupt.h"
+#include "LUR7_power.h"
+#include "LUR7_timer0.h"
+#include "LUR7_timer1.h"
 
 #endif  // _LUR7_H_

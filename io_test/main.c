@@ -20,49 +20,24 @@
 
 int main(void) {
 	init_io();
-
-	pc_int_on(IN6);
-	//pc_int_on(IN2);
-	//pc_int_on(IN3);
-	//pc_int_on(IN4);
-	//pc_int_on(IN5);
-	//pc_int_on(IN6);
-	//pc_int_on(IN7);
-	//pc_int_on(IN8);
-	//pc_int_on(IN9);
-
-	interrupts_on();
+	set_output(OUT1, ON);
+	set_output(OUT1, OFF);
 
 	while (1) {
-		;
+		toggle_output(OUT1);
+		toggle_output(OUT2);
+		toggle_output(OUT8);
+		_delay_ms(50);
 	}
 	return 0;
 }
 
-void pcISR_in1(void) {
-	set_output(OUT1, get_input(IN1));
-}
-void pcISR_in2(void) {
-	set_output(OUT1, get_input(IN2));
-}
-void pcISR_in3(void) {
-	set_output(OUT1, get_input(IN3));
-}
-void pcISR_in4(void) {
-	set_output(OUT1, get_input(IN4));
-}
-void pcISR_in5(void) {
-	set_output(OUT1, get_input(IN5));
-}
-void pcISR_in6(void) {
-	set_output(OUT1, get_input(IN6));
-}
-void pcISR_in7(void) {
-	set_output(OUT1, get_input(IN7));
-}
-void pcISR_in8(void) {
-	set_output(OUT1, get_input(IN8));
-}
-void pcISR_in9(void) {
-	set_output(OUT1, get_input(IN9));
-}
+void pcISR_in1(void) {}
+void pcISR_in2(void) {}
+void pcISR_in3(void) {}
+void pcISR_in4(void) {}
+void pcISR_in5(void) {}
+void pcISR_in6(void) {}
+void pcISR_in7(void) {}
+void pcISR_in8(void) {}
+void pcISR_in9(void) {}

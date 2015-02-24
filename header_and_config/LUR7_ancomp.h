@@ -1,6 +1,6 @@
 /*
- * LUR7_io.h - A collection of functions to setup and ease the use of the LUR7 PCB
- * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * LUR7_ancomp.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LUR7_IO_H_
-#define _LUR7_IO_H_
+#ifndef _LUR7_ANCOMP_H_
+#define _LUR7_ANCOMP_H_
 
-#define NBR_OF_IO 17
+void ancomp_init(void);
 
-void io_init(void);
+extern void early_bod_warning_ISR(void);
+extern void early_bod_safe_ISR(void);
 
-uint8_t set_output(uint8_t, uint8_t);
-uint8_t get_output(uint8_t);
-uint8_t toggle_output(uint8_t);
-
-uint8_t get_input(uint8_t);
-
-#endif  // _LUR7_IO_H_
+#endif // _LUR7_ANCOMP_H_

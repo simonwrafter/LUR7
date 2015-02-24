@@ -1,5 +1,5 @@
 /*
- * LUR7_io.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * LUR7_timer0.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,17 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LUR7_IO_H_
-#define _LUR7_IO_H_
+#ifndef _LUR7_TIMER1_H_
+#define _LUR7_TIMER1_H_
 
-#define NBR_OF_IO 17
+void timer1_init(void);
+void set_pwm_output(uint16_t);
 
-void io_init(void);
+// extern void timer1_isr_400Hz(uint8_t);
 
-uint8_t set_output(uint8_t, uint8_t);
-uint8_t get_output(uint8_t);
-uint8_t toggle_output(uint8_t);
-
-uint8_t get_input(uint8_t);
-
-#endif  // _LUR7_IO_H_
+#endif //_LUR7_TIMER1_H_

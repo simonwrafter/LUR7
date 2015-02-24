@@ -1,45 +1,33 @@
 #include "../header_and_config/LUR7.h"
-#include "can_lib.h"
 
-st_cmd_t received_cmd;
-uint8_t rec_data;
-
-void loop(void);
-void setup(void);
+uint8_t string_test(uint8_t *, uint8_t *, uint8_t);
 
 int main(void) {
-	setup();
+	init_io();
+
+	can_init();
+	can_setup_rx(0x000f0f00, 0xffffff00, 0);
+
+	interrupts_on();
+	can_enable();
+
+	set_output(OUT1, OFF);
+
 	while(1) {
-		loop();
+		;
 	}
 	return(0);
 }
 
-inline void setup() {
-	//CAN
-	CLKPR = (1<<CLKPCE); //Enable clock prescaler
-	CLKPR = 0x00; //set prescaler to 1
-
-	can_init(); //init the CAN bus
-	CANGIE = (1<<ENIT) | (1<<ENRX); //enable RX interrupts
-	CANIE2 = (1<<IEMOB5) | (1<<IEMOB4) | (1<<IEMOB3) | (1<<IEMOB2) | (1<<IEMOB1);
-
-	//set up receiver
-	received_cmd.pt_data = &rec_data;
-	received_cmd.dlc = 1;
-	received_cmd.id.ext = 0x80;
-	received_cmd.status = 0x00;
-	received_cmd.cmd = CMD_RX_DATA;
-
-	//LUR7
-	init_io();
-	interrupts_on();
-
-	can_cmd(&received_cmd);
-}
-
-inline void loop() {
-	;
+uint8_t string_test(uint8_t * s1, uint8_t * s2, uint8_t nbr_to_compare) {
+	for (uint8_t pos = 0; pos < nbr_to_compare; pos++) {
+		if (s1[pos] != s2[pos]) {
+			return FALSE;
+		} else if (s1[pos] == '\0') {
+			return TRUE;
+		}
+	}
+	return TRUE;
 }
 
 void pcISR_in1(void) {}
@@ -52,12 +40,14 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-ISR(CAN_INT_vect) {
-	if (CANSTMOB & 1<<RXOK) {
-		can_get_status(&received_cmd);
-		toggle_output(OUT1);
-	} else {
-		can_get_status(&received_cmd);
-	}
-	can_cmd(&received_cmd);
+void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
+	/*if (string_test(data, (uint8_t *) "onononon", 8)) {
+		set_output(OUT5, ON);
+	} else if (string_test(data, (uint8_t *) "offoffof", 8)) {
+		set_output(OUT5, OFF);
+	}*/
+	toggle_output(OUT5);
 }
+
+void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_OTHER() {}
