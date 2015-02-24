@@ -26,6 +26,10 @@ int main(void) {
 	timer0_init();
 	timer1_init();
 	power_off_default();
+
+	interrupts_on();
+	can_enable();
+	
 	/*
 	 * Space for more setup code
 	 * This code will be run once.

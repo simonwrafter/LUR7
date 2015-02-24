@@ -19,21 +19,26 @@
 #include "../header_and_config/LUR7.h"
 
 int main(void) {
-	init_io();
-	set_output(OUT1, ON);
+	io_init();
 	set_output(OUT1, OFF);
+	set_output(OUT2, ON);
+
+	pc_int_on(IN1);
+	pc_int_on(IN2);
+
+	interrupts_on();
 
 	while (1) {
-		toggle_output(OUT1);
-		toggle_output(OUT2);
-		toggle_output(OUT8);
-		_delay_ms(50);
 	}
 	return 0;
 }
 
-void pcISR_in1(void) {}
-void pcISR_in2(void) {}
+void pcISR_in1(void) {
+	toggle_output(OUT1);
+}
+void pcISR_in2(void) {
+	toggle_output(OUT2);
+}
 void pcISR_in3(void) {}
 void pcISR_in4(void) {}
 void pcISR_in5(void) {}
@@ -41,3 +46,12 @@ void pcISR_in6(void) {}
 void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
+
+void timer0_isr_50Hz(uint8_t interrupt_nbr) {}
+
+void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_OTHER(void) {}
+
+void early_bod_warning_ISR(void) {}
+void early_bod_safe_ISR(void) {}
