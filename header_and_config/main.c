@@ -26,7 +26,14 @@ int main(void) {
 	timer0_init();
 	timer1_init(); // if PWM output
 	power_off_default();
+<<<<<<< HEAD
 	//power_off_timer1(); //if no PWM output
+=======
+
+	interrupts_on();
+	can_enable();
+	
+>>>>>>> 404a86a5d588aec13808f9eb9b6eff8f5f14d909
 	/*
 	 * Space for more setup code
 	 * This code will be run once.

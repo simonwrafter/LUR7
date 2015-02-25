@@ -41,11 +41,11 @@ void can_init(void) {
 
 	//clear all MOb
 	for (uint8_t mob_number = 0; mob_number < NBR_OF_MOB; mob_number++) {
-		CANPAGE = (mob_number << 4); // select each MOb in turn
+		CANPAGE = (mob_number << MOBNB0); // select each MOb in turn
 
 		//initiate everything to zero
-		CANSTMOB = 0x00;
 		CANCDMOB = 0x00;
+		CANSTMOB = 0x00;
 
 		//CANIDT4 = 0x00;
 		//CANIDT3 = 0x00;

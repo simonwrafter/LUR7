@@ -72,7 +72,7 @@ void update7seg(uint8_t i){
 }
 
 void lightAll(){
-	if(get_input(IN8)){
+	if(get_input(IN7)){
 		set_output(OUT1, 0);
 		set_output(OUT2, 0);
 		set_output(OUT3, 0);

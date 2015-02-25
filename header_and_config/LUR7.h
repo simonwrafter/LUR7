@@ -29,7 +29,7 @@
 #include <util/delay.h>
 
 // CAN LIB CONFIGURATION
-#define CAN_BAUDRATE	100        // in kBit
+#define CAN_BAUDRATE	125        // in kBit
 
 // SYSTEM DEFINITION
 //digital inputs
@@ -42,12 +42,6 @@
 #define IN7		6 //PD0
 #define IN8		7 //PB5
 #define IN9		8 //PB2
-
-//analog inputs
-#define AN1		4 //PC0
-#define AN2		6 //PD0
-#define AN3		7 //PB5
-#define AN4		8 //PB2
 
 //digital outputs
 #define OUT1	9  //PB0 v1.0; PC1 v1.1
