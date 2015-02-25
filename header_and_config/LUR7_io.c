@@ -151,11 +151,11 @@ static uint8_t PINXn[19] = {
 	PIND0, //IN7
 	PINB5, //IN8
 	PINB2, //IN9
-	#ifdef PCBv1.1
+#ifdef PCBv1.1
 	PINC1, //OUT1 MCU v1.1
-	#else
+#else
 	PINB0, //OUT1 MCU v1.0
-	#endif
+#endif
 	PINB1, //OUT2
 	PIND7, //OUT3
 	PINC4, //OUT4
