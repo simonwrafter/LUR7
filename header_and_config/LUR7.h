@@ -50,7 +50,7 @@
 #define AN4		8 //PB2
 
 //digital outputs
-#define OUT1	9  //PB0
+#define OUT1	9  //PB0 v1.0; PC1 v1.1
 #define OUT2	10 //PB1
 #define OUT3	11 //PD7
 #define OUT4	12 //PC4

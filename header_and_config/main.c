@@ -24,8 +24,9 @@ int main(void) {
 	ancomp_init();
 	can_init();
 	timer0_init();
-	timer1_init();
+	timer1_init(); // if PWM output
 	power_off_default();
+	//power_off_timer1(); //if no PWM output
 	/*
 	 * Space for more setup code
 	 * This code will be run once.
