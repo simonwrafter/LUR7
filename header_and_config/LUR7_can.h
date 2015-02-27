@@ -20,15 +20,15 @@
 #define _LUR7_CAN_LIB_H_
 
 // - Baud rate definitions
-#ifndef FOSC
-#  error  FOSC not defined in LUR7.h
+#ifndef F_CPU
+#  error  F_CPU not defined in LUR7.h
 #endif
 // ----------
 #ifndef CAN_BAUDRATE
 #  error  CAN_BAUDRATE not defined in LUR7.h
 #endif
 // ----------
-#if FOSC == 16000             //!< Fclkio = 16 MHz, Tclkio = 62.5 ns
+#if F_CPU == 16000000             //!< Fclkio = 16 MHz, Tclkio = 62.5 ns
 #   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
 #       define CONF_CANBT1  0x12       // Tscl  = 10x Tclkio = 625 ns
 #       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
@@ -57,7 +57,7 @@
 #       error This CAN_BAUDRATE value is not in "LUR7_can.h" file
 #   endif
 
-#elif FOSC == 8000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
+#elif F_CPU == 8000000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
 #   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
 #       define CONF_CANBT1  0x08       // Tscl  = 5x Tclkio = 625 ns
 #       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
@@ -87,7 +87,7 @@
 #   endif
 
 #else
-#   error This FOSC value is not in "LUR7_can.h" file
+#   error This F_CPU value is not in "LUR7_can.h" file
 #endif
 
 // - system definitions

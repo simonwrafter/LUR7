@@ -16,7 +16,18 @@
 / along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "LUR7.h"
+/*! \file LUR7_adc.c
+ * LUR7_adc.c sets up and retreives analog input values through 10 bit adc for
+ * the LUR7 project. All code is released under the GPLv3 license.
+ * 
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the LUR7.h file to your main.c file.
+ * 
+ * In this file functions pertaining to the initialization and usage of the 10
+ * bit ADC are defined.
+ */
+
+//#include "LUR7.h"
 #include "LUR7_adc.h"
 
 void adc_init(void) {

@@ -1,6 +1,6 @@
 /*
- * LUR7_adc.h - A collection of functions to setup and ease the use of the LUR7 PCB
- * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * LUR7_adc.h - Sets up and retreives analog input values through a 10 bit ADC.
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*! \file LUR7_adc.h
+ * LUR7_adc.h sets up and retreives analog input values through 10 bit adc for
+ * the LUR7 project. All code is released under the GPLv3 license.
+ * 
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the LUR7.h file to your main.c file.
+ * 
+ * In this file functions pertaining to the initialization and usage of the 10
+ * bit ADC are declared.
  */
 
 #ifndef _LUR7_ADC_H_
