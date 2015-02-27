@@ -15,13 +15,13 @@
  * / You should have received a copy of the GNU General Public License
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#define PCBv11
 #include "../header_and_config/LUR7.h"
 #include "rearMCU.h"
 
 int main(void) {
-	init_io();
-	init_adc();
+	io_init();
+	//adc_init();
 	init_interrupt();
 	TCCR1A = 0;        		// set entire TCCR1A register to 0
     TCCR1B = 0;
@@ -31,7 +31,7 @@ int main(void) {
 
 	while (1) {
 		;;
-		lightAll();
+		//lightAll();
 		//update7seg(0);
 		//bin_to_7seg(2, 0);
 

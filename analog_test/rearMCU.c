@@ -26,10 +26,10 @@ static volatile uint16_t speed_r = 0;
 static volatile uint16_t susp_l = 0;
 static volatile uint16_t susp_r = 0;
 volatile uint32_t overflowTimeCounter = 0;
-volatile uint32_t velocity_l = 0;
 volatile uint32_t velocity_r = 0;
 uint8_t seg = 0;
 
+/*
 void init_interrupt(void) {
 	ext_int_on(IN5, 0, 1);
 	ext_int_on(IN8, 0, 1);
@@ -54,14 +54,13 @@ ISR(INT_IN9_vect) { // SPEED_L
 
 //With each bit change 16 us, TIMER1 will overflow each 1,048576 s
 ISR(TIMER1_OVF_vect){
-	overflowTimeCounter++;
-	velocity_l = speed_l;
-	speed_l = 0;
-	update7seg(velocity_l);
-}
+	
 
-void update7seg(uint8_t i){
-	seg = bin_to_7seg(i, 0);
+*/
+void update7seg(uint16_t i){
+	uint16_t k = i / 100;
+	//i = 3;
+	seg = bin_to_7seg(k, 0);
 	set_output(OUT1, (seg & _BV(7)));
 	set_output(OUT2, (seg & _BV(6)));
 	set_output(OUT3, (seg & _BV(5)));
@@ -103,7 +102,7 @@ void blink(uint8_t bo){
 	}
 }
 
-uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
+uint8_t bin_to_7seg(uint16_t binary, uint8_t dp) {
 	if (binary >= 0 && binary <= 10) {
 		if (!dp) {
 			return sev_seg[binary];
@@ -113,14 +112,4 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 	}
 	return sev_seg[10];
 }
-
-void pcISR_in1(){}
-void pcISR_in2(){}
-void pcISR_in3(){}
-void pcISR_in4(){}
-void pcISR_in5(){}
-void pcISR_in6(){}
-void pcISR_in7(){}
-void pcISR_in8(){}
-void pcISR_in9(){}
 

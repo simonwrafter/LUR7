@@ -27,7 +27,7 @@
  * bit ADC are defined.
  */
 
-//#include "LUR7.h"
+#include "LUR7.h"
 #include "LUR7_adc.h"
 
 void adc_init(void) {
@@ -38,21 +38,19 @@ void adc_init(void) {
 }
 
 uint16_t adc_get(uint8_t analog_port) {
-	ADMUX &= ~((1<<MUX4) | (1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0));
+	ADMUX &= ~((1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0));
 	ADMUX |= analog_port;
 	if (analog_port < 8) {
 		DIDR0 |= (1 << analog_port);
 	}
-	ADCSRA = (1<<ADSC);
+	ADCSRA |= (1<<ADSC);
 
-	while (!(ADCSRA & (1<<ADIF))) {
+	while ((ADCSRA & (1<<ADSC))) {
 		;
 	}
-	ADCSRA |= (1<<ADIF);
-	
+
 	if (analog_port < 8) {
 		DIDR0 &= ~(1 << analog_port);
 	}
-	
-	return (ADCH<<8) | ADCL;
+	return ADCL | (ADCH<<8);
 }

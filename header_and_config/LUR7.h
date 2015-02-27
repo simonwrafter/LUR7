@@ -89,9 +89,9 @@
 
 // ADC
 /*! ADC_AN1 selects IN5 for A/D conversion. */
-#define ADC_AN1			0x04 //PC0, IN5
+#define ADC_AN1			0x04 //PB7, IN4
 /*! ADC_AN2 selects IN7 for A/D conversion. */
-#define ADC_AN2			0x07 //PD0, IN7
+#define ADC_AN2			0x07 //PB6, IN6
 /*! ADC_AN3 selects IN8 for A/D conversion. */
 #define ADC_AN3			0x06 //PB5, IN8
 /*! ADC_AN4 selects IN9 for A/D conversion. */
