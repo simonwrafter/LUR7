@@ -89,13 +89,13 @@
 
 // ADC
 /*! ADC_AN1 selects IN5 for A/D conversion. */
-#define ADC_AN1			0x04 //PB7, IN4
+#define ADC_IN4			0x04 //PB7, IN4
 /*! ADC_AN2 selects IN7 for A/D conversion. */
-#define ADC_AN2			0x07 //PB6, IN6
+#define ADC_IN6			0x07 //PB6, IN6
 /*! ADC_AN3 selects IN8 for A/D conversion. */
-#define ADC_AN3			0x06 //PB5, IN8
+#define ADC_IN8			0x06 //PB5, IN8
 /*! ADC_AN4 selects IN9 for A/D conversion. */
-#define ADC_AN4			0x05 //PB2, IN9
+#define ADC_IN9			0x05 //PB2, IN9
 /*! ADC_TEMP selects the temperature sensor of the ATmega32M1 for A/D conversion. */
 #define ADC_TEMP		0x0B
 /*! ADC_SUPPLY_P selects the voltage over the capacitor bank on the PCB for A/D conversion. */
