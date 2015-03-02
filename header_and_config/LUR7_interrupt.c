@@ -58,7 +58,8 @@ static uint8_t INTn[9] = {
 
 //PIN CHANGE INTERRUPTS
 static volatile uint8_t * PCMSKn[9] = {
-	&PCMSK2, //PD3 - IN1
+	&PCMSK2, //PD3 - IN1 PCBv1.0
+//	&PCMSK1, //PC1 - IN1 PCBv1.1
 	&PCMSK2, //PD2 - IN2
 	&PCMSK2, //PD1 - IN3
 	&PCMSK0, //PB7 - IN4
@@ -70,7 +71,8 @@ static volatile uint8_t * PCMSKn[9] = {
 };
 
 static uint8_t PCINTn[9] = {
-	PCINT19, //PD3 - IN1
+	PCINT19, //PD3 - IN1 PCBv1.0
+//	PCINT9,  //PC1 - IN1 PCBv1.1
 	PCINT18, //PD2 - IN2
 	PCINT17, //PD1 - IN3
 	PCINT7,  //PB7 - IN4
@@ -82,7 +84,8 @@ static uint8_t PCINTn[9] = {
 };
 
 static uint8_t PCIEn[9] = {
-	PCIE2, //PD3
+	PCIE2, //PD3 PCBv1.0
+//	PCIE1, //PC1 PCBv1.1
 	PCIE2, //PD2
 	PCIE2, //PD1
 	PCIE0, //PB7
@@ -94,6 +97,7 @@ static uint8_t PCIEn[9] = {
 };
 
 static volatile uint8_t pcint0_data = 0;
+static volatile uint8_t pcint1_data = 0;
 static volatile uint8_t pcint2_data = 0;
 
 //EXTERNAL INTERRUPTS
@@ -118,6 +122,7 @@ uint8_t ext_int_off(uint8_t port) {
 //PIN CHANGE INTERRUPTS
 static void update_pcint_data(void) {
 	pcint0_data = PINB & PCMSK0;
+	pcint1_data = PINC & PCMSK0;
 	pcint2_data = PIND & PCMSK2;
 }
 
@@ -165,15 +170,26 @@ ISR(PCINT0_vect) {
 }
 
 ISR(PCINT1_vect) {
-	pcISR_in5();
+	uint8_t change_finder = (PINC & PCMSK1) ^ pcint1_data;
+	update_pcint_data();
+	//PCBv1.1--
+	if(change_finder & (1<<PCINTn[IN1])) {
+		pcISR_in1();
+	}
+	//--PCBv1.1
+	if(change_finder & (1<<PCINTn[IN5])) {
+		pcISR_in5();
+	}
 }
 
 ISR(PCINT2_vect) {
 	uint8_t change_finder = (PIND & PCMSK2) ^ pcint2_data;
 	update_pcint_data();
+	//PCBv1.0--
 	if(change_finder & (1<<PCINTn[IN1])) {
 		pcISR_in1();
 	}
+	//--PCBv1.0
 	if(change_finder & (1<<PCINTn[IN2])) {
 		pcISR_in2();
 	}
