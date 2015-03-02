@@ -99,8 +99,8 @@
  * public api
  ******************************************************************************/
 void can_init(void);
-void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
-void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
+uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
+uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
 void can_enable(void);
 void can_disable(void);
 

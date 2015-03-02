@@ -61,9 +61,14 @@ void can_init(void) {
 /*
  * After the init function, run this function to setup receiving messages.
  */
-void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
+uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
-	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+	
+	uint8_t free_mob = _can_get_free_mob();
+	if (free_mob == 0xFF) {
+		return 0xFF; //no free mob, error
+	}
+	CANPAGE = free_mob << MOBNB0; // select first free MOb for use
 
 	_can_set_id(mob_id); //id to compare against
 	_can_set_msk(mob_msk); //mask for comparing id
@@ -73,15 +78,21 @@ void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 	CANCDMOB = (1 << CONMOB1) | (1 << IDE) | (mob_dlc << DLC0); // configure MOb for reception of mob_dlc number of data bytes
 
 	//CANPAGE = save_CANPAGE; //restore CANPAGE
+	return 0;
 }
 
 /*
  * send message with id = mob_id, data = *mob_data and dlc = mob_dlc
  * run once per message. use CAN_ISR_TXOK() for additional actions on send completion
  */
-void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
+uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
-	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+	
+	uint8_t free_mob = _can_get_free_mob();
+	if (free_mob == 0xFF) {
+		return 0xFF; //no free mob, error
+	}
+	CANPAGE = free_mob << MOBNB0; // select first free MOb for use
 
 	CANSTMOB = 0x00; //clear MOb status
 
@@ -94,6 +105,7 @@ void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 	CANCDMOB = (1<<CONMOB0) | (1 << IDE) | (mob_dlc << DLC0); // enable transmission and set DLC
 
 	//CANPAGE = save_CANPAGE; //restore CANPAGE
+	return 0;
 }
 
 /*
@@ -166,16 +178,15 @@ ISR (CAN_INT_vect) {
 	CANPAGE = CANHPMOB & 0xF0; // select MOb with highest priority interrupt
 
 	if (CANSTMOB & (1 << RXOK)) {
-		CANSTMOB &= ~(1 << RXOK); //clear interrupt flag
+		CANSTMOB &= ~(1 << RXOK); // clear interrupt flag
 		_can_handle_RXOK();
 	} else if (CANSTMOB & (1 << TXOK)) {
-		CANSTMOB &= ~(1 << TXOK); //clear interrupt flag
+		CANSTMOB &= ~(1 << TXOK); // clear interrupt flag
 		_can_handle_TXOK();
 	} else {
-		CANSTMOB = 0x00; //clear interrupt flag, FIXME: errors not handled
-		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
-		CANGIT = 0x00; //clear general interrupts
-		CAN_ISR_OTHER();
+		CAN_ISR_OTHER(); // extern function
+		CANSTMOB = 0x00; // clear interrupt flag, FIXME: errors not handled well
+		CANGIT = 0x00; // clear general interrupts
 	}
 
 	CANPAGE = save_CANPAGE; //restore CANPAGE
@@ -198,6 +209,7 @@ void _can_handle_RXOK() {
 	// send information to extern function in application to act on information
 	CAN_ISR_RXOK(id, dlc, data);
 
+	CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
 	CANCDMOB |= (1 << CONMOB1); // re-enable reception
 }
 
