@@ -19,10 +19,10 @@
 /*! \file LUR7.h
  * LUR7.h is the main .h file for the entire LUR7 project. All code is released
  * under the GPLv3 license.
- * 
+ *
  * To write code for the LUR7 PCB only this file should be included as any and
- * all other dependencies are included from here. 
- * 
+ * all other dependencies are included from here.
+ *
  * In this file a number of global macros are defined for inputs and outputs,
  * system clock, etc.
  */
@@ -41,7 +41,7 @@
 
 // CAN LIB CONFIGURATION
 //! The baudrate at which the CAN bus operates, must be identical for all attached units.
-#define CAN_BAUDRATE	125        // in kBit
+#define CAN_BAUDRATE	1000        // in kBit
 
 // SYSTEM DEFINITION
 
