@@ -19,7 +19,7 @@
 #include "LUR7.h"
 #include "LUR7_can.h"
 
-/*******************************************************************************x
+/*******************************************************************************
  * public api
  ******************************************************************************/
 
@@ -29,7 +29,7 @@
  */
 void can_init(void) {
 	CANGCON = (1<<SWRES); // reset CAN
-	//CANTCON = 0x00; //set timing prescaler to zero
+	CANTCON = 0x00; //set timing prescaler to zero
 
 	CANBT1 = CONF_CANBT1; // set baudrate, CONF_CANBT1 defined in .h file
 	CANBT2 = CONF_CANBT2; // set baudrate, CONF_CANBT2 defined in .h file
@@ -47,14 +47,14 @@ void can_init(void) {
 		CANCDMOB = 0x00;
 		CANSTMOB = 0x00;
 
-		//CANIDT4 = 0x00;
-		//CANIDT3 = 0x00;
-		//CANIDT2 = 0x00;
-		//CANIDT1 = 0x00;
-		//CANIDM4 = 0x00;
-		//CANIDM3 = 0x00;
-		//CANIDM2 = 0x00;
-		//CANIDM1 = 0x00;
+		CANIDT4 = 0x00;
+		CANIDT3 = 0x00;
+		CANIDT2 = 0x00;
+		CANIDT1 = 0x00;
+		CANIDM4 = 0x00;
+		CANIDM3 = 0x00;
+		CANIDM2 = 0x00;
+		CANIDM1 = 0x00;
 	}
 }
 
@@ -149,7 +149,7 @@ void _can_set_msk(uint32_t mask) {
  */
 uint8_t _can_get_free_mob() {
 	for (uint8_t mob = 0; mob < NBR_OF_MOB; mob++) {
-		if (CANEN2 & (1 << mob)) {
+		if (!(CANEN2 & (1 << mob))) {
 			return mob;
 		}
 	}
@@ -161,18 +161,15 @@ uint8_t _can_get_free_mob() {
  ******************************************************************************/
 
 ISR (CAN_INT_vect) {
-	uint8_t save_SREG = SREG; // save SREG
 	uint8_t save_CANPAGE = CANPAGE; // save CANPAGE
 
 	CANPAGE = CANHPMOB & 0xF0; // select MOb with highest priority interrupt
 
 	if (CANSTMOB & (1 << RXOK)) {
 		CANSTMOB &= ~(1 << RXOK); //clear interrupt flag
-		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
 		_can_handle_RXOK();
 	} else if (CANSTMOB & (1 << TXOK)) {
 		CANSTMOB &= ~(1 << TXOK); //clear interrupt flag
-		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
 		_can_handle_TXOK();
 	} else {
 		CANSTMOB = 0x00; //clear interrupt flag, FIXME: errors not handled
@@ -182,7 +179,6 @@ ISR (CAN_INT_vect) {
 	}
 
 	CANPAGE = save_CANPAGE; //restore CANPAGE
-	SREG = save_SREG; //restore SREG
 }
 
 /*
@@ -202,7 +198,7 @@ void _can_handle_RXOK() {
 	// send information to extern function in application to act on information
 	CAN_ISR_RXOK(id, dlc, data);
 
-	CANCDMOB |= (1 << CONMOB1); // reenable reception
+	CANCDMOB |= (1 << CONMOB1); // re-enable reception
 }
 
 /*
