@@ -24,7 +24,7 @@ static volatile uint8_t interrupt_nbr = 0;
 void timer0_init(void) {
 	TCCR0A = (1 << WGM01); // no outputs, CTC mode
 	TCCR0B = (1 << CS02) | (1 << CS00); // prescaler = 1024
-	OCR0A  = 0b10011011; // OCR0A = 155 => 50,080 Hz,
+	OCR0A  = 0b11111011; // OCR0A = 155 => 50,080 Hz,
 	/* OCR0A  = 0b11111011; // OCR0A = 251 => 31,00198 Hz,
 	 * OCR0A  = 0b11011001; // OCR0A = 217 => 36,0023 Hz.
 	 * OCR0A  = 0b10011011; // OCR0A = 155 => 50,080 Hz,
@@ -35,7 +35,7 @@ void timer0_init(void) {
 }
 
 ISR(TIMER0_COMPA_vect) {
-	timer0_isr_50Hz(interrupt_nbr++);
+	timer0_isr_100Hz(interrupt_nbr++);
 	if (interrupt_nbr >= 50) {
 		interrupt_nbr = 0;
 	}

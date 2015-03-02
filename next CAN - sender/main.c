@@ -38,7 +38,7 @@ void CAN_ISR_OTHER() {
 }
 
 
-void timer0_isr_50Hz(uint8_t interrupt_nbr) {
+void timer0_isr_100Hz(uint8_t interrupt_nbr) {
 	if (interrupt_nbr % 5 == 0) {
 		if (can_setup_tx(0x0f0f0f00, '\0', 0) !=0xFF) {
 			toggle_output(OUT1);

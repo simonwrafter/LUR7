@@ -30,7 +30,7 @@ int main(void) {
 
 	interrupts_on();
 	can_enable();
-	
+
 	/*
 	 * Space for more setup code
 	 * This code will be run once.
@@ -55,7 +55,7 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void timer0_isr_50Hz(uint8_t interrupt_nbr) {}
+void timer0_isr_100Hz(uint8_t interrupt_nbr) {}
 
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
