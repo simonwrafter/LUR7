@@ -17,28 +17,74 @@
 */
 
 /*! \file LUR7_adc.c
- * LUR7_adc.c sets up and retreives analog input values through 10 bit adc for
+ * LUR7_adc.c sets up and retreives analog input values through 10 bit ADC for
  * the LUR7 project. All code is released under the GPLv3 license.
  * 
  * When writing code for the LUR7 PCB this file should not be included directly,
  * instead you should include the LUR7.h file to your main.c file.
  * 
  * In this file functions pertaining to the initialization and usage of the 10
- * bit ADC are defined.
+ * bit ADC are defined. Possible analog values for conversion are
+ * - ADC_IN4
+ *   + PB7
+ * - ADC_IN6
+ *   + PB6
+ * - ADC_IN8
+ *   + PB5
+ * - ADC_IN9
+ *   + PB2
+ * - ADC_TEMP
+ *   + internal temperature sensor
+ * - ADC_SUPPLY_P
+ *   + PD5, Capacitor bank
+ * - ADC_SUPPLY_N
+ *   + PD6, 12V main
+ * 
+ * as defined in LUR7.h.
+ * 
+ * To start using the ADC run adc_init(void) once. To get an analog read out run
+ * adc_get(uint8_t) for each acquisition.
+ * 
+ * Conversion does not use interrupts to return the result, meaning there is a
+ * time delay from starting a conversion before returning the result. 
  */
 
 #include "LUR7.h"
 #include "LUR7_adc.h"
 
+//! Hardware initialisation functions.
+/*!
+ * The ADC is started in single conversion mode. AVcc is used as voltage reference.
+ * Interrupts are not used. The ADC is clocked at 2MHz (assuming 16 MHz crystal).
+ * 
+ * To use the ADC, run this function once at boot time.
+ * 
+ * \param void
+ * \return void
+ */
 void adc_init(void) {
-	ADMUX = (1<<REFS0) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0);
-	ADCSRA = (1<<ADEN) | (1<<ADPS1) | (1<<ADPS0);
-	ADCSRB = (1<<ADHSM);
-	DIDR0 = (1 << ADC2D) | (1 << ADC3D);
+	ADMUX = (1<<REFS0) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0); //AVcc reference, temperature input (not converted)
+	ADCSRA = (1<<ADEN) | (1<<ADPS1) | (1<<ADPS0); //enable hw, prescaler = 8 => 2MHz adc clock (max)
+	ADCSRB = (1<<ADHSM); // high speed mode
+	DIDR0 = (1 << ADC2D) | (1 << ADC3D); // disable digital buffer for ADC_SUPPLY_{N,P}
 }
 
+//! Analog value acquisition.
+/*!
+ * This function requests a conversion of an analog voltage level, waits for the
+ * conversion to complete and returns the 10 bit result.
+ * 
+ * Due to not using interrupts for returning converted values, there is a slight
+ * delay in (pos. 100µs?) the acquisition time. Therefore requeting analog values
+ * should be done sparingly. However, merely waiting for the result in a loop does
+ * not hinder other interrupts to happen, it just slows down the execution of the
+ * main code.
+ * 
+ * \param analog_port (uint8_t) the port to read analog level from
+ * \return (uint16_t) 10 bit representation of the analog value
+ */
 uint16_t adc_get(uint8_t analog_port) {
-	ADMUX &= ~((1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0));
+	ADMUX &= ~((1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0)); 
 	ADMUX |= analog_port;
 	if (analog_port < 8) {
 		DIDR0 |= (1 << analog_port);
