@@ -1,4 +1,4 @@
-LUR7 is the Lund University Formula Student Engineering teams 2015 effort of
+LUR7 is the [Lund University Formula Student Engineering] teams 2015 effort of
 building a Formula Student car with internal combustion engine.
 
 The electronics system is centred around three ATmega32M1 chips on our custom
@@ -23,7 +23,7 @@ on this see their webpage.
 To transfer the compiled code onto the ATmega32M1 a [AVRISP mkII] is used.
 
 
-
+[Lund University Formula Student Engineering]: http://www.luracing.com/ "Official Team Homepage"
 [Github]:		https://github.com/simonwrafter/LUR7					"LUR7 Github"
 [avr/io.h]:		http://www.atmel.com/webdoc/AVRLibcReferenceManual/group__avr__io.html	"AVR Libc Reference Manual"
 [Atmel's product page]:	http://www.atmel.com/devices/ATMEGA32M1.aspx	"ATmega32M1 product page"

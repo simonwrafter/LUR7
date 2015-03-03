@@ -16,6 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_timer0.h
+ * \ref LUR7_timer0 sets up timer interrupts with a frequency of 100Hz for
+ * the LUR7 project. All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the LUR7.h file to each source file.
+ *
+ * \addtogroup LUR7_timer0
+ */
+
+//see LUR7_timer0.c for documentation
+
 #ifndef _LUR7_TIMER0_H_
 #define _LUR7_TIMER0_H_
 

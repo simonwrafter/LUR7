@@ -17,15 +17,16 @@
  */
 
 /*! \file LUR7_adc.h
- * LUR7_adc.h sets up and retreives analog input values through 10 bit adc for
+ * \ref LUR7_adc sets up and retreives analog input values through 10 bit ADC for
  * the LUR7 project. All code is released under the GPLv3 license.
- * 
+ *
  * When writing code for the LUR7 PCB this file should not be included directly,
- * instead you should include the LUR7.h file to your main.c file.
- * 
- * In this file functions pertaining to the initialization and usage of the 10
- * bit ADC are declared.
+ * instead you should include the LUR7.h file to each source file.
+ *
+ * \addtogroup LUR7_adc
  */
+
+//see LUR7_adc.c for documentation
 
 #ifndef _LUR7_ADC_H_
 #define _LUR7_ADC_H_

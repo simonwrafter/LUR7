@@ -20,8 +20,8 @@
  * LUR7.h is the main .h file for the entire LUR7 project. All code is released
  * under the GPLv3 license.
  *
- * To write code for the LUR7 PCB only this file should be included as any and
- * all other dependencies are included from here.
+ * To write code for the LUR7 PCB only this file should be included to each new
+ * source file, all other dependencies are included from here.
  *
  * In this file a number of global macros are defined for inputs and outputs,
  * system clock, etc.
