@@ -56,7 +56,7 @@
 #include "LUR7.h"
 #include "LUR7_adc.h"
 
-//! Hardware initialisation functions.
+//! Hardware initialisation function.
 /*!
  * The ADC is started in single conversion mode. AVcc is used as voltage reference.
  * Interrupts are not used. The ADC is clocked at 2MHz (assuming 16 MHz crystal).

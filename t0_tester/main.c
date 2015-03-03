@@ -56,8 +56,8 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {
-	if (interrupt_nbr % 1 == 0) {
-		toggle_output(OUT1);
+	if (interrupt_nbr % 10 == 0) {
+		toggle_output(OUT2);
 	}
 }
 

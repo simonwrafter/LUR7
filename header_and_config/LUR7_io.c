@@ -32,9 +32,9 @@ static volatile uint8_t * DDX[19] = {
 	&DDRB, //IN8
 	&DDRB, //IN9
 //#ifdef PCBv11
-//	&DDRC, //OUT1 MCU v1.1
+	&DDRC, //OUT1 MCU v1.1
 //#else
-	&DDRB, //OUT1 MCU v1.0
+//	&DDRB, //OUT1 MCU v1.0
 //#endif
 	&DDRB, //OUT2
 	&DDRD, //OUT3
@@ -56,9 +56,9 @@ static uint8_t DDXn[19] = {
 	DDB5, //IN8
 	DDB2, //IN9
 //#ifdef PCBv11
-//	DDC1, //OUT1 MCU v1.1
+	DDC1, //OUT1 MCU v1.1
 //#else
-	DDB0, //OUT1 MCU v1.0
+//	DDB0, //OUT1 MCU v1.0
 //#endif
 	DDB1, //OUT2
 	DDD7, //OUT3
@@ -80,9 +80,9 @@ static volatile uint8_t * PORTX[19] = {
 	&PORTB, //IN8
 	&PORTB, //IN9
 //#ifdef PCBv11
-//	&PORTC, //OUT1 MCU v1.1
+	&PORTC, //OUT1 MCU v1.1
 //#else
-	&PORTB, //OUT1 MCU v1.0
+//	&PORTB, //OUT1 MCU v1.0
 //#endif
 	&PORTB, //OUT2
 	&PORTD, //OUT3
@@ -104,9 +104,9 @@ static uint8_t PORTXn[19] = {
 	PORTB5, //IN8
 	PORTB2, //IN9
 //#ifdef PCBv11
-//	PORTC1, //OUT1 MCU v1.1
+	PORTC1, //OUT1 MCU v1.1
 //#else
-	PORTB0, //OUT1 MCU v1.0
+//	PORTB0, //OUT1 MCU v1.0
 //#endif
 	PORTB1, //OUT2
 	PORTD7, //OUT3
@@ -128,9 +128,9 @@ static volatile uint8_t * PINX[19] = {
 	&PINB, //IN8
 	&PINB, //IN9
 //#ifdef PCBv11
-//	&PINC, //OUT1 MCU v1.1
+	&PINC, //OUT1 MCU v1.1
 //#else
-	&PINB, //OUT1 MCU v1.0
+//	&PINB, //OUT1 MCU v1.0
 //#endif
 	&PINB, //OUT2
 	&PIND, //OUT3
@@ -152,9 +152,9 @@ static uint8_t PINXn[19] = {
 	PINB5, //IN8
 	PINB2, //IN9
 //#ifdef PCBv11
-//	PINC1, //OUT1 MCU v1.1
+	PINC1, //OUT1 MCU v1.1
 //#else
-	PINB0, //OUT1 MCU v1.0
+//	PINB0, //OUT1 MCU v1.0
 //#endif
 	PINB1, //OUT2
 	PIND7, //OUT3
