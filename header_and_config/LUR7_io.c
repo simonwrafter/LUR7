@@ -186,7 +186,7 @@ uint8_t set_output(uint8_t port, uint8_t data) {
 }
 
 uint8_t get_output(uint8_t port) {
-	return get_input(port);
+	return !get_input(port);
 }
 
 uint8_t toggle_output(uint8_t port){
