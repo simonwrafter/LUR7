@@ -16,6 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_power.h
+ * \ref LUR7_power allows for unused peripheral hardware to be shut off, thus
+ * reducing the overall power consumption.
+ * 
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_power
+ * \see LUR7_power.c
+ * \see http://www.gnu.org/copyleft/gpl.html
+ * 
+ * \addtogroup LUR7_power
+ */
+
 #ifndef _LUR7_POWER_H_
 #define _LUR7_POWER_H_
 

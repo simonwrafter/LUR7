@@ -18,12 +18,18 @@
 
 /*! \file LUR7_adc.c
  * \ref LUR7_adc sets up and retreives analog input values through 10 bit ADC for
- * the LUR7 project. All code is released under the GPLv3 license.
+ * the LUR7 project.
+ * 
+ * All code is released under the GPLv3 license.
  *
  * When writing code for the LUR7 PCB this file should not be included directly,
- * instead you should include the LUR7.h file to each source file.
+ * instead you should include the \ref LUR7.h file to each source file.
  *
- * \defgroup LUR7_adc
+ * \see LUR7_adc
+ * \see LUR7_adc.h
+ * \see http://www.gnu.org/copyleft/gpl.html
+ *
+ * \defgroup LUR7_adc A/D conversion
  * In this module functions pertaining to the initialization and usage of the 10
  * bit ADC are defined. Possible analog values for conversion are
  * - ADC_IN4
@@ -51,6 +57,7 @@
  *
  * \see LUR7_adc.c
  * \see LUR7_adc.h
+ * \see http://www.gnu.org/copyleft/gpl.html
  */
 
 #include "LUR7.h"
@@ -62,9 +69,6 @@
  * Interrupts are not used. The ADC is clocked at 2MHz (assuming 16 MHz crystal).
  *
  * To use the ADC, run this function once at boot time.
- *
- * \param void
- * \return void
  */
 void adc_init(void) {
 	ADMUX = (1<<REFS0) | (1<<MUX3) | (1<<MUX1) | (1<<MUX0); //AVcc reference, temperature input (not converted)
@@ -84,8 +88,8 @@ void adc_init(void) {
  * not hinder other interrupts to happen, it just slows down the execution of the
  * main code.
  *
- * \param analog_port (uint8_t) the port to read analog level from
- * \return (uint16_t) 10 bit representation of the analog value
+ * \param analog_port The port to read analog level from
+ * \return 10 bit representation of the analog value
  */
 uint16_t adc_get(uint8_t analog_port) {
 	ADMUX &= ~((1<<MUX3) | (1<<MUX2) | (1<<MUX1) | (1<<MUX0));

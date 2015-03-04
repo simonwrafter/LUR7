@@ -105,16 +105,6 @@ void can_enable(void);
 void can_disable(void);
 
 /*******************************************************************************
- * static functions
- ******************************************************************************/
-uint32_t _can_get_id(void);
-void _can_set_id(uint32_t identifier);
-void _can_set_msk(uint32_t mask);
-uint8_t _can_get_free_mob(void);
-void _can_handle_RXOK(void);
-void _can_handle_TXOK(void);
-
-/*******************************************************************************
  * extern functions
  ******************************************************************************/
 

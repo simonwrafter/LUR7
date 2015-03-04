@@ -20,6 +20,16 @@
 #include "LUR7_can.h"
 
 /*******************************************************************************
+ * static function declarations
+ ******************************************************************************/
+static uint32_t _can_get_id(void);
+static void _can_set_id(uint32_t identifier);
+static void _can_set_msk(uint32_t mask);
+static uint8_t _can_get_free_mob(void);
+static void _can_handle_RXOK(void);
+static void _can_handle_TXOK(void);
+
+/*******************************************************************************
  * public api
  ******************************************************************************/
 
@@ -123,7 +133,7 @@ void can_disable() {
 }
 
 /*******************************************************************************
- * static functions
+ * static function definitions
  ******************************************************************************/
 
 /*

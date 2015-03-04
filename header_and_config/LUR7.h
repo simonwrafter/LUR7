@@ -17,14 +17,26 @@
  */
 
 /*! \file LUR7.h
- * LUR7.h is the main .h file for the entire LUR7 project. All code is released
- * under the GPLv3 license.
+ * LUR7.h is the main .h file for the entire LUR7 project.
+ *
+ * All code is released under the GPLv3 license.
  *
  * To write code for the LUR7 PCB only this file should be included to each new
  * source file, all other dependencies are included from here.
+ * 
+ * \see LUR7
+ * \see http://www.gnu.org/copyleft/gpl.html
  *
- * In this file a number of global macros are defined for inputs and outputs,
- * system clock, etc.
+ * \defgroup LUR7  Main header file
+ * In LUR7.h a number of global macros are defined for inputs and outputs,
+ * system clock, CAN baudrate etc.
+ * 
+ * All dependencies are included through this file, this means that to write
+ * code for the ATmega32M1 and LUR7 PCB only this file needs to be included to
+ * each source file.
+ * 
+ * \see LUR7.h
+ * \see http://www.gnu.org/copyleft/gpl.html
  */
 
 #ifndef _LUR7_H_
@@ -81,6 +93,15 @@
 #define OUT7	15 //PB3
 //! OUT8 is defined as PB4 and used as an output on the PCB.
 #define OUT8	16 //PB4
+
+//! Copy of the first input
+#define FIRST_IN	IN1
+//! Copy of the last input
+#define LAST_IN		IN9
+//! Copy of the first output
+#define FIRST_OUT	OUT1
+//! Copy of the last output
+#define LAST_OUT	OUT8
 
 // ADC
 //! ADC_AN1 selects IN5 for A/D conversion

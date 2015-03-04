@@ -16,10 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_io.h
+ * \ref LUR7_io provides functions for setting up and using the digital inputs
+ * and outputs of the LUR7 PCB. 
+ * 
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_io
+ * \see LUR7_io.c
+ * \see http://www.gnu.org/copyleft/gpl.html
+ * \addtogroup LUR7_io
+ */
+
 #ifndef _LUR7_IO_H_
 #define _LUR7_IO_H_
-
-#define NBR_OF_IO 17
 
 void io_init(void);
 
