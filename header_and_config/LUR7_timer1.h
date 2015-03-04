@@ -20,7 +20,7 @@
 #define _LUR7_TIMER1_H_
 
 void timer1_init(void);
-void set_pwm_output(uint16_t);
+void timer1_dutycycle(uint16_t);
 
 // extern void timer1_isr_400Hz(uint8_t);
 

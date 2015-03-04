@@ -35,7 +35,7 @@ void timer1_init(void) { //(uint8_t pwm_on) {
 	TIMSK1 = 0x00; //(1 << OCIE1A);
 }
 
-void set_pwm_output(uint16_t dutycycle) {
+void timer1_dutycycle(uint16_t dutycycle) {
 	if (dutycycle > 20000) {
 		dutycycle = 20000;
 	}
