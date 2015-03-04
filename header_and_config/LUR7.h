@@ -25,7 +25,7 @@
  * source file, all other dependencies are included from here.
  * 
  * \see LUR7
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  *
  * \defgroup LUR7  Main header file
  * In LUR7.h a number of global macros are defined for inputs and outputs,
@@ -36,7 +36,7 @@
  * each source file.
  * 
  * \see LUR7.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  */
 
 #ifndef _LUR7_H_

@@ -27,7 +27,7 @@
  *
  * \see LUR7_timer0
  * \see LUR7_timer0.c
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  * 
  * \addtogroup LUR7_timer0
  */

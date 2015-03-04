@@ -27,15 +27,15 @@
  *
  * \see LUR7_timer1
  * \see LUR7_timer1.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  * 
  * \defgroup LUR7_timer1 Timer 1
  * Timer 1 generates a high precision PWM signal on \ref OUT1 at a frequency of
- * 400Hz.
+ * 400Hz. The dutycycle can be set to any value from 0 to 20000.
  *
  * \see LUR7_timer1.c
  * \see LUR7_timer1.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  */
 
 #include "LUR7.h"
@@ -43,7 +43,11 @@
 
 //! Hardware initialisation function.
 /*!
- * The timer is setup to 
+ * The timer is setup up in phase and frequency correct PWM mode with OC1B
+ * (OUT1) as output. The PWM frequency is calculated as
+ * \f[f_{PWM} = \frac {f_{IO}}{2 \times N \times TOP} = \frac {16000000}{2 \times 1 \times 20000} = 400.000 Hz\f]
+ * TOP is defined in Output Compare Register 1A (OCR1A) as 20000 meaning the 
+ * frequency is 400Hz.
  */
 void timer1_init(void) {
 	TCCR1A = (1 << COM1B1) | (1 << WGM10); // non-inverting output on PC1 (OC1B), phase and frequency correct PWM mode
@@ -51,13 +55,17 @@ void timer1_init(void) {
 	TCCR1C = 0x00; // no force compare match
 	OCR1A  = 0x4E20; // 20000 => 400Hz
 	OCR1B  = 0x0000; // duytcycle = 0 to start
-	ICR1   = 0x0000; // 
-	TIMSK1 = 0x00;   // 
+	TIMSK1 = 0x00; // no interrupts
 }
 
 //! Sets the dutycycle of the output.
 /*!
- * fgs
+ * The dutycycle of the output is controlled by Output Compare Register 1B. The
+ * output is toggled upon a match between the compare register value and the TOP
+ * value in Output Compare Register 1A. As TOP=20000 \p dutycycle can be any 
+ * number [0, 20000].
+ * 
+ * \param dutycycle the dutycycle [0, 20000] of the PWM output.
  */
 void timer1_dutycycle(uint16_t dutycycle) {
 	if (dutycycle > 20000) {

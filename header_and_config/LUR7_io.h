@@ -27,7 +27,7 @@
  *
  * \see LUR7_io
  * \see LUR7_io.c
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  * \addtogroup LUR7_io
  */
 

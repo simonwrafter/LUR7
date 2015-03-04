@@ -27,7 +27,7 @@
  * 
  * \see LUR7_io
  * \see LUR7_io.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  *
  * \defgroup LUR7_io In- and Outputs
  * The aim of this module is to simplify the reading of input values and writing

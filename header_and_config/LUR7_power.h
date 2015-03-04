@@ -27,7 +27,7 @@
  *
  * \see LUR7_power
  * \see LUR7_power.c
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  * 
  * \addtogroup LUR7_power
  */

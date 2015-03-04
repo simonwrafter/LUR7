@@ -27,7 +27,7 @@
  *
  * \see LUR7_adc
  * \see LUR7_adc.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  *
  * \defgroup LUR7_adc A/D conversion
  * In this module functions pertaining to the initialization and usage of the 10
@@ -57,7 +57,7 @@
  *
  * \see LUR7_adc.c
  * \see LUR7_adc.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  */
 
 #include "LUR7.h"

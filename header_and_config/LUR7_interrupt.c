@@ -27,7 +27,7 @@
  *
  * \see LUR7_interrupt
  * \see LUR7_interrupt.h
- * \see http://www.gnu.org/copyleft/gpl.html
+ * \see <http://www.gnu.org/copyleft/gpl.html>
  * 
  * \defgroup LUR7_interrupt Input Interrupts
  * Input interrupts are a very powerful way of controling surrounding systems
