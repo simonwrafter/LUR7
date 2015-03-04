@@ -28,6 +28,8 @@
  * \see LUR7_io
  * \see LUR7_io.c
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * \addtogroup LUR7_io
  */
 

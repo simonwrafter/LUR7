@@ -28,6 +28,8 @@
  * \see LUR7_power
  * \see LUR7_power.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * 
  * \defgroup LUR7_power Power Reduction Settings
  * 
@@ -37,6 +39,8 @@
  * \see LUR7_power.c
  * \see LUR7_power.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #include "LUR7.h"

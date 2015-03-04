@@ -28,6 +28,8 @@
  * \see LUR7_timer0
  * \see LUR7_timer0.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * 
  * \defgroup LUR7_timer0 Timer 0
  * Timer0 is set up in CTC mode generating timer interrupts at a frequency of
@@ -37,6 +39,8 @@
  * \see LUR7_timer0.c
  * \see LUR7_timer0.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #include "LUR7.h"

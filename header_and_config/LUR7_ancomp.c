@@ -27,6 +27,8 @@
  * \see LUR7_ancomp
  * \see LUR7_ancomp.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * 
  * \defgroup LUR7_ancomp Analog Comparator
  * By connecting the 12V main power supply and capacitor bank to either input of
@@ -36,6 +38,8 @@
  * \see LUR7_ancomp.c
  * \see LUR7_ancomp.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #include "LUR7.h"

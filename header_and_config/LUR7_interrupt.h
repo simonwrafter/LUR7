@@ -29,6 +29,8 @@
  * \see LUR7_interrupt
  * \see LUR7_interrupt.c
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * 
  * \addtogroup LUR7_interrupt
  */

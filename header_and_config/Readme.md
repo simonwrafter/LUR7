@@ -26,6 +26,9 @@ on this see their webpage.
 
 To transfer the compiled code onto the ATmega32M1 a [AVRISP mkII] is used.
 
+\author Simon Wrafter
+\copyright GNU Public License v3.0
+
 
 [Lund University Formula Student Engineering]: http://www.luracing.com/ "Official Team Homepage"
 

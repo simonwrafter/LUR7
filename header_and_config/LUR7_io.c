@@ -28,6 +28,8 @@
  * \see LUR7_io
  * \see LUR7_io.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  *
  * \defgroup LUR7_io In- and Outputs
  * The aim of this module is to simplify the reading of input values and writing
@@ -44,6 +46,8 @@
  * \see LUR7_io.c
  * \see LUR7_io.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 

@@ -28,6 +28,8 @@
  * \see LUR7_timer1
  * \see LUR7_timer1.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * 
  * \defgroup LUR7_timer1 Timer 1
  * Timer 1 generates a high precision PWM signal on \ref OUT1 at a frequency of
@@ -36,6 +38,8 @@
  * \see LUR7_timer1.c
  * \see LUR7_timer1.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #include "LUR7.h"

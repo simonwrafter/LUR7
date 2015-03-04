@@ -26,6 +26,8 @@
  * 
  * \see LUR7
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  *
  * \defgroup LUR7  Main header file
  * In LUR7.h a number of global macros are defined for inputs and outputs,
@@ -37,6 +39,8 @@
  * 
  * \see LUR7.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #ifndef _LUR7_H_

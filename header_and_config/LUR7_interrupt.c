@@ -28,6 +28,8 @@
  * \see LUR7_interrupt
  * \see LUR7_interrupt.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  * 
  * \defgroup LUR7_interrupt Input Interrupts
  * Input interrupts are a very powerful way of controling surrounding systems
@@ -43,6 +45,8 @@
  * \see LUR7_interrupt.h
  * \see <http://www.atmel.com/devices/ATMEGA32M1.aspx>
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #include "LUR7.h"

@@ -28,6 +28,8 @@
  * \see LUR7_adc
  * \see LUR7_adc.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  *
  * \defgroup LUR7_adc A/D conversion
  * In this module functions pertaining to the initialization and usage of the 10
@@ -58,6 +60,8 @@
  * \see LUR7_adc.c
  * \see LUR7_adc.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #include "LUR7.h"
