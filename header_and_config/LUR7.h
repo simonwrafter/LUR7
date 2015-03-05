@@ -23,7 +23,7 @@
  *
  * To write code for the LUR7 PCB only this file should be included to each new
  * source file, all other dependencies are included from here.
- * 
+ *
  * \see LUR7
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
@@ -32,11 +32,11 @@
  * \defgroup LUR7  Main header file
  * In LUR7.h a number of global macros are defined for inputs and outputs,
  * system clock, CAN baudrate etc.
- * 
+ *
  * All dependencies are included through this file, this means that to write
  * code for the ATmega32M1 and LUR7 PCB only this file needs to be included to
  * each source file.
- * 
+ *
  * \see LUR7.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
@@ -108,19 +108,19 @@
 #define LAST_OUT	OUT8
 
 // ADC
-//! ADC_AN1 selects IN5 for A/D conversion
+//! selects IN4 for A/D conversion
 #define ADC_IN4			0x04 //PB7, IN4
-//! ADC_AN2 selects IN7 for A/D conversion.
+//! selects IN6 for A/D conversion.
 #define ADC_IN6			0x07 //PB6, IN6
-//! ADC_AN3 selects IN8 for A/D conversion.
+//! selects IN8 for A/D conversion.
 #define ADC_IN8			0x06 //PB5, IN8
-//! ADC_AN4 selects IN9 for A/D conversion.
+//! selects IN9 for A/D conversion.
 #define ADC_IN9			0x05 //PB2, IN9
-//! ADC_TEMP selects the temperature sensor of the ATmega32M1 for A/D conversion.
+//! selects the temperature sensor of the ATmega32M1 for A/D conversion.
 #define ADC_TEMP		0x0B
-//! ADC_SUPPLY_P selects the voltage over the capacitor bank on the PCB for A/D conversion.
+//! selects the voltage over the capacitor bank on the PCB for A/D conversion.
 #define ADC_SUPPLY_P	0x02 //PD5, Capacitor bank
-//! ADC_SUPPLY_N selects the incoming voltage from the main power supply for A/D conversion.
+//! selects the incoming voltage from the main power supply for A/D conversion.
 #define ADC_SUPPLY_N	0x03 //PD6, 12V main
 
 // LOGIC
