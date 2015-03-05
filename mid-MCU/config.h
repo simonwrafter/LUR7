@@ -19,6 +19,12 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+//Inputs
+#define CLUTCH		ADC_IN6
+#define GEAR_DOWN		IN8
+#define GEAR_UP			IN9
+
+//Outputs
 #define SHIFT_STROBE	OUT2
 #define SHIFT_DATA		OUT3
 #define SHIFT_CLK		OUT4

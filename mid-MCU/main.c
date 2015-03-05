@@ -21,7 +21,7 @@
 #include "shiftregister.h"
 #include "display.h"
 
-static uint8_t CAN_DTA_MOb = 0;
+static uint8_t CAN_DTA_MOb;
 
 int main(void) {
 	//init
@@ -35,9 +35,14 @@ int main(void) {
 	power_off_timer1(); //if no PWM output
 
 	// CAN receivers
-	CAN_DTA_MOb = can_setup_rx(0x00002000, 0xFFFFFFF0, 8); //DTA
+	//   DTA listen for packages 0x2000-3
+	CAN_DTA_MOb = can_setup_rx(0x00002000, 0xFFFFFFFC, 8);
 
-	//enable
+	// Input interrupts
+	ext_int_on(GEAR_UP,);
+
+
+	//enable, LAST!!!
 	interrupts_on();
 	can_enable();
 
@@ -91,6 +96,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 					// Injection = (data[5] << 8) | data[4] // ms x 10
 					// Fuel Con. = (data[7] << 8) | data[6] // L/100Km x 10
 					break;
+					/*
 				case 4 :
 					// Ana1 = (data[1] << 8) | data[0] // mV
 					// Ana2 = (data[3] << 8) | data[2] // mV
@@ -103,6 +109,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 					// Crank Errors = (data[5] << 8) | data[4]
 					// Cam Errors = (data[7] << 8) | data[6]
 					break;
+				*/
 				default :
 					break;
 			}
@@ -111,6 +118,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			break;
 	}
 }
+
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 
