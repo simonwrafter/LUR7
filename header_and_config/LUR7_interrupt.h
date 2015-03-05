@@ -110,8 +110,8 @@ uint8_t ext_int_on(uint8_t, uint8_t, uint8_t);
 uint8_t ext_int_off(uint8_t);
 
 //PIN CHANGE INTERRUPTS
-void pc_int_on(uint8_t);
-void pc_int_off(uint8_t);
+uint8_t pc_int_on(uint8_t);
+uint8_t pc_int_off(uint8_t);
 
 //GENERAL
 void interrupts_on(void);
