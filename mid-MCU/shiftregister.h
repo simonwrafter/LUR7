@@ -19,7 +19,7 @@
 #ifndef _SHIFTREG_H_
 #define _SHIFTREG_H_
 
-#define PULSE_TIME 100
+#define PULSE_TIME 50
 
 void shift_byte(uint8_t);
 void shift_bar(uint8_t, uint8_t);

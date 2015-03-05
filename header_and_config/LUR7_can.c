@@ -60,6 +60,36 @@
 #include "LUR7_can.h"
 
 /*******************************************************************************
+ * constant variable definitions
+ ******************************************************************************/
+// Addresses, Masks and DLCs
+//    DTA
+const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from the DTA
+const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint8_t CAN_DTA_DLC = 8; //!< DLC of DTA messages
+
+//    Gear and Clutch, sent by mid-MCU
+const uint32_t CAN_GEAR_ID = 0x00001500; //!< The ID for messages carrying Gear Change information
+const uint32_t CAN_CLUTCH_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
+const uint32_t CAN_GEAR_CLUTCH_MASK = 0xFFFFFFFE; //!< Mask for Gear Change and Clutch Position IDs
+const uint8_t CAN_GEAR_CLUTCH_DLC = 2; //!< DLC of Gear Change and Clutch Position messages
+
+//    Logging, sent by mid-MCU
+const uint32_t CAN_LOG_ID = 0x00005000; //!< The ID of CAN messages for starting/stoping logging
+const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
+
+// Pre-defined messages
+const uint16_t CAN_MSG_NONE = 0x0000; //!< No message
+
+const uint16_t CAN_MSG_GEAR_UP = 0x0101; //!< Message for Gear Change UP
+const uint16_t CAN_MSG_GEAR_DOWN = 0x0202; //!< Message for Gear Change DOWN
+const uint16_t CAN_MSG_GEAR_NEUTRAL = 0x0404; //!< Message for Gear Change to NEUTRAL
+
+const uint16_t CAN_MSG_LOG_START = 0x1010; //!< Start sending log data.
+const uint16_t CAN_MSG_LOG_STOP = 0x2020; //!< Stop sending log data.
+
+/*******************************************************************************
  * static function declarations
  ******************************************************************************/
 static uint32_t _can_get_id(void);
@@ -305,6 +335,7 @@ void _can_handle_RXOK() {
  * implemented in application.
  */
 void _can_handle_TXOK() {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
 	uint32_t id = _can_get_id(); // get id
 	uint8_t dlc = CANCDMOB & 0x0F; // get dlc
 	uint8_t data[dlc]; // create vector for data
@@ -314,6 +345,6 @@ void _can_handle_TXOK() {
 		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
 	}
 
-	CAN_ISR_TXOK(id, dlc, data); // extern function if more actions are required after TXOK
+	CAN_ISR_TXOK(mob, id, dlc, data); // extern function if more actions are required after TXOK
 	CANCDMOB = 0x00; // clear control register
 }

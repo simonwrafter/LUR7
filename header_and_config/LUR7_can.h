@@ -108,9 +108,36 @@
 #   error This F_CPU value is not in "LUR7_can.h" file
 #endif
 
-// system definitions
+// Definitions
 //! Number of MOb's in the ATmega32M1.
-#define NBR_OF_MOB 6
+#define NBR_OF_MOB		6
+
+// Addresses, Masks and DLCs
+//    DTA
+extern const uint32_t CAN_DTA_ID;
+extern const uint32_t CAN_DTA_MASK;
+extern const uint8_t CAN_DTA_DLC;
+
+//    Gear and Clutch, sent by mid-MCU
+extern const uint32_t CAN_GEAR_ID;
+extern const uint32_t CAN_CLUTCH_ID;
+extern const uint32_t CAN_GEAR_CLUTCH_MASK;
+extern const uint8_t CAN_GEAR_CLUTCH_DLC;
+
+//    Logging, sent by mid-MCU
+extern const uint32_t CAN_LOG_ID;
+extern const uint32_t CAN_LOG_MASK;
+extern const uint8_t CAN_LOG_DLC;
+
+// Pre-defined messages
+extern const uint16_t CAN_MSG_NONE;
+
+extern const uint16_t CAN_MSG_GEAR_UP;
+extern const uint16_t CAN_MSG_GEAR_DOWN;
+extern const uint16_t CAN_MSG_GEAR_NEUTRAL;
+
+extern const uint16_t CAN_MSG_LOG_START;
+extern const uint16_t CAN_MSG_LOG_STOP;
 
 /*******************************************************************************
  * public api
@@ -135,7 +162,7 @@ void can_disable(void);
  * \param dlc number of bytes of data.
  * \param data pointer to copy of the received data.
  */
-extern void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+extern void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data);
 
 //! Contents of transmitted message.
 /*!

@@ -19,14 +19,27 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+//Constants
+
 //Inputs
-#define CLUTCH		ADC_IN6
-#define GEAR_DOWN		IN8
-#define GEAR_UP			IN9
+//#define					IN1
+//#define					IN2
+#define IO_GP_BTN			IN3
+#define IO_LOG_BTN			IN4
+#define IO_GEAR_NEUTRAL		IN5
+#define IO_CLUTCH		ADC_IN6
+//#define					IN7
+#define IO_GEAR_DOWN		IN8
+#define IO_GEAR_UP			IN9
 
 //Outputs
-#define SHIFT_STROBE	OUT2
-#define SHIFT_DATA		OUT3
-#define SHIFT_CLK		OUT4
+#define IO_SHIFT_STROBE		OUT2
+#define IO_SHIFT_DATA		OUT3
+#define IO_SHIFT_CLK		OUT4
+
+//External interrupts
+#define INT_GEAR_UP			INT_IN9_vect
+#define INT_GEAR_DOWN		INT_IN8_vect
+#define INT_GEAR_NEUTRAL	INT_IN5_vect
 
 #endif // _CONFIG_H_

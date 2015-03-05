@@ -44,7 +44,7 @@ static volatile uint16_t oil_temp = 30;
 static volatile uint8_t  bcd_vect[3] = {0,0,0};
 
 void update_RPM(uint16_t new_RPM) {
-	revs = RPM;
+	revs = new_RPM;
 }
 
 void update_gear(uint8_t new_gear) {
@@ -78,29 +78,29 @@ uint8_t revs_to_bar() {
 }
 
 uint8_t temp_to_bar() {
-	if (temperature < TEMP_LVL_1) {
+	if (water_temp < TEMP_LVL_1) {
 		return 0;
-	} else if (temperature < TEMP_LVL_2) {
+	} else if (water_temp < TEMP_LVL_2) {
 		return 1;
-	} else if (temperature < TEMP_LVL_3) {
+	} else if (water_temp < TEMP_LVL_3) {
 		return 2;
-	} else if (temperature < TEMP_LVL_4) {
+	} else if (water_temp < TEMP_LVL_4) {
 		return 3;
-	} else if (temperature < TEMP_LVL_5) {
+	} else if (water_temp < TEMP_LVL_5) {
 		return 4;
-	} else if (temperature < TEMP_LVL_6) {
+	} else if (water_temp < TEMP_LVL_6) {
 		return 5;
-	} else if (temperature < TEMP_LVL_7) {
+	} else if (water_temp < TEMP_LVL_7) {
 		return 6;
-	} else if (temperature < TEMP_LVL_8) {
+	} else if (water_temp < TEMP_LVL_8) {
 		return 7;
-	} else if (temperature < TEMP_LVL_9) {
+	} else if (water_temp < TEMP_LVL_9) {
 		return 8;
-	} else if (temperature < TEMP_LVL_10) {
+	} else if (water_temp < TEMP_LVL_10) {
 		return 9;
-	} else {
-		return 10;
 	}
+	return 10;
+	
 }
 
 void bcd_convert(uint16_t value) {
@@ -145,7 +145,7 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 void update_display(void) {
 	shift_byte(bin_to_7seg(gear, OFF));
 
-	bcd_speed();
+	bcd_convert(speed);
 	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
