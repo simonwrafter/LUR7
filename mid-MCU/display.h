@@ -35,20 +35,12 @@
 #define TEMP_LVL_9 95
 #define TEMP_LVL_10 100
 
-static const uint8_t sev_seg[11] = {
-	// a b c d e f g dp
-	0b11111100,	//0
-	0b01100000,	//1
-	0b11011010,	//2
-	0b11110010,	//3
-	0b01100110,	//4
-	0b10110110,	//5
-	0b10111110,	//6
-	0b11100000,	//7
-	0b11111110,	//8
-	0b11110110,	//9
-	0b00000000	//blank
-};
+void update_RPM(uint16_t);
+void update_gear(uint8_t);
+void update_speed(uint16_t);
+void update_logid(uint16_t);
+void update_watertemp(uint16_t);
+void update_oiltemp(uint16_t);
 
 uint8_t revs_to_bar(void);
 uint8_t temp_to_bar(void);

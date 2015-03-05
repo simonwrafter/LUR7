@@ -19,7 +19,7 @@
 /*! \file LUR7_can.c
  * \ref LUR7_can performs communication tasks between the microcontrollers, ECU
  * and onboard logging computer using the CAN protocol.
- * 
+ *
  * All code is released under the GPLv3 license.
  *
  * When writing code for the LUR7 PCB this file should not be included directly,
@@ -30,23 +30,23 @@
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
- * 
+ *
  * \defgroup LUR7_CAN CAN Bus Communication
- * 
+ *
  * This is the killer feature of the ATmega32M1, a built in CAN bus controller.
- * CAN is a communication bus used heavily in the automotive industry, it is 
- * designed to withstand both common and differential mode electro-magnetic 
+ * CAN is a communication bus used heavily in the automotive industry, it is
+ * designed to withstand both common and differential mode electro-magnetic
  * disturbances. In order to read information from the ECU (DTA S60pro) there is
  * a choice between RS-232 and CAN, due to the environmental requirements with
  * large electro-magnetic disturbances the CAN system is necessary.
- * 
+ *
  * The CAN bus is extended to include not only one microcontroller and the ECU.
  * All electronics nodes will attatch to the same bus and use it to communicate.
- * 
- * For a better understanding of how the CAN bus works see the ISO standard 
- * linked below, the ATmege32M1 manual and other web resources. Delving in to 
+ *
+ * For a better understanding of how the CAN bus works see the ISO standard
+ * linked below, the ATmege32M1 manual and other web resources. Delving in to
  * the details of the system is beyond the scope of this document.
- * 
+ *
  * \see LUR7_can.c
  * \see LUR7_can.h
  * \see <http://www.dtafast.co.uk/Downloads/Manuals/S%20Series%20Manual.pdf>
@@ -76,7 +76,7 @@ static void _can_handle_TXOK(void);
 //! Hardware initialisation function.
 /*!
  * To start using CAN run this function during the setup phase of the code.
- * The CAN hardware is reset and re configured. All interrupts except for timer 
+ * The CAN hardware is reset and re configured. All interrupts except for timer
  * overflow are activated. To enable the CAN controller, see \ref can_enable.
  */
 void can_init(void) {
@@ -114,14 +114,14 @@ void can_init(void) {
 /*!
  * After the \ref can_init function, run this function to setup the reception of
  * messages.
- * 
+ *
  * \param mob_id the message ID to look for.
  * \param mob_msk the mask for what bits of the ID to compare.
  * \param mob_dlc the expected number of data bytes.
  * \return the number of the MOb configured for RX.
  */
 uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
-	
+
 	uint8_t free_mob = _can_get_free_mob(); // first free mob
 	if (free_mob == 0xFF) {
 		return 0xFF; //no free mob, error
@@ -141,16 +141,16 @@ uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 //! Send message.
 /*!
  * Sends a message with id = \p mob_id, data = \p *mob_data and dlc = \p mob_dlc.
- * Run the function once per message. When the transmission is complete 
+ * Run the function once per message. When the transmission is complete
  * CAN_ISR_TXOK() is executed, allowing for additional actions.
- * 
+ *
  * \param mob_id the 29 bit message ID.
  * \param mob_data is a pointer to the data that will be sent.
  * \param mob_dlc is the number of bytes of data to send. (Maximum 8)
  * \return the number of the MOb used for TX.
  */
 uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
-	
+
 	uint8_t free_mob = _can_get_free_mob(); //first free MOb
 	if (free_mob == 0xFF) {
 		return 0xFF; //no free mob, error
@@ -246,12 +246,12 @@ uint8_t _can_get_free_mob() {
  * Interrupts are handled very differently for CAN compared to the regular ones.
  * This is described at some depth in the ATmega32M1 datasheet and much has been
  * written about it on the AVRFreaks forum.
- * 
- * There are only two flag registers, and each flag can be set for several 
- * simultanious reasons. Therefore it is important that each possible cause is 
- * tested individually. Once the interrupt has been handled the flags must be 
+ *
+ * There are only two flag registers, and each flag can be set for several
+ * simultanious reasons. Therefore it is important that each possible cause is
+ * tested individually. Once the interrupt has been handled the flags must be
  * cleared manually.
- * 
+ *
  * Once the cause of the interrupt is clear static helper functions read out any
  * useful data from the MOb, executes extern functions to deal with the data,
  * and lastly resets the MOb for future use.
@@ -282,6 +282,7 @@ ISR (CAN_INT_vect) {
  * implemented in application.
  */
 void _can_handle_RXOK() {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
 	uint32_t id = _can_get_id(); // get id
 	uint8_t dlc = CANCDMOB & 0x0F; // get dlc
 	uint8_t data[dlc]; // create vector for data
@@ -292,7 +293,7 @@ void _can_handle_RXOK() {
 	}
 
 	// send information to extern function in application to act on information
-	CAN_ISR_RXOK(id, dlc, data);
+	CAN_ISR_RXOK(mob, id, dlc, data);
 
 	CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
 	CANCDMOB |= (1 << CONMOB1); // re-enable reception

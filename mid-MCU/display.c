@@ -17,15 +17,55 @@
  */
 
 #include "../header_and_config/LUR7.h"
-#include "midMCU.h"
+#include "display.h"
 #include "shiftregister.h"
 
+static const uint8_t sev_seg[11] = {
+	// a b c d e f g dp
+	0b11111100, //0
+	0b01100000, //1
+	0b11011010, //2
+	0b11110010, //3
+	0b01100110, //4
+	0b10110110, //5
+	0b10111110, //6
+	0b11100000, //7
+	0b11111110, //8
+	0b11110110, //9
+	0b00000000  //blank
+};
+
 static volatile uint16_t revs = 8000;
-static volatile uint8_t  gear = 2;
+static volatile uint8_t  gear = 0;
 static volatile uint16_t speed = 88;
 static volatile uint16_t log_id = 0;
-static volatile uint16_t temperature = 70;
+static volatile uint16_t water_temp = 20;
+static volatile uint16_t oil_temp = 30;
 static volatile uint8_t  bcd_vect[3] = {0,0,0};
+
+void update_RPM(uint16_t new_RPM) {
+	revs = RPM;
+}
+
+void update_gear(uint8_t new_gear) {
+	gear = new_gear;
+}
+
+void update_speed(uint16_t new_speed) {
+	speed = new_speed;
+}
+
+void update_logid(uint16_t new_logid) {
+	log_id = new_logid;
+}
+
+void update_watertemp(uint16_t new_watertemp) {
+	water_temp = new_watertemp;
+}
+
+void update_oiltemp(uint16_t new_oiltemp) {
+	oil_temp = new_oiltemp;
+}
 
 uint8_t revs_to_bar() {
 	uint8_t return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * REV_BAR_MAX + REV_BAR_MIN;
@@ -63,24 +103,21 @@ uint8_t temp_to_bar() {
 	}
 }
 
-
-void bcd_speed(void) {
-	uint16_t holder = speed;
-
-	if (holder >= 100) {
+void bcd_convert(uint16_t value) {
+	if (value >= 100) {
 		bcd_vect[0] = 0;
-		while (holder >= 100) {
-			holder -= 100;
+		while (value >= 100) {
+			value -= 100;
 			bcd_vect[0]++;
 		}
 	} else {
 		bcd_vect[0] = 10;
 	}
 
-	if (holder >= 10) {
+	if (value >= 10) {
 		bcd_vect[1] = 0;
-		while (holder >= 10) {
-			holder -= 10;
+		while (value >= 10) {
+			value -= 10;
 			bcd_vect[1]++;
 		}
 	} else {
@@ -88,11 +125,10 @@ void bcd_speed(void) {
 	}
 
 	bcd_vect[2] = 0;
-	while (holder >= 1) {
-		holder -= 1;
+	while (value >= 1) {
+		value -= 1;
 		bcd_vect[2]++;
 	}
-
 }
 
 uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
@@ -107,15 +143,15 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 }
 
 void update_display(void) {
-	shift_bar(temp_to_bar(), 10);
-	shift_bar(revs_to_bar(), 22);
+	shift_byte(bin_to_7seg(gear, OFF));
 
 	bcd_speed();
-	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
 
-	shift_byte(bin_to_7seg(gear, OFF));
+	shift_bar(revs_to_bar(), 22);
+	shift_bar(temp_to_bar(), 10);
 
 	shift_strobe();
 }

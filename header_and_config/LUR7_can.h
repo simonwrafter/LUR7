@@ -19,7 +19,7 @@
 /*! \file LUR7_can.h
  * \ref LUR7_can performs communication tasks between the microcontrollers, ECU
  * and onboard logging computer using the CAN protocol.
- * 
+ *
  * All code is released under the GPLv3 license.
  *
  * When writing code for the LUR7 PCB this file should not be included directly,
@@ -30,7 +30,7 @@
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
- * 
+ *
  * \addtogroup LUR7_CAN
  */
 
@@ -127,10 +127,10 @@ void can_disable(void);
 
 //! Contents of received message.
 /*!
- * When a CAN message is received the \p id, \p dlc and \p data are extracted 
+ * When a CAN message is received the \p id, \p dlc and \p data are extracted
  * and passed as parameters to the CAN_ISR_RXOK function. this function needs
- * to be defined in the project source code. 
- * 
+ * to be defined in the project source code.
+ *
  * \param id 29 bit identifier of the message.
  * \param dlc number of bytes of data.
  * \param data pointer to copy of the received data.
@@ -142,16 +142,17 @@ extern void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
  * When a CAN message is transmitted the \p id, \p dlc and \p data are extracted
  * and passed back as parameters to the CAN_ISR_TXOK function. This function needs
  * to be defined in the project source code.
- * 
+ *
+ * \param mob MOb number.
  * \param id 29 bit identifier of the message.
  * \param dlc number of bytes of data.
  * \param data pointer to copy of the received data.
  */
-extern void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+extern void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data);
 
 //! Other interrupt causes.
 /*!
- * Should any other interrupt besides TXOK and RXOK occure this function is 
+ * Should any other interrupt besides TXOK and RXOK occure this function is
  * triggered.
  */
 extern void CAN_ISR_OTHER(void);
