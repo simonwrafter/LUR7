@@ -133,7 +133,7 @@ void timer0_isr_100Hz(uint8_t interrupt_nbr) {
 }
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
-	if (mob == log_MOb) {
+	if (id == CAN_LOG_ID) {
 		if (*data == CAN_MSG_LOG_START) {
 			logging = TRUE;
 		} else if (*data == CAN_MSG_LOG_STOP) {
