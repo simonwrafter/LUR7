@@ -60,7 +60,7 @@ int main(void) {
 		brake = adc_get(BRAKE_PRESSURE);
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			brake_safe = brake;
-		}
+		} // end ATOMIC_BLOCK
 		
 		if (logging) {
 			susp_l = adc_get(SUSPENSION_L);
@@ -77,7 +77,7 @@ int main(void) {
 						susp_l_safe = susp_l;
 						susp_r_safe = susp_r;
 						steering_safe = steering;
-					}
+					} // end ATOMIC_BLOCK
 				}
 			}
 		}
