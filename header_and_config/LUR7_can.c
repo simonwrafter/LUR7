@@ -17,7 +17,7 @@
  */
 
 /*! \file LUR7_can.c
- * \ref LUR7_can performs communication tasks between the microcontrollers, ECU
+ * \ref LUR7_CAN performs communication tasks between the microcontrollers, ECU
  * and onboard logging computer using the CAN protocol.
  *
  * All code is released under the GPLv3 license.
@@ -63,31 +63,53 @@
  * constant variable definitions
  ******************************************************************************/
 // Addresses, Masks and DLCs
-//    DTA
+// +  DTA
 const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from the DTA
 const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t CAN_DTA_DLC = 8; //!< DLC of DTA messages
 
-//    Gear and Clutch, sent by mid-MCU
+// +  Front-MCU
+// +  +  Brake Light
+const uint32_t CAN_BRAKE_LIGHT_ID = 0x00001800; //!< The ID of CAN messages for Brake Light on/off
+const uint32_t CAN_BRAKE_LIGHT_MASK = 0xFFFFFFFC; //!< Mask for the Brake Light messages
+const uint8_t CAN_BRAKE_LIGHT_DLC = 1; //!< DLC of Brake Pressure messages
+
+// +  +  Logging
+const uint32_t CAN_FRONT_LOG_SPEED_ID = 0x00004000; //!< Message ID for front wheel speeds
+const uint32_t CAN_FRONT_LOG_SUSPENSION_ID = 0x00004001; //!< Message ID for front suspension
+const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID = 0x00004002; //!< Message ID for steering and braking
+const uint8_t CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging node
+
+// +  Mid-MCU
+// +  +  Gear and Clutch
 const uint32_t CAN_GEAR_ID = 0x00001500; //!< The ID for messages carrying Gear Change information
 const uint32_t CAN_CLUTCH_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
 const uint32_t CAN_GEAR_CLUTCH_MASK = 0xFFFFFFFE; //!< Mask for Gear Change and Clutch Position IDs
 const uint8_t CAN_GEAR_CLUTCH_DLC = 2; //!< DLC of Gear Change and Clutch Position messages
 
-//    Logging, sent by mid-MCU
-const uint32_t CAN_LOG_ID = 0x00005000; //!< The ID of CAN messages for starting/stoping logging
+// +  +  Logging
+const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
 const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
 // Pre-defined messages
-const uint16_t CAN_MSG_NONE = 0x0000; //!< No message
+const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
 
+// +  Front-MCU
+// +  +  Brake Light
+const uint16_t CAN_MSG_BRAKE_ON = 0x01; //!< Message for Brake Light ON
+const uint16_t CAN_MSG_BRAKE_OFF = 0x20; //!< Message for Brake Light OFF
+
+// +  Mid-MCU
+// +  +  Gear and Clutch
 const uint16_t CAN_MSG_GEAR_UP = 0x0101; //!< Message for Gear Change UP
 const uint16_t CAN_MSG_GEAR_DOWN = 0x0202; //!< Message for Gear Change DOWN
 const uint16_t CAN_MSG_GEAR_NEUTRAL = 0x0404; //!< Message for Gear Change to NEUTRAL
 
-const uint16_t CAN_MSG_LOG_START = 0x1010; //!< Start sending log data.
-const uint16_t CAN_MSG_LOG_STOP = 0x2020; //!< Stop sending log data.
+// +  +  Logging
+const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.
+const uint8_t CAN_MSG_LOG_STOP = 0x44; //!< Stop sending log data.
+
 
 /*******************************************************************************
  * static function declarations
@@ -231,7 +253,7 @@ uint32_t _can_get_id(void) {
 
 //! Writes the ID of the MOb to the CANIDTn registers.
 /*!
- * \param identitier the 29 bit message id.
+ * \param identifier the 29 bit message id.
  */
 void _can_set_id(uint32_t identifier) {
 	uint32_t id_v = (identifier << 3);

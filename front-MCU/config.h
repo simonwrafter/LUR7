@@ -1,5 +1,5 @@
 /*
- * / frontMCU.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * / config.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * / Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  * /
  * / This program is free software: you can redistribute it and/or modify
@@ -16,16 +16,27 @@
  * / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _FRONTMCU_H_
-#define _FRONTMCU_H_
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
 
-#define WHEEL_SPEED_L	IN5 //INT3
-#define WHEEL_SPEED_R	IN9 //INT1, (also AN4, not used)
-#define SUSPENSION_L	ADC_AN1 //IN4
-#define SUSPENSION_R	ADC_AN2 //IN6
-#define STEERING_WHEEL	ADC_AN3 //IN8
+//Constants
+#define BRAKES_ON			100
 
-void init_interrupt(void);
-void update_analog(void);
+//Inputs
+#define WHEEL_R				IN1
+#define WHEEL_L				IN2
+//#define					IN3
+#define BRAKE_PRESSURE	ADC_IN4
+//#define					IN5
+#define STEERING_WHEEL	ADC_IN6
+//#define					IN7
+#define SUSPENSION_R	ADC_IN8
+#define SUSPENSION_L	ADC_IN9
 
-#endif  // _FRONTMCU_H_
+//Outputs
+//none
+
+//External interrupts
+//none
+
+#endif // _CONFIG_H_

@@ -48,6 +48,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include <stdint.h>
 
 // CLOCK SETTINGS AND DELAY

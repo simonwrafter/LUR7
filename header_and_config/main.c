@@ -57,8 +57,8 @@ void pcISR_in9(void) {}
 
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {}
 
-void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 
 void early_bod_warning_ISR(void) {}

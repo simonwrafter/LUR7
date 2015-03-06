@@ -21,8 +21,8 @@
 #include "shiftregister.h"
 #include "display.h"
 
-static uint8_t CAN_DTA_MOb; // message object for the DTA's CAN messages
-static uint8_t logging = FALSE; // message object for the DTA's CAN messages
+volatile uint8_t CAN_DTA_MOb; // message object for the DTA's CAN messages
+volatile uint8_t logging = FALSE; // message object for the DTA's CAN messages
 
 int main(void) {
 	//init +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -91,8 +91,10 @@ void pcISR_in3(void) {}
 void pcISR_in4(void) {
 	if (logging) {
 		can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_STOP, CAN_LOG_DLC);
+		logging = TRUE;
 	} else {
 		can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_START, CAN_LOG_DLC);
+		logging = FALSE;
 	}
 }
 //! \warning in5 used as external interrupt
