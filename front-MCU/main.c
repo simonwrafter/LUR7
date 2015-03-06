@@ -20,8 +20,9 @@
 #include "config.h"
 
 volatile uint8_t logging = FALSE;
-volatile uint8_t log_almost_valid = FALSE;
-volatile uint8_t log_valid = FALSE;
+volatile uint8_t an_log_almost_valid = FALSE;
+volatile uint8_t an_log_valid = FALSE;
+volatile uint8_t w_log_valid = FALSE;
 
 volatile uint16_t wheel_count_l = 0;
 volatile uint16_t wheel_count_r = 0;
@@ -66,11 +67,11 @@ int main(void) {
 			susp_r = adc_get(SUSPENSION_R);
 			steering = adc_get(STEERING_WHEEL);
 			
-			if (!log_almost_valid) {
-				log_almost_valid = TRUE;
+			if (!an_log_almost_valid) {
+				an_log_almost_valid = TRUE;
 			} else {
-				if (!log_valid) {
-					log_valid = TRUE;
+				if (!an_log_valid) {
+					an_log_valid = TRUE;
 				} else {
 					ATOMIC_BLOCK(ATOMIC_FORCEON) {
 						susp_l_safe = susp_l;
@@ -111,15 +112,17 @@ void timer0_isr_100Hz(uint8_t interrupt_nbr) {
 		can_setup_tx(CAN_BRAKE_LIGHT_ID, (uint8_t *) &CAN_MSG_BRAKE_OFF, CAN_FRONT_LOG_DLC);
 	}
 	
-	
-	if (logging && log_valid) {
-		if (!(interrupt_nbr % 10)) { //10 Hz
+	if (logging && !(interrupt_nbr % 10)) { //10 Hz
+		if (w_log_valid) {
 			uint32_t holder = ((uint32_t) wheel_count_l << 16) | wheel_count_r;
 			can_setup_tx(CAN_FRONT_LOG_SPEED_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC);
-			wheel_count_l = 0;
-			wheel_count_r = 0;
 		}
-		
+		wheel_count_l = 0;
+		wheel_count_r = 0;
+		w_log_valid = TRUE;
+	}
+	
+	if (logging && an_log_valid) {
 		if (!((interrupt_nbr + 2) % 5)) { //20 Hz
 			uint32_t holder = ((uint32_t) susp_l_safe << 16) | susp_r_safe;
 			can_setup_tx(CAN_FRONT_LOG_SPEED_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC);
@@ -136,10 +139,15 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	if (id == CAN_LOG_ID) {
 		if (*data == CAN_MSG_LOG_START) {
 			logging = TRUE;
+			pc_int_on(WHEEL_L);
+			pc_int_on(WHEEL_R);
 		} else if (*data == CAN_MSG_LOG_STOP) {
 			logging = FALSE;
-			log_valid = FALSE;
-			log_almost_valid = FALSE;
+			pc_int_off(WHEEL_L);
+			pc_int_off(WHEEL_R);
+			an_log_valid = FALSE;
+			an_log_almost_valid = FALSE;
+			w_log_valid = FALSE;
 		}
 	}
 }
