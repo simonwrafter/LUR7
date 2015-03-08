@@ -16,72 +16,90 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_can.h
+ * \ref LUR7_CAN performs communication tasks between the microcontrollers, ECU
+ * and onboard logging computer using the CAN protocol.
+ *
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_can
+ * \see LUR7_can.c
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ *
+ * \addtogroup LUR7_CAN
+ */
+
 #ifndef _LUR7_CAN_LIB_H_
 #define _LUR7_CAN_LIB_H_
 
-// - Baud rate definitions
+// Baud rate definitions
 #ifndef F_CPU
 #  error  F_CPU not defined in LUR7.h
 #endif
-// ----------
+//
 #ifndef CAN_BAUDRATE
 #  error  CAN_BAUDRATE not defined in LUR7.h
 #endif
-// ----------
-#if F_CPU == 16000000             //!< Fclkio = 16 MHz, Tclkio = 62.5 ns
-#   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x12       // Tscl  = 10x Tclkio = 625 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 125       //!< -- 125Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x0E       // Tscl  = 8x Tclkio = 500 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 200       //!< -- 200Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x08       // Tscl  = 5x Tclkio = 312.5 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 250       //!< -- 250Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x06       // Tscl  = 4x Tclkio = 250 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 500       //!< -- 500Kb/s, 8x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x06       // Tscl = 4x Tclkio = 250 ns
-#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 1000      //!< -- 1 Mb/s, 8x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 125 ns
-#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+//
+#if F_CPU == 16000000             // - Fclkio = 16 MHz, Tclkio = 62.5 ns
+#   if   CAN_BAUDRATE == 100      //   - 100Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x12  //       Tscl  = 10x Tclkio = 625 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 125      //   - 125Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x0E  //       Tscl  = 8x Tclkio = 500 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 200      //   - 200Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x08  //       Tscl  = 5x Tclkio = 312.5 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 250      //   - 250Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x06  //       Tscl  = 4x Tclkio = 250 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 500      //   - 500Kb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x06  //       Tscl = 4x Tclkio = 250 ns
+#       define CONF_CANBT2  0x04  //       Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13  //       Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 1000     //   - 1 Mb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02  //       Tscl  = 2x Tclkio = 125 ns
+#       define CONF_CANBT2  0x04  //       Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13  //       Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
 #   else
 #       error This CAN_BAUDRATE value is not in "LUR7_can.h" file
 #   endif
 
-#elif F_CPU == 8000000              //!< Fclkio = 8 MHz, Tclkio = 125 ns
-#   if   CAN_BAUDRATE == 100       //!< -- 100Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x08       // Tscl  = 5x Tclkio = 625 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 125       //!< -- 125Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x06       // Tscl  = 4x Tclkio = 500 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 200       //!< -- 200Kb/s, 20x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 250 ns
-#       define CONF_CANBT2  0x0E       // Tsync = 1x Tscl, Tprs = 8x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x4B       // Tpsh1 = 6x Tscl, Tpsh2 = 5x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 250       //!< -- 250Kb/s, 16x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 250 ns
-#       define CONF_CANBT2  0x0C       // Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x37       // Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 500       //!< -- 500Kb/s, 8x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x02       // Tscl  = 2x Tclkio = 250 ns
-#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
-#   elif CAN_BAUDRATE == 1000      //!< -- 1 Mb/s, 8x Tscl, sampling at 75%
-#       define CONF_CANBT1  0x00       // Tscl  = 1x Tclkio = 125 ns
-#       define CONF_CANBT2  0x04       // Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
-#       define CONF_CANBT3  0x13       // Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#elif F_CPU == 8000000            // - Fclkio = 8 MHz, Tclkio = 125 ns
+#   if   CAN_BAUDRATE == 100      //   - 100Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x08  //       Tscl  = 5x Tclkio = 625 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 125      //   - 125Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x06  //       Tscl  = 4x Tclkio = 500 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 200      //   - 200Kb/s, 20x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02  //       Tscl  = 2x Tclkio = 250 ns
+#       define CONF_CANBT2  0x0E  //       Tsync = 1x Tscl, Tprs = 8x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x4B  //       Tpsh1 = 6x Tscl, Tpsh2 = 5x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 250      //   - 250Kb/s, 16x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02  //       Tscl  = 2x Tclkio = 250 ns
+#       define CONF_CANBT2  0x0C  //       Tsync = 1x Tscl, Tprs = 7x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x37  //       Tpsh1 = 4x Tscl, Tpsh2 = 4x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 500      //   - 500Kb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x02  //       Tscl  = 2x Tclkio = 250 ns
+#       define CONF_CANBT2  0x04  //       Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13  //       Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
+#   elif CAN_BAUDRATE == 1000     //   - 1 Mb/s, 8x Tscl, sampling at 75%
+#       define CONF_CANBT1  0x00  //       Tscl  = 1x Tclkio = 125 ns
+#       define CONF_CANBT2  0x04  //       Tsync = 1x Tscl, Tprs = 3x Tscl, Tsjw = 1x Tscl
+#       define CONF_CANBT3  0x13  //       Tpsh1 = 2x Tscl, Tpsh2 = 2x Tscl, 3 sample points
 #   else
 #       error This CAN_BAUDRATE value is not in "LUR7_can.h" file
 #   endif
@@ -90,36 +108,104 @@
 #   error This F_CPU value is not in "LUR7_can.h" file
 #endif
 
-// - system definitions
-#define NBR_OF_MOB 6
+// Definitions
+//! Number of MOb's in the ATmega32M1.
+#define NBR_OF_MOB		6
 
-// - function declarations
+// Addresses, Masks and DLCs
+// +  DTA
+const uint32_t CAN_DTA_ID; //!< The base ID of CAN messages from the DTA
+const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
+
+// +  Front-MCU
+// +  +  Brake Light
+const uint32_t CAN_BRAKE_LIGHT_ID; //!< The ID of CAN messages for Brake Light on/off
+const uint32_t CAN_BRAKE_LIGHT_MASK; //!< Mask for the Brake Light messages
+const uint8_t CAN_BRAKE_LIGHT_DLC; //!< DLC of Brake Pressure messages
+
+// +  +  Logging
+const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
+const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
+const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering and braking
+const uint8_t CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
+
+// +  Mid-MCU
+// +  +  Gear and Clutch
+const uint32_t CAN_GEAR_ID; //!< The ID for messages carrying Gear Change information
+const uint32_t CAN_CLUTCH_ID; //!< The ID for messages carrying Clutch Position information
+const uint32_t CAN_GEAR_CLUTCH_MASK; //!< Mask for Gear Change and Clutch Position IDs
+const uint8_t CAN_GEAR_CLUTCH_DLC; //!< DLC of Gear Change and Clutch Position messages
+
+// +  +  Logging
+const uint32_t CAN_LOG_ID; //!< The ID of CAN messages for starting/stoping logging
+const uint32_t CAN_LOG_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
+
+// Pre-defined messages
+const uint64_t CAN_MSG_NONE; //!< No message
+
+// +  Front-MCU
+// +  +  Brake Light
+const uint16_t CAN_MSG_BRAKE_ON; //!< Message for Brake Light ON
+const uint16_t CAN_MSG_BRAKE_OFF; //!< Message for Brake Light OFF
+
+// +  Mid-MCU
+// +  +  Gear and Clutch
+const uint16_t CAN_MSG_GEAR_UP; //!< Message for Gear Change UP
+const uint16_t CAN_MSG_GEAR_DOWN; //!< Message for Gear Change DOWN
+const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change to NEUTRAL
+
+// +  +  Logging
+const uint8_t CAN_MSG_LOG_START; //!< Start sending log data.
+const uint8_t CAN_MSG_LOG_STOP; //!< Stop sending log data.
+
+
 
 /*******************************************************************************
  * public api
  ******************************************************************************/
 void can_init(void);
-void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
-void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
+uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
+uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
 void can_enable(void);
 void can_disable(void);
-
-/*******************************************************************************
- * static functions
- ******************************************************************************/
-uint32_t _can_get_id(void);
-void _can_set_id(uint32_t identifier);
-void _can_set_msk(uint32_t mask);
-uint8_t _can_get_free_mob(void);
-void _can_handle_RXOK(void);
-void _can_handle_TXOK(void);
 
 /*******************************************************************************
  * extern functions
  ******************************************************************************/
 
-extern void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data);
-extern void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data);
+//! Contents of received message.
+/*!
+ * When a CAN message is received the \p id, \p dlc and \p data are extracted
+ * and passed as parameters to the CAN_ISR_RXOK function. this function needs
+ * to be defined in the project source code.
+ *
+ * \param mob MOb number.
+ * \param id 29 bit identifier of the message.
+ * \param dlc number of bytes of data.
+ * \param data pointer to copy of the received data.
+ */
+extern void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data);
+
+//! Contents of transmitted message.
+/*!
+ * When a CAN message is transmitted the \p id, \p dlc and \p data are extracted
+ * and passed back as parameters to the CAN_ISR_TXOK function. This function needs
+ * to be defined in the project source code.
+ *
+ * \param mob MOb number.
+ * \param id 29 bit identifier of the message.
+ * \param dlc number of bytes of data.
+ * \param data pointer to copy of the received data.
+ */
+extern void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data);
+
+//! Other interrupt causes.
+/*!
+ * Should any other interrupt besides TXOK and RXOK occure this function is
+ * triggered.
+ */
 extern void CAN_ISR_OTHER(void);
 
 #endif // _LUR7_CAN_LIB_H_

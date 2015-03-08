@@ -16,13 +16,49 @@
  / along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_power.c
+ * \ref LUR7_power allows for unused peripheral hardware to be shut off, thus
+ * reducing the overall power consumption.
+ * 
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_power
+ * \see LUR7_power.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ * 
+ * \defgroup LUR7_power Power Reduction Settings
+ * 
+ * \ref LUR7_power allows for unused peripheral hardware to be shut off, thus
+ * reducing the overall power consumption.
+ *
+ * \see LUR7_power.c
+ * \see LUR7_power.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ */
+
 #include "LUR7.h"
 #include "LUR7_power.h"
 
+//! Default power settings
+/*!
+ * Shuts off power to the Power Stage Controller, SPI, and LIN interfaces. These
+ * peripherals are never used and can thus be safely dissabled.
+ */
 void power_off_default(void) {
 	PRR = (1 << PRPSC) | (1 << PRSPI) | (1 << PRLIN);
 }
 
+//! Dissable Timer1
+/*! If \ref LUR7_timer1 is unused (no PWM output on \ref OUT1), this function
+ * disables the \ref LUR7_timer1 hardware.
+ */
 void power_off_timer1(void) {
 	PRR |= (1 << PRTIM1);
 }

@@ -16,20 +16,124 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_can.c
+ * \ref LUR7_CAN performs communication tasks between the microcontrollers, ECU
+ * and onboard logging computer using the CAN protocol.
+ *
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_can
+ * \see LUR7_can.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ *
+ * \defgroup LUR7_CAN CAN Bus Communication
+ *
+ * This is the killer feature of the ATmega32M1, a built in CAN bus controller.
+ * CAN is a communication bus used heavily in the automotive industry, it is
+ * designed to withstand both common and differential mode electro-magnetic
+ * disturbances. In order to read information from the ECU (DTA S60pro) there is
+ * a choice between RS-232 and CAN, due to the environmental requirements with
+ * large electro-magnetic disturbances the CAN system is necessary.
+ *
+ * The CAN bus is extended to include not only one microcontroller and the ECU.
+ * All electronics nodes will attatch to the same bus and use it to communicate.
+ *
+ * For a better understanding of how the CAN bus works see the ISO standard
+ * linked below, the ATmege32M1 manual and other web resources. Delving in to
+ * the details of the system is beyond the scope of this document.
+ *
+ * \see LUR7_can.c
+ * \see LUR7_can.h
+ * \see <http://www.dtafast.co.uk/Downloads/Manuals/S%20Series%20Manual.pdf>
+ * \see <http://www.bosch-semiconductors.de/media/pdf_1/canliteratur/can2spec.pdf>
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ */
+
 #include "LUR7.h"
 #include "LUR7_can.h"
 
-/*******************************************************************************x
+/*******************************************************************************
+ * constant variable definitions
+ ******************************************************************************/
+// Addresses, Masks and DLCs
+// +  DTA
+const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from the DTA
+const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint8_t CAN_DTA_DLC = 8; //!< DLC of DTA messages
+
+// +  Front-MCU
+// +  +  Brake Light
+const uint32_t CAN_BRAKE_LIGHT_ID = 0x00001800; //!< The ID of CAN messages for Brake Light on/off
+const uint32_t CAN_BRAKE_LIGHT_MASK = 0xFFFFFFFC; //!< Mask for the Brake Light messages
+const uint8_t CAN_BRAKE_LIGHT_DLC = 1; //!< DLC of Brake Pressure messages
+
+// +  +  Logging
+const uint32_t CAN_FRONT_LOG_SPEED_ID = 0x00004000; //!< Message ID for front wheel speeds
+const uint32_t CAN_FRONT_LOG_SUSPENSION_ID = 0x00004001; //!< Message ID for front suspension
+const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID = 0x00004002; //!< Message ID for steering and braking
+const uint8_t CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging node
+
+// +  Mid-MCU
+// +  +  Gear and Clutch
+const uint32_t CAN_GEAR_ID = 0x00001500; //!< The ID for messages carrying Gear Change information
+const uint32_t CAN_CLUTCH_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
+const uint32_t CAN_GEAR_CLUTCH_MASK = 0xFFFFFFFE; //!< Mask for Gear Change and Clutch Position IDs
+const uint8_t CAN_GEAR_CLUTCH_DLC = 2; //!< DLC of Gear Change and Clutch Position messages
+
+// +  +  Logging
+const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
+const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
+
+// Pre-defined messages
+const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
+
+// +  Front-MCU
+// +  +  Brake Light
+const uint16_t CAN_MSG_BRAKE_ON = 0x01; //!< Message for Brake Light ON
+const uint16_t CAN_MSG_BRAKE_OFF = 0x20; //!< Message for Brake Light OFF
+
+// +  Mid-MCU
+// +  +  Gear and Clutch
+const uint16_t CAN_MSG_GEAR_UP = 0x0101; //!< Message for Gear Change UP
+const uint16_t CAN_MSG_GEAR_DOWN = 0x0202; //!< Message for Gear Change DOWN
+const uint16_t CAN_MSG_GEAR_NEUTRAL = 0x0404; //!< Message for Gear Change to NEUTRAL
+
+// +  +  Logging
+const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.
+const uint8_t CAN_MSG_LOG_STOP = 0x44; //!< Stop sending log data.
+
+
+/*******************************************************************************
+ * static function declarations
+ ******************************************************************************/
+static uint32_t _can_get_id(void);
+static void _can_set_id(uint32_t identifier);
+static void _can_set_msk(uint32_t mask);
+static uint8_t _can_get_free_mob(void);
+static void _can_handle_RXOK(void);
+static void _can_handle_TXOK(void);
+
+/*******************************************************************************
  * public api
  ******************************************************************************/
 
-/*
+//! Hardware initialisation function.
+/*!
  * To start using CAN run this function during the setup phase of the code.
- * It activates TXOK and RXOK interrupts on all 6 MObs.
+ * The CAN hardware is reset and re configured. All interrupts except for timer
+ * overflow are activated. To enable the CAN controller, see \ref can_enable.
  */
 void can_init(void) {
 	CANGCON = (1<<SWRES); // reset CAN
-	//CANTCON = 0x00; //set timing prescaler to zero
+	CANTCON = 0x00; //set timing prescaler to zero
 
 	CANBT1 = CONF_CANBT1; // set baudrate, CONF_CANBT1 defined in .h file
 	CANBT2 = CONF_CANBT2; // set baudrate, CONF_CANBT2 defined in .h file
@@ -47,23 +151,34 @@ void can_init(void) {
 		CANCDMOB = 0x00;
 		CANSTMOB = 0x00;
 
-		//CANIDT4 = 0x00;
-		//CANIDT3 = 0x00;
-		//CANIDT2 = 0x00;
-		//CANIDT1 = 0x00;
-		//CANIDM4 = 0x00;
-		//CANIDM3 = 0x00;
-		//CANIDM2 = 0x00;
-		//CANIDM1 = 0x00;
+		CANIDT4 = 0x00;
+		CANIDT3 = 0x00;
+		CANIDT2 = 0x00;
+		CANIDT1 = 0x00;
+		CANIDM4 = 0x00;
+		CANIDM3 = 0x00;
+		CANIDM2 = 0x00;
+		CANIDM1 = 0x00;
 	}
 }
 
-/*
- * After the init function, run this function to setup receiving messages.
+//! Setup reception of messages.
+/*!
+ * After the \ref can_init function, run this function to setup the reception of
+ * messages.
+ *
+ * \param mob_id the message ID to look for.
+ * \param mob_msk the mask for what bits of the ID to compare.
+ * \param mob_dlc the expected number of data bytes.
+ * \return the number of the MOb configured for RX.
  */
-void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
-	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
-	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
+
+	uint8_t free_mob = _can_get_free_mob(); // first free mob
+	if (free_mob == 0xFF) {
+		return 0xFF; //no free mob, error
+	}
+	CANPAGE = free_mob << MOBNB0; // select first free MOb for use
 
 	_can_set_id(mob_id); //id to compare against
 	_can_set_msk(mob_msk); //mask for comparing id
@@ -72,20 +187,31 @@ void can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc) {
 
 	CANCDMOB = (1 << CONMOB1) | (1 << IDE) | (mob_dlc << DLC0); // configure MOb for reception of mob_dlc number of data bytes
 
-	//CANPAGE = save_CANPAGE; //restore CANPAGE
+	return free_mob; // the configured MOb
 }
 
-/*
- * send message with id = mob_id, data = *mob_data and dlc = mob_dlc
- * run once per message. use CAN_ISR_TXOK() for additional actions on send completion
+//! Send message.
+/*!
+ * Sends a message with id = \p mob_id, data = \p *mob_data and dlc = \p mob_dlc.
+ * Run the function once per message. When the transmission is complete
+ * CAN_ISR_TXOK() is executed, allowing for additional actions.
+ *
+ * \param mob_id the 29 bit message ID.
+ * \param mob_data is a pointer to the data that will be sent.
+ * \param mob_dlc is the number of bytes of data to send. (Maximum 8)
+ * \return the number of the MOb used for TX.
  */
-void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
-	//uint8_t save_CANPAGE = CANPAGE; //save CANPAGE
-	CANPAGE = _can_get_free_mob() << MOBNB0; // select first free MOb for use
+uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
+
+	uint8_t free_mob = _can_get_free_mob(); //first free MOb
+	if (free_mob == 0xFF) {
+		return 0xFF; //no free mob, error
+	}
+	CANPAGE = free_mob << MOBNB0; // select first free MOb for use
 
 	CANSTMOB = 0x00; //clear MOb status
 
-	_can_set_id(mob_id);
+	_can_set_id(mob_id); // configure ID
 
 	for (uint8_t i = 0; i < mob_dlc; i++) {
 		CANMSG = mob_data[i]; // set data
@@ -93,36 +219,41 @@ void can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 
 	CANCDMOB = (1<<CONMOB0) | (1 << IDE) | (mob_dlc << DLC0); // enable transmission and set DLC
 
-	//CANPAGE = save_CANPAGE; //restore CANPAGE
+	return free_mob; // return the MOb used
 }
 
-/*
- * run this function at the end of the setup procedure.
+//! Enable CAN.
+/*!
+ * Run this function at the end of the setup procedure. This activates the CAN bus.
  */
-void can_enable() {
+void can_enable(void) {
 	CANGCON |= (1 << ENASTB); //enable CAN
 }
 
-/*
- * for completeness
+//! Disable CAN.
+/*!
+ * Should there be a need to disable the CAN controller this function will do so.
  */
-void can_disable() {
+void can_disable(void) {
 	CANGCON &= ~(1 << ENASTB); //disable CAN
 }
 
 /*******************************************************************************
- * static functions
+ * static function definitions
  ******************************************************************************/
 
-/*
- * rebuilds the message identifier
+//! Reconstruct the message ID.
+/*!
+ * Rebuilds the message identifier from the CANIDTn registers.
+ * \return 29 bit message ID.
  */
-uint32_t _can_get_id() {
-	return (CANIDT4 >> 3) | ((uint32_t)CANIDT3 << 5) | ((uint32_t)CANIDT2 << 13) | ((uint32_t)CANIDT1 << 21);
+uint32_t _can_get_id(void) {
+	return ((uint32_t)CANIDT4 >> 3) | ((uint32_t)CANIDT3 << 5) | ((uint32_t)CANIDT2 << 13) | ((uint32_t)CANIDT1 << 21);
 }
 
-/*
- * set ID registers and RTR bit
+//! Writes the ID of the MOb to the CANIDTn registers.
+/*!
+ * \param identifier the 29 bit message id.
  */
 void _can_set_id(uint32_t identifier) {
 	uint32_t id_v = (identifier << 3);
@@ -133,8 +264,9 @@ void _can_set_id(uint32_t identifier) {
 	CANIDT4 = *((uint8_t *) &id_v + 0);
 }
 
-/*
- * set mask registers
+//! Writes the mask for the MOb to the CANIDMn registers.
+/*!
+ * \param mask the 29 bit id mask.
  */
 void _can_set_msk(uint32_t mask) {
 	uint32_t mask_v = (mask << 3);
@@ -144,12 +276,13 @@ void _can_set_msk(uint32_t mask) {
 	CANIDM4 = *((uint8_t *) &mask_v + 0) | (1<<RTRMSK) | (1<<IDEMSK);
 }
 
-/*
- * Returns the number of the first free MOb, 0xFF if no free MOb is found
+//! First free MOb.
+/*!
+ * \return the first free MOb, 0xFF if no free MOb is found.
  */
 uint8_t _can_get_free_mob() {
 	for (uint8_t mob = 0; mob < NBR_OF_MOB; mob++) {
-		if (CANEN2 & (1 << mob)) {
+		if (!(CANEN2 & (1 << mob))) {
 			return mob;
 		}
 	}
@@ -160,36 +293,48 @@ uint8_t _can_get_free_mob() {
  * Interrupt handling
  ******************************************************************************/
 
+//! Interrupt Service Routine, CAN
+/*!
+ * Interrupts are handled very differently for CAN compared to the regular ones.
+ * This is described at some depth in the ATmega32M1 datasheet and much has been
+ * written about it on the AVRFreaks forum.
+ *
+ * There are only two flag registers, and each flag can be set for several
+ * simultanious reasons. Therefore it is important that each possible cause is
+ * tested individually. Once the interrupt has been handled the flags must be
+ * cleared manually.
+ *
+ * Once the cause of the interrupt is clear static helper functions read out any
+ * useful data from the MOb, executes extern functions to deal with the data,
+ * and lastly resets the MOb for future use.
+ */
 ISR (CAN_INT_vect) {
-	uint8_t save_SREG = SREG; // save SREG
 	uint8_t save_CANPAGE = CANPAGE; // save CANPAGE
 
 	CANPAGE = CANHPMOB & 0xF0; // select MOb with highest priority interrupt
 
-	if (CANSTMOB & (1 << RXOK)) {
-		CANSTMOB &= ~(1 << RXOK); //clear interrupt flag
-		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
-		_can_handle_RXOK();
-	} else if (CANSTMOB & (1 << TXOK)) {
-		CANSTMOB &= ~(1 << TXOK); //clear interrupt flag
-		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
-		_can_handle_TXOK();
-	} else {
-		CANSTMOB = 0x00; //clear interrupt flag, FIXME: errors not handled
-		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
-		CANGIT = 0x00; //clear general interrupts
-		CAN_ISR_OTHER();
+	if (CANSTMOB & (1 << RXOK)) { //test for RXOK
+		CANSTMOB &= ~(1 << RXOK); // clear interrupt flag
+		_can_handle_RXOK(); //handle RXOK
+	} else if (CANSTMOB & (1 << TXOK)) { //test for TXOK
+		CANSTMOB &= ~(1 << TXOK); // clear interrupt flag
+		_can_handle_TXOK(); //handle TXOK
+	} else { // any other interrupt, most likely an error
+		CAN_ISR_OTHER(); // extern function, handles errors
+		CANSTMOB = 0x00; // clear interrupt flag, FIXME: errors not handled well
+		CANGIT = 0x00; // clear general interrupts
 	}
 
 	CANPAGE = save_CANPAGE; //restore CANPAGE
-	SREG = save_SREG; //restore SREG
 }
 
-/*
- * helper function for ISR receiving messages, relies on external function
+//! Receives message.
+/*!
+ * Helper function for ISR receiving messages, relies on external function
  * implemented in application.
  */
 void _can_handle_RXOK() {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
 	uint32_t id = _can_get_id(); // get id
 	uint8_t dlc = CANCDMOB & 0x0F; // get dlc
 	uint8_t data[dlc]; // create vector for data
@@ -200,16 +345,19 @@ void _can_handle_RXOK() {
 	}
 
 	// send information to extern function in application to act on information
-	CAN_ISR_RXOK(id, dlc, data);
+	CAN_ISR_RXOK(mob, id, dlc, data);
 
-	CANCDMOB |= (1 << CONMOB1); // reenable reception
+	CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
+	CANCDMOB |= (1 << CONMOB1); // re-enable reception
 }
 
-/*
- * helper function for ISR sending messages, relies on external function
+//! Ends transmission of message.
+/*!
+ * Helper function for ISR sending messages, relies on external function
  * implemented in application.
  */
 void _can_handle_TXOK() {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
 	uint32_t id = _can_get_id(); // get id
 	uint8_t dlc = CANCDMOB & 0x0F; // get dlc
 	uint8_t data[dlc]; // create vector for data
@@ -219,6 +367,6 @@ void _can_handle_TXOK() {
 		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
 	}
 
-	CAN_ISR_TXOK(id, dlc, data); // extern function if more actions are required after TXOK
+	CAN_ISR_TXOK(mob, id, dlc, data); // extern function if more actions are required after TXOK
 	CANCDMOB = 0x00; // clear control register
 }

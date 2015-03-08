@@ -20,22 +20,23 @@
 
 int main(void) {
 	io_init();
-	adc_init();
+	//adc_init();
 	ancomp_init();
-	can_init();
-	timer0_init();
-	timer1_init(); // if PWM output
-	power_off_default();
+	//can_init();
+	//timer0_init();
+	//timer1_init(); // if PWM output
+	//power_off_default();
 	//power_off_timer1(); //if no PWM output
 
 	interrupts_on();
-	can_enable();
+	//can_enable();
 
 	/*
 	 * Space for more setup code
 	 * This code will be run once.
 	 */
 
+	set_output(OUT1, ON);
 	while (1) {
 		/*
 		 * Space for main code
@@ -61,5 +62,9 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 
-void early_bod_warning_ISR(void) {}
-void early_bod_safe_ISR(void) {}
+void early_bod_warning_ISR(void) {
+	set_output(OUT1, OFF);
+}
+void early_bod_safe_ISR(void) {
+	//toggle_output(OUT1);
+}

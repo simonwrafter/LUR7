@@ -16,11 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_timer1.h
+ * \ref LUR7_timer1 
+ * 
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_timer1
+ * \see LUR7_timer1.c
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ * 
+ * \addtogroup LUR7_timer1
+ */
+
 #ifndef _LUR7_TIMER1_H_
 #define _LUR7_TIMER1_H_
 
 void timer1_init(void);
-void set_pwm_output(uint16_t);
+void timer1_dutycycle(uint16_t);
 
 // extern void timer1_isr_400Hz(uint8_t);
 

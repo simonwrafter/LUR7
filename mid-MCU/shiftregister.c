@@ -37,15 +37,15 @@ void shift_bar(uint8_t led_on, uint8_t length) {
 }
 
 void shift_bit(uint8_t value) {
-	set_output(SHIFT_DATA, (value>0));
+	set_output(IO_SHIFT_DATA, (value>0));
 	_delay_us(PULSE_TIME);
-	set_output(SHIFT_CLK, HIGH);
+	set_output(IO_SHIFT_CLK, HIGH);
 	_delay_us(PULSE_TIME);
-	set_output(SHIFT_CLK, LOW);
+	set_output(IO_SHIFT_CLK, LOW);
 }
 
 void shift_strobe(void) {
-	set_output(SHIFT_STROBE, HIGH);
+	set_output(IO_SHIFT_STROBE, HIGH);
 	_delay_us(PULSE_TIME);
-	set_output(SHIFT_STROBE, LOW);
+	set_output(IO_SHIFT_STROBE, LOW);
 }

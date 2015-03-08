@@ -1,33 +1,27 @@
 #include "../header_and_config/LUR7.h"
 
-uint8_t string_test(uint8_t *, uint8_t *, uint8_t);
+uint16_t tps = 0;
+//uint8_t new = 0;
 
 int main(void) {
 	io_init();
 
 	can_init();
-	can_setup_rx(0x0f0f0f00, 0xffffff00, 0);
+	can_setup_rx(0x00002000, 0xffffffff, 8);
 
 	interrupts_on();
 	can_enable();
 
-	set_output(OUT1, OFF);
+	set_output(OUT2, OFF);
 
 	while(1) {
+//		if (new) {
+			;
+//		}
 	}
 	return(0);
 }
-/*
-uint8_t string_test(uint8_t * s1, uint8_t * s2, uint8_t nbr_to_compare) {
-	for (uint8_t pos = 0; pos < nbr_to_compare; pos++) {
-		if (s1[pos] != s2[pos]) {
-			return FALSE;
-		} else if (s1[pos] == '\0') {
-			return TRUE;
-		}
-	}
-	return TRUE;
-}*/
+
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
@@ -40,7 +34,8 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
-	toggle_output(OUT1);
+	toggle_output(OUT2);
+	tps = (uint16_t) (data[7] << 8) | data[8];
 }
 
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}

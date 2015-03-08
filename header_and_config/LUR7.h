@@ -17,14 +17,30 @@
  */
 
 /*! \file LUR7.h
- * LUR7.h is the main .h file for the entire LUR7 project. All code is released
- * under the GPLv3 license.
- * 
- * To write code for the LUR7 PCB only this file should be included as any and
- * all other dependencies are included from here. 
- * 
- * In this file a number of global macros are defined for inputs and outputs,
- * system clock, etc.
+ * LUR7.h is the main .h file for the entire LUR7 project.
+ *
+ * All code is released under the GPLv3 license.
+ *
+ * To write code for the LUR7 PCB only this file should be included to each new
+ * source file, all other dependencies are included from here.
+ *
+ * \see LUR7
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ *
+ * \defgroup LUR7  Main header file
+ * In LUR7.h a number of global macros are defined for inputs and outputs,
+ * system clock, CAN baudrate etc.
+ *
+ * All dependencies are included through this file, this means that to write
+ * code for the ATmega32M1 and LUR7 PCB only this file needs to be included to
+ * each source file.
+ *
+ * \see LUR7.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
  */
 
 #ifndef _LUR7_H_
@@ -32,98 +48,103 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <util/atomic.h>
 #include <stdint.h>
 
 // CLOCK SETTINGS AND DELAY
-/*!
- * The clockspeed of the system
- */
+//! The clockspeed of the system
 #define F_CPU	16000000UL     // 16Mhz external clock, for delay and CAN
 #include <util/delay.h>
 
 // CAN LIB CONFIGURATION
-/*!
- * The baudrate at which the CAN bus operates, must be identical for all 
- * attached units.
- */
-#define CAN_BAUDRATE	125        // in kBit
+//! The baudrate at which the CAN bus operates, must be identical for all attached units.
+#define CAN_BAUDRATE	1000        // in kBit
 
 // SYSTEM DEFINITION
 
-/*! IN1 is defined as PD3 and used as an input on the PCB. */
+//! IN1 is defined as PD3 and used as an input on the PCB.
 #define IN1		0 //PD3
-/*! IN2 is defined as PD2 and used as an input on the PCB. */
+//! IN2 is defined as PD2 and used as an input on the PCB.
 #define IN2		1 //PD2
-/*! IN3 is defined as PD1 and used as an input on the PCB. */
+//! IN3 is defined as PD1 and used as an input on the PCB.
 #define IN3		2 //PD1
-/*! IN4 is defined as PB7 and used as an input on the PCB. */
+//! IN4 is defined as PB7 and used as an input on the PCB.
 #define IN4		3 //PB7
-/*! IN5 is defined as PC0 and used as an input on the PCB. */
+//! IN5 is defined as PC0 and used as an input on the PCB.
 #define IN5		4 //PC0
-/*! IN6 is defined as PB6 and used as an input on the PCB. */
+//! IN6 is defined as PB6 and used as an input on the PCB.
 #define IN6		5 //PB6
-/*! IN7 is defined as PD0 and used as an input on the PCB. */
+//! IN7 is defined as PD0 and used as an input on the PCB.
 #define IN7		6 //PD0
-/*! IN8 is defined as PB5 and used as an input on the PCB. */
+//! IN8 is defined as PB5 and used as an input on the PCB.
 #define IN8		7 //PB5
-/*! IN9 is defined as PB2 and used as an input on the PCB. */
+//! IN9 is defined as PB2 and used as an input on the PCB.
 #define IN9		8 //PB2
 
 //digital outputs
-/*! OUT1 is defined as PC1 and used as an output on the PCB. */
+//! OUT1 is defined as PC1 and used as an output on the PCB.
 #define OUT1	9  //PB0 v1.0; PC1 v1.1
-/*! OUT2 is defined as PB1 and used as an output on the PCB. */
+//! OUT2 is defined as PB1 and used as an output on the PCB.
 #define OUT2	10 //PB1
-/*! OUT3 is defined as PD7 and used as an output on the PCB. */
+//! OUT3 is defined as PD7 and used as an output on the PCB.
 #define OUT3	11 //PD7
-/*! OUT4 is defined as PC4 and used as an output on the PCB. */
+//! OUT4 is defined as PC4 and used as an output on the PCB.
 #define OUT4	12 //PC4
-/*! OUT5 is defined as PC5 and used as an output on the PCB. */
+//! OUT5 is defined as PC5 and used as an output on the PCB.
 #define OUT5	13 //PC5
-/*! OUT6 is defined as PC6 and used as an output on the PCB. */
+//! OUT6 is defined as PC6 and used as an output on the PCB.
 #define OUT6	14 //PC6
-/*! OUT7 is defined as PB3 and used as an output on the PCB. */
+//! OUT7 is defined as PB3 and used as an output on the PCB.
 #define OUT7	15 //PB3
-/*! OUT8 is defined as PB4 and used as an output on the PCB. */
+//! OUT8 is defined as PB4 and used as an output on the PCB.
 #define OUT8	16 //PB4
 
+//! Copy of the first input
+#define FIRST_IN	IN1
+//! Copy of the last input
+#define LAST_IN		IN9
+//! Copy of the first output
+#define FIRST_OUT	OUT1
+//! Copy of the last output
+#define LAST_OUT	OUT8
+
 // ADC
-/*! ADC_AN1 selects IN5 for A/D conversion. */
-#define ADC_AN1			0x04 //PB7, IN4
-/*! ADC_AN2 selects IN7 for A/D conversion. */
-#define ADC_AN2			0x07 //PB6, IN6
-/*! ADC_AN3 selects IN8 for A/D conversion. */
-#define ADC_AN3			0x06 //PB5, IN8
-/*! ADC_AN4 selects IN9 for A/D conversion. */
-#define ADC_AN4			0x05 //PB2, IN9
-/*! ADC_TEMP selects the temperature sensor of the ATmega32M1 for A/D conversion. */
+//! selects IN4 for A/D conversion
+#define ADC_IN4			0x04 //PB7, IN4
+//! selects IN6 for A/D conversion.
+#define ADC_IN6			0x07 //PB6, IN6
+//! selects IN8 for A/D conversion.
+#define ADC_IN8			0x06 //PB5, IN8
+//! selects IN9 for A/D conversion.
+#define ADC_IN9			0x05 //PB2, IN9
+//! selects the temperature sensor of the ATmega32M1 for A/D conversion.
 #define ADC_TEMP		0x0B
-/*! ADC_SUPPLY_P selects the voltage over the capacitor bank on the PCB for A/D conversion. */
+//! selects the voltage over the capacitor bank on the PCB for A/D conversion.
 #define ADC_SUPPLY_P	0x02 //PD5, Capacitor bank
-/*! ADC_SUPPLY_N selects the incoming voltage from the main power supply for A/D conversion. */
+//! selects the incoming voltage from the main power supply for A/D conversion.
 #define ADC_SUPPLY_N	0x03 //PD6, 12V main
 
 // LOGIC
-/*! logic TRUE */
+//! logic TRUE */
 #define TRUE	1
-/*! Eg. for setting outputs */
+//! Eg. for setting outputs
 #define HIGH	1
-/*! Eg. for setting outputs */
+//! Eg. for setting outputs
 #define ON		1
-/*! Eg. for setting outputs to a high impedance state */
+//! Eg. for setting outputs to a high impedance state
 #define TRI		1
-/*! Eg. for setting outputs to a high impedance state */
+//! Eg. for setting outputs to a high impedance state
 #define CUT		1
 
-/*! logic FALSE */
+//! logic FALSE */
 #define FALSE	0
-/*! Eg. for setting outputs */
+//! Eg. for setting outputs
 #define LOW		0
-/*! Eg. for setting outputs */
+//! Eg. for setting outputs
 #define OFF		0
-/*! Eg. for setting outputs to a low impedance state */
+//! Eg. for setting outputs to a low impedance state
 #define GND		0
-/*! Eg. for setting outputs to a low impedance state */
+//! Eg. for setting outputs to a low impedance state
 #define OPEN	0
 
 // SYSTEM FUNCTIONS

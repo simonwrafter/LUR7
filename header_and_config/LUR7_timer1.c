@@ -16,37 +16,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file LUR7_timer1.c
+ * \ref LUR7_timer1 generates a high precision PWM signal on \ref OUT1 at a 
+ * frequency of 400Hz.
+ * 
+ * All code is released under the GPLv3 license.
+ *
+ * When writing code for the LUR7 PCB this file should not be included directly,
+ * instead you should include the \ref LUR7.h file to each source file.
+ *
+ * \see LUR7_timer1
+ * \see LUR7_timer1.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ * 
+ * \defgroup LUR7_timer1 Timer 1
+ * Timer 1 generates a high precision PWM signal on \ref OUT1 at a frequency of
+ * 400Hz. The dutycycle can be set to any value from 0 to 20000.
+ *
+ * \see LUR7_timer1.c
+ * \see LUR7_timer1.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ */
+
 #include "LUR7.h"
 #include "LUR7_timer1.h"
 
-//static volatile uint8_t interrupt_nbr = 0;
-
-void timer1_init(void) { //(uint8_t pwm_on) {
-	//if (pwm_on) {
-		TCCR1A = (1 << COM1B1) | (1 << WGM10); // non-inverting output on PC1 (OC1B), phase and frequency correct PWM mode
-	//} else {
-	//	TCCR1A = (1 << WGM10); // no pwm output on PC1 (OC1B)
-	//}
+//! Hardware initialisation function.
+/*!
+ * The timer is setup up in phase and frequency correct PWM mode with OC1B
+ * (OUT1) as output. The PWM frequency is calculated as
+ * \f[f_{PWM} = \frac {f_{IO}}{2 \times N \times TOP} = \frac {16000000}{2 \times 1 \times 20000} = 400.000 Hz\f]
+ * TOP is defined in Output Compare Register 1A (OCR1A) as 20000 meaning the 
+ * frequency is 400Hz.
+ */
+void timer1_init(void) {
+	TCCR1A = (1 << COM1B1) | (1 << WGM10); // non-inverting output on PC1 (OC1B), phase and frequency correct PWM mode
 	TCCR1B = (1 << WGM13) | (1 << CS10); // phase and frequency correct PWM mode, prescaler = 1
 	TCCR1C = 0x00; // no force compare match
 	OCR1A  = 0x4E20; // 20000 => 400Hz
-	OCR1B  = 0x0000;
-	ICR1   = 0x0000;
-	TIMSK1 = 0x00; //(1 << OCIE1A);
+	OCR1B  = 0x0000; // duytcycle = 0 to start
+	TIMSK1 = 0x00; // no interrupts
 }
 
-void set_pwm_output(uint16_t dutycycle) {
+//! Sets the dutycycle of the output.
+/*!
+ * The dutycycle of the output is controlled by Output Compare Register 1B. The
+ * output is toggled upon a match between the compare register value and the TOP
+ * value in Output Compare Register 1A. As TOP=20000 \p dutycycle can be any 
+ * number [0, 20000].
+ * 
+ * \param dutycycle the dutycycle [0, 20000] of the PWM output.
+ */
+void timer1_dutycycle(uint16_t dutycycle) {
 	if (dutycycle > 20000) {
 		dutycycle = 20000;
 	}
 	OCR1B = dutycycle;
 }
-
-/*
-ISR(TIMER1_COMPA_vect) {
-	timer1_isr_400Hz(interrupt_nbr++);
-	if (interrupt_nbr == 400) {
-		interrupt_nbr = 0;
-	}
-}
-*/

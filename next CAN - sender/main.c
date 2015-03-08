@@ -1,26 +1,18 @@
 #include "../header_and_config/LUR7.h"
 
-uint8_t er_flag = 0;
-uint8_t txok_flag = 1;
-
 int main(void) {
-	init_io();
+	io_init();
 	set_output(OUT1, ON);
-	set_output(OUT2, OFF);
+	set_output(OUT2, TRI);
 	can_init();
+
+	timer0_init();
 
 	interrupts_on();
 	can_enable();
 
 	while(1) {
-		if (er_flag != 0) {
-			set_output(OUT2, ON);
-		}
-		if (txok_flag == 1) {
-			set_output(OUT1, OFF);
-			can_setup_tx(0x000f0f00, '\0', 0);
-			txok_flag = 0;
-		}
+
 	}
 	return(0);
 }
@@ -39,11 +31,20 @@ void pcISR_in9(void) {}
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
-	set_output(OUT1, ON);
-	txok_flag = 1;
+	//toggle_output(OUT1);
 }
 
 void CAN_ISR_OTHER() {
-	CANGIT = 0x00;
-	er_flag = 1;
 }
+
+
+void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+	if (interrupt_nbr % 5 == 0) {
+		if (can_setup_tx(0x0f0f0f00, '\0', 0) !=0xFF) {
+			toggle_output(OUT1);
+		}
+	}
+}
+
+void early_bod_warning_ISR(void) {}
+void early_bod_safe_ISR(void) {}

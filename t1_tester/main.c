@@ -20,27 +20,34 @@
 
 int main(void) {
 	io_init();
-	adc_init();
-	ancomp_init();
-	can_init();
-	timer0_init();
+	//adc_init();
+	//ancomp_init();
+	//can_init();
+	//timer0_init();
 	timer1_init(); // if PWM output
-	power_off_default();
+	//power_off_default();
 	//power_off_timer1(); //if no PWM output
 
 	interrupts_on();
-	can_enable();
+	//can_enable();
 
-	/*
-	 * Space for more setup code
-	 * This code will be run once.
-	 */
+	//timer1_dutycycle(3300);
+	//timer1_dutycycle(13500);
+
+	uint16_t high = 13700;
+	uint16_t low = 2000;
+	uint16_t delay = 1000;
+	uint16_t step = 1;
 
 	while (1) {
-		/*
-		 * Space for main code
-		 * This code will be run repeatedly.
-		 */
+		for (int i=low; i<high; i += step) {
+			timer1_dutycycle(i);
+			_delay_us(delay);
+		}
+		for (int i=high; i>low; i -= step) {
+			timer1_dutycycle(i);
+			_delay_us(delay);
+		}
 	}
 	return 0;
 }

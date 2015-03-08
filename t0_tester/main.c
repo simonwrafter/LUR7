@@ -20,16 +20,16 @@
 
 int main(void) {
 	io_init();
-	adc_init();
-	ancomp_init();
-	can_init();
+	//adc_init();
+	//ancomp_init();
+	//can_init();
 	timer0_init();
-	timer1_init(); // if PWM output
-	power_off_default();
+	//timer1_init(); // if PWM output
+	//power_off_default();
 	//power_off_timer1(); //if no PWM output
 
 	interrupts_on();
-	can_enable();
+	//can_enable();
 
 	/*
 	 * Space for more setup code
@@ -55,10 +55,14 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+	if (interrupt_nbr % 10 == 0) {
+		toggle_output(OUT2);
+	}
+}
 
-void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 
 void early_bod_warning_ISR(void) {}
