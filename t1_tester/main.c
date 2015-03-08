@@ -30,17 +30,24 @@ int main(void) {
 
 	interrupts_on();
 	//can_enable();
-	
-	uint16_t duty = 0;
-	uint8_t dir = 1;
-	
+
+	//timer1_dutycycle(3300);
+	//timer1_dutycycle(13500);
+
+	uint16_t high = 13700;
+	uint16_t low = 2000;
+	uint16_t delay = 1000;
+	uint16_t step = 1;
+
 	while (1) {
-		timer1_dutycycle(duty++);
-		_delay_us(200);
-		if (duty == 20000) {
-			dir *= -1;
+		for (int i=low; i<high; i += step) {
+			timer1_dutycycle(i);
+			_delay_us(delay);
 		}
-		duty *= dir;
+		for (int i=high; i>low; i -= step) {
+			timer1_dutycycle(i);
+			_delay_us(delay);
+		}
 	}
 	return 0;
 }
@@ -57,8 +64,8 @@ void pcISR_in9(void) {}
 
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {}
 
-void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 
 void early_bod_warning_ISR(void) {}
