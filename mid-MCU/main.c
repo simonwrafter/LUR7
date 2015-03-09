@@ -23,6 +23,9 @@
 
 volatile uint8_t CAN_DTA_MOb; // message object for the DTA's CAN messages
 volatile uint8_t logging = FALSE; // message object for the DTA's CAN messages
+volatile uint8_t new_info = TRUE; //update display
+volatile uint8_t clutch_pos = 0;
+volatile uint8_t clutch_pos_safe = 0;
 
 int main(void) {
 	//init +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -57,7 +60,14 @@ int main(void) {
 	
 	//loop +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	while (1) {
-		update_display();
+		clutch_pos = adc_get(IO_CLUTCH);
+		ATOMIC_BLOCK(ATOMIC_FORCEON) {
+			clutch_pos_safe = clutch_pos;
+		} // end ATOMIC_BLOCK
+		if (new_info) {
+			new_info = FALSE;
+			update_display();
+		}
 	}
 	//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	return 0;
@@ -66,9 +76,7 @@ int main(void) {
 // Interrupts
 
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {
-	//while adc_get is used here: DO THIS LAST!!!
-	uint16_t clutch_pos = adc_get(IO_CLUTCH); //get clutch position
-	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_safe, CAN_GEAR_CLUTCH_DLC);
 }
 
 ISR (INT_GEAR_UP) { //IN9
@@ -110,45 +118,21 @@ void pcISR_in9(void) {}
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	uint8_t id_lsb = ((uint8_t *) &id)[3];
 	if (mob == CAN_DTA_MOb) {
+		new_info = TRUE;
 		switch (id_lsb) {
 			case 0 :
 				update_RPM((data[1] << 8) | data[0]); // rpm
-				// TPS = (data[3] << 8) | data[2]; // %
 				update_watertemp((data[5] << 8) | data[4]); // C
-				// air temp = (data[7] << 8) | data[6] // C
 				break;
 			case 1 :
-				// MAP = (data[1] << 8) | data[0] // KPa
-				// Lambda x 1000 = (data[3] << 8) | data[2] // x 1000
 				update_speed((data[5] << 8) | data[4]); // Kph x 10
-				// Oil P = (data[7] << 8) | data[6] // KPa
 				break;
 			case 2 :
-				// Fuel P = (data[1] << 8) | data[0] // KPa
 				update_oiltemp((data[3] << 8) | data[2]); // C
-				// Volts x 10 = (data[5] << 8) | data[4] // V x 10
-				// Fuel Con. L/Hr x 10 = (data[7] << 8) | data[6] // L/Hr x 10
 				break;
 			case 3 :
 				update_gear(data[1]); // gear
-				// Advance = (data[3] << 8) | data[2] // deg x 10
-				// Injection = (data[5] << 8) | data[4] // ms x 10
-				// Fuel Con. = (data[7] << 8) | data[6] // L/100Km x 10
 				break;
-				/*
-			case 4 :
-				// Ana1 = (data[1] << 8) | data[0] // mV
-				// Ana2 = (data[3] << 8) | data[2] // mV
-				// Ana3 = (data[5] << 8) | data[4] // mV
-				// Cam Advance = (data[7] << 8) | data[6] // x 10
-				break;
-			case 5 :
-				// Cam Targ x 10 = (data[1] << 8) | data[0]
-				// Cam PWM x 10 = (data[3] << 8) | data[2]
-				// Crank Errors = (data[5] << 8) | data[4]
-				// Cam Errors = (data[7] << 8) | data[6]
-				break;
-			*/
 			default :
 				break;
 		}
