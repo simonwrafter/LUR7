@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup LUR7_adc A/D conversion
+ * \defgroup LUR7_adc Shared - A/D conversion
  * In this module functions pertaining to the initialization and usage of the 10
  * bit ADC are defined. Possible analog values for conversion are
  * - ADC_IN4

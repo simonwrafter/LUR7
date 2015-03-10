@@ -16,6 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file main.c
+ * \ref main is the Entry Point for execution of code on the mid MCU used in 
+ * the LUR7.
+ *
+ * All code is released under the GPLv3 license.
+ *
+ * \see \ref main
+ * \see \ref config.h
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ *
+ * \defgroup main Main source file
+ * \ref main.c is the top source code file for the mid LUR7 MCU.
+ *
+ * \see \ref main.c
+ * \see \ref config
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ */
+
 #include "../header_and_config/LUR7.h"
 #include "config.h"
 #include "shiftregister.h"
@@ -118,11 +140,11 @@ void pcISR_in9(void) {}
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	uint8_t id_lsb = ((uint8_t *) &id)[3];
 	if (mob == CAN_DTA_MOb) {
-		new_info = TRUE;
 		switch (id_lsb) {
 			case 0 :
 				update_RPM((data[1] << 8) | data[0]); // rpm
 				update_watertemp((data[5] << 8) | data[4]); // C
+				new_info = TRUE;
 				break;
 			case 1 :
 				update_speed((data[5] << 8) | data[4]); // Kph x 10

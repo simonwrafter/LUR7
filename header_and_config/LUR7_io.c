@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup LUR7_io In- and Outputs
+ * \defgroup LUR7_io Shared - In- and Outputs
  * The aim of this module is to simplify the reading of input values and writing
  * to outputs. By removing the setting of bits in registers from the main code
  * and handling it all in this controlled environment reduces the risk of faulty

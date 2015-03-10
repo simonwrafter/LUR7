@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  * 
- * \defgroup LUR7_power Power Reduction Settings
+ * \defgroup LUR7_power Shared - Power Reduction Settings
  * 
  * \ref LUR7_power allows for unused peripheral hardware to be shut off, thus
  * reducing the overall power consumption.

@@ -17,7 +17,7 @@
  */
 
 /*! \file config.h
- * The \ref config defines inputs and constants used on the front MCU.
+ * The \ref config defines inputs and constants used on the MCU.
  *
  * All code is released under the GPLv3 license.
  *
@@ -27,8 +27,8 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup config Front MCU - Configuration File
- * The front MCU has several inputs for measuring the behaviour of the LUR7. In
+ * \defgroup config Example Configuration File
+ * The MCU has several inputs for measuring the behaviour of the LUR7. In
  * \ref config.h the setup of the MCU is defined. 
  *
  * \see \ref config.h
@@ -44,24 +44,25 @@
 //Constants
 
 //Inputs
-//! Input for speed measurment of front right wheel.
-#define WHEEL_R				IN1
-//! Input for speed measurment of front left wheel.
-#define WHEEL_L				IN2
+// unused					IN1
+// unused					IN2
 // unused					IN3
-//! Input (analog) for measurment of brake pressure.
-#define BRAKE_PRESSURE	ADC_IN4
+// unused					IN4
 // unused					IN5
-//! Input (analog) for measurment of steering wheel angle.
-#define STEERING_WHEEL	ADC_IN6
+// unused					IN6
 // unused					IN7
-//! Input (analog) for measurment of front right suspension.
-#define SUSPENSION_R	ADC_IN8
-//! Input (analog) for measurment of front left suspension.
-#define SUSPENSION_L	ADC_IN9
+// unused					IN8
+// unused					IN9
 
 //Outputs
-//none
+// unused					OUT1
+// unused					OUT2
+// unused					OUT3
+// unused					OUT4
+// unused					OUT5
+// unused					OUT6
+// unused					OUT7
+// unused					OUT8
 
 //External interrupts
 //none

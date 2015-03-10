@@ -30,7 +30,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup LUR7_ancomp Analog Comparator
+ * \defgroup LUR7_ancomp Shared - Analog Comparator
  * By connecting the 12V main power supply and capacitor bank to either input of
  * an Analog Comparator and generating interrupts the 12v main supply dips below
  * the capacitor pack, early Brown Out conditions can be identified and handled.

@@ -42,7 +42,7 @@
 //doc in .c file
 void timer0_init(void);
 
-//! Extern function triggered at 100 Hz.
+//! Timer interrupt function triggered at 100 Hz.
 /*!
  * Triggered every 10ms, this function is suited for tasks that need scheduling
  * and repeated at a known frequency.

@@ -6,7 +6,9 @@ made circuit boards. To ease the use of the ATmega32M1 and its peripheral
 hardware a number of libraries have been written. The code is hosted at [Github]
 and licensed under [GPLv3].
 
-Documentation for the code can be generated using [doxygen], or read [here].
+Documentation for the code can be generated using [doxygen], or read it [here].
+
+This documentation covers the shared folder header_and_config.
 
 When using the code here in documented include LUR7.h to each file of your
 project; all LUR7 libraries are included through this file. By including LUR7.h

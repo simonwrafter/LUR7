@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  * 
- * \defgroup LUR7_timer0 Timer 0
+ * \defgroup LUR7_timer0 Shared - Timer 0
  * Timer0 is set up in CTC mode generating timer interrupts at a frequency of
  * 100Hz. Thus making it possible to schedule tasks and repeat them with at
  * known time intervalls. No output is connected to the timer

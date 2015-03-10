@@ -114,52 +114,51 @@
 
 // Addresses, Masks and DLCs
 // +  DTA
-const uint32_t CAN_DTA_ID; //!< The base ID of CAN messages from the DTA
-const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
-const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
+extern const uint32_t CAN_DTA_ID; //!< The base ID of CAN messages from the DTA
+extern const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+extern const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
 
 // +  Front-MCU
 // +  +  Brake Light
-const uint32_t CAN_BRAKE_LIGHT_ID; //!< The ID of CAN messages for Brake Light on/off
-const uint32_t CAN_BRAKE_LIGHT_MASK; //!< Mask for the Brake Light messages
-const uint8_t CAN_BRAKE_LIGHT_DLC; //!< DLC of Brake Pressure messages
+extern const uint32_t CAN_BRAKE_LIGHT_ID; //!< The ID of CAN messages for Brake Light on/off
+extern const uint32_t CAN_BRAKE_LIGHT_MASK; //!< Mask for the Brake Light messages
+extern const uint8_t CAN_BRAKE_LIGHT_DLC; //!< DLC of Brake Pressure messages
 
 // +  +  Logging
-const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
-const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
-const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering and braking
-const uint8_t CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
+extern const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
+extern const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
+extern const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering and braking
+extern const uint8_t CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
 
 // +  Mid-MCU
 // +  +  Gear and Clutch
-const uint32_t CAN_GEAR_ID; //!< The ID for messages carrying Gear Change information
-const uint32_t CAN_CLUTCH_ID; //!< The ID for messages carrying Clutch Position information
-const uint32_t CAN_GEAR_CLUTCH_MASK; //!< Mask for Gear Change and Clutch Position IDs
-const uint8_t CAN_GEAR_CLUTCH_DLC; //!< DLC of Gear Change and Clutch Position messages
+extern const uint32_t CAN_GEAR_ID; //!< The ID for messages carrying Gear Change information
+extern const uint32_t CAN_CLUTCH_ID; //!< The ID for messages carrying Clutch Position information
+extern const uint32_t CAN_GEAR_CLUTCH_MASK; //!< Mask for Gear Change and Clutch Position IDs
+extern const uint8_t CAN_GEAR_CLUTCH_DLC; //!< DLC of Gear Change and Clutch Position messages
 
 // +  +  Logging
-const uint32_t CAN_LOG_ID; //!< The ID of CAN messages for starting/stoping logging
-const uint32_t CAN_LOG_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
-const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
+extern const uint32_t CAN_LOG_ID; //!< The ID of CAN messages for starting/stoping logging
+extern const uint32_t CAN_LOG_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+extern const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
 
 // Pre-defined messages
-const uint64_t CAN_MSG_NONE; //!< No message
+extern const uint64_t CAN_MSG_NONE; //!< No message
 
 // +  Front-MCU
 // +  +  Brake Light
-const uint16_t CAN_MSG_BRAKE_ON; //!< Message for Brake Light ON
-const uint16_t CAN_MSG_BRAKE_OFF; //!< Message for Brake Light OFF
+extern const uint16_t CAN_MSG_BRAKE_ON; //!< Message for Brake Light ON
+extern const uint16_t CAN_MSG_BRAKE_OFF; //!< Message for Brake Light OFF
 
 // +  Mid-MCU
 // +  +  Gear and Clutch
-const uint16_t CAN_MSG_GEAR_UP; //!< Message for Gear Change UP
-const uint16_t CAN_MSG_GEAR_DOWN; //!< Message for Gear Change DOWN
-const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change to NEUTRAL
+extern const uint16_t CAN_MSG_GEAR_UP; //!< Message for Gear Change UP
+extern const uint16_t CAN_MSG_GEAR_DOWN; //!< Message for Gear Change DOWN
+extern const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change to NEUTRAL
 
 // +  +  Logging
-const uint8_t CAN_MSG_LOG_START; //!< Start sending log data.
-const uint8_t CAN_MSG_LOG_STOP; //!< Stop sending log data.
-
+extern const uint8_t CAN_MSG_LOG_START; //!< Start sending log data.
+extern const uint8_t CAN_MSG_LOG_STOP; //!< Stop sending log data.
 
 
 /*******************************************************************************

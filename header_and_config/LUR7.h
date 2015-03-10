@@ -29,7 +29,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup LUR7  Main header file
+ * \defgroup LUR7 Shared - Main header file
  * In LUR7.h a number of global macros are defined for inputs and outputs,
  * system clock, CAN baudrate etc.
  *
@@ -59,6 +59,12 @@
 // CAN LIB CONFIGURATION
 //! The baudrate at which the CAN bus operates, must be identical for all attached units.
 #define CAN_BAUDRATE	1000        // in kBit
+
+// SHARED CONSTANTS
+//! The value above which the brakes are considered to have been applied.
+#define BRAKES_ON	100 // MUST above BRAKES_OFF
+//! The value below which the brakes are considered to have been released.
+#define BRAKES_OFF	80 // MUST below BRAKES_ON
 
 // SYSTEM DEFINITION
 

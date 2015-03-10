@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  * 
- * \defgroup LUR7_interrupt Input Interrupts
+ * \defgroup LUR7_interrupt Shared - Input Interrupts
  * Input interrupts are a very powerful way of controling surrounding systems
  * without having to constantly check their status. Two kinds of interrupts are
  * available on the ATmega32M1, external and pin-change interrupts. \ref IN5,

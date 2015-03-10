@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup LUR7_CAN CAN Bus Communication
+ * \defgroup LUR7_CAN Shared - CAN Bus Communication
  *
  * This is the killer feature of the ATmega32M1, a built in CAN bus controller.
  * CAN is a communication bus used heavily in the automotive industry, it is

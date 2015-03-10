@@ -17,7 +17,7 @@
  */
 
 /*! \file config.h
- * The \ref config defines inputs and constants used on the front MCU.
+ * The \ref config defines inputs and constants used on the rear MCU.
  *
  * All code is released under the GPLv3 license.
  *
@@ -27,9 +27,9 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \defgroup config Front MCU - Configuration File
- * The front MCU has several inputs for measuring the behaviour of the LUR7. In
- * \ref config.h the setup of the MCU is defined. 
+ * \defgroup config Rear MCU - Configuration File
+ * The rear MCU has several inputs for measuring the behaviour of the LUR7 and 
+ * outputs for gear changing. In \ref config.h the setup of the MCU is defined. 
  *
  * \see \ref config.h
  * \see \ref main
@@ -44,24 +44,41 @@
 //Constants
 
 //Inputs
-//! Input for speed measurment of front right wheel.
+//! Input for speed measurment of rear right wheel.
 #define WHEEL_R				IN1
-//! Input for speed measurment of front left wheel.
+//! Input for speed measurment of rear left wheel.
 #define WHEEL_L				IN2
-// unused					IN3
-//! Input (analog) for measurment of brake pressure.
-#define BRAKE_PRESSURE	ADC_IN4
-// unused					IN5
-//! Input (analog) for measurment of steering wheel angle.
-#define STEERING_WHEEL	ADC_IN6
-// unused					IN7
-//! Input (analog) for measurment of front right suspension.
+//! Backup, Gear Up button. (see middle MCU)
+#define BAK_IN_GEAR_UP		IN3
+//! Backup, Brake Pressure Sensor. (see front MCU)
+#define BAK_IN_BRAKE	ADC_IN4
+//! Backup, Gear Down button. (see middle MCU)
+#define BAK_IN_GEAR_DOWN	IN5
+//! Backup, Clutch Paddle angle sensor. (see middle MCU)
+#define BAK_IN_CLUTCH	ADC_IN6
+//! Backup, Neutral Gear button. (see middle MCU)
+#define BAK_IN_NEUTRAL		IN7
+//! Input (analog) for measurment of rear right suspension.
 #define SUSPENSION_R	ADC_IN8
-//! Input (analog) for measurment of front left suspension.
+//! Input (analog) for measurment of rear left suspension.
 #define SUSPENSION_L	ADC_IN9
 
+
 //Outputs
-//none
+//! Output for Clutch Servo, PWM
+#define CLUTCH				OUT1
+//#define 					OUT2
+//! Output for Brakelight
+#define BRAKE_LIGHT			OUT3
+//! Output for Gear Up signal to solenoid.
+#define GEAR_UP				OUT4
+//! Output for Gear Down signal to solenoid.
+#define GEAR_DOWN			OUT5
+//! Output for Shift cut
+#define SHIFT_CUT			OUT6
+//#define					OUT7
+//#define					OUT8
+
 
 //External interrupts
 //none

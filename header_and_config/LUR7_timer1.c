@@ -31,7 +31,7 @@
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  * 
- * \defgroup LUR7_timer1 Timer 1
+ * \defgroup LUR7_timer1 Shared - Timer 1
  * Timer 1 generates a high precision PWM signal on \ref OUT1 at a frequency of
  * 400Hz. The dutycycle can be set to any value from 0 to 20000.
  *
