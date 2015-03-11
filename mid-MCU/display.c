@@ -1,5 +1,5 @@
 /*
- * midMCU.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * display.c - Controls the LED display of the LUR7
  * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*! \file display.c
+ * \ref display controls the LED display used in the LUR7.
+ *
+ * All code is released under the GPLv3 license.
+ *
+ * \see \ref display.h
+ * \see \ref main.c
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ *
+ * \defgroup display Display Control
+ * \ref display.c contains functions controling the LED display of the LUR7.
+ *
+ * \see \ref display.c
+ * \see \ref display.h
+ * \see \ref main
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ */
+
 #include "../header_and_config/LUR7.h"
 #include "display.h"
 #include "shiftregister.h"
 
+//! Array of bit patterns for numbers on seven segment display.
 static const uint8_t sev_seg[11] = {
 	// a b c d e f g dp
 	0b11111100, //0
@@ -35,38 +58,60 @@ static const uint8_t sev_seg[11] = {
 	0b00000000  //blank
 };
 
+//! Engine revs
 static volatile uint16_t revs = 8000;
+//! Current gear
 static volatile uint8_t  gear = 0;
+//! Current speed
 static volatile uint16_t speed = 88;
+//! Logging number
 static volatile uint16_t log_id = 0;
+//! Water temperature
 static volatile uint16_t water_temp = 20;
+//! Oil temperature
 static volatile uint16_t oil_temp = 30;
+//! BCD representation of number to display.
 static volatile uint8_t  bcd_vect[3] = {0,0,0};
 
+//! Set new RPM value.
 void update_RPM(uint16_t new_RPM) {
 	revs = new_RPM;
 }
 
+//! Set new current gear.
 void update_gear(uint8_t new_gear) {
 	gear = new_gear;
 }
 
+//! Set new current speed.
 void update_speed(uint16_t new_speed) {
 	speed = new_speed;
 }
 
+//! Set new loggin number.
 void update_logid(uint16_t new_logid) {
 	log_id = new_logid;
 }
 
+//! Set new water temperature.
 void update_watertemp(uint16_t new_watertemp) {
 	water_temp = new_watertemp;
 }
 
+//! Set new oil temperature.
 void update_oiltemp(uint16_t new_oiltemp) {
 	oil_temp = new_oiltemp;
 }
 
+//! Get the current gear.
+uint8_t get_current_gear() {
+	return gear;
+}
+
+//! Calculate the number of LEDs to light for the rev-bar.
+/*!
+ * The Rev-Bar is lit up in a linear manner proportional to the engine revs.
+ */
 uint8_t revs_to_bar() {
 	uint8_t return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * REV_BAR_MAX + REV_BAR_MIN;
 	if (return_val < REV_BAR_MIN) {
@@ -77,60 +122,83 @@ uint8_t revs_to_bar() {
 	return return_val;
 }
 
+//! Determine the number of LEDs to light for the temperature bar.
+/*!
+ * The Temperature Bar is lit up in a alinear manner. The intervalls are chosen
+ * to give good resolution in the interesting regions, while maintaining a wide
+ * span. \ref TEMP_LVL_1 to \ref TEMP_LVL_10 determine the steps.
+ */
 uint8_t temp_to_bar() {
-	if (water_temp < TEMP_LVL_1) {
+	if (water_temp < TEMP_LVL_1) { // 20
 		return 0;
-	} else if (water_temp < TEMP_LVL_2) {
+	} else if (water_temp < TEMP_LVL_2) { // 40
 		return 1;
-	} else if (water_temp < TEMP_LVL_3) {
+	} else if (water_temp < TEMP_LVL_3) { // 50
 		return 2;
-	} else if (water_temp < TEMP_LVL_4) {
+	} else if (water_temp < TEMP_LVL_4) { // 60
 		return 3;
-	} else if (water_temp < TEMP_LVL_5) {
+	} else if (water_temp < TEMP_LVL_5) { // 70
 		return 4;
-	} else if (water_temp < TEMP_LVL_6) {
+	} else if (water_temp < TEMP_LVL_6) { // 80
 		return 5;
-	} else if (water_temp < TEMP_LVL_7) {
+	} else if (water_temp < TEMP_LVL_7) { // 85
 		return 6;
-	} else if (water_temp < TEMP_LVL_8) {
+	} else if (water_temp < TEMP_LVL_8) { // 90
 		return 7;
-	} else if (water_temp < TEMP_LVL_9) {
+	} else if (water_temp < TEMP_LVL_9) { // 95
 		return 8;
-	} else if (water_temp < TEMP_LVL_10) {
+	} else if (water_temp < TEMP_LVL_10) { // 100
 		return 9;
 	}
 	return 10;
-	
 }
 
+//! Convert binary to BCD
+/*!
+ * Calculates the Binary Coded Decimal representation of \p value.
+ * 
+ * \param value number to convert.
+ */
 void bcd_convert(uint16_t value) {
-	if (value >= 100) {
-		bcd_vect[0] = 0;
-		while (value >= 100) {
-			value -= 100;
-			bcd_vect[0]++;
+	if (value >= 100) { // if larger than 100
+		bcd_vect[0] = 0; // reset to 0
+		while (value >= 100) { // while larger than 99
+			value -= 100; // reduce by 100
+			bcd_vect[0]++; // count the hundreds
 		}
 	} else {
-		bcd_vect[0] = 10;
+		bcd_vect[0] = 10; // clear digit
 	}
-
-	if (value >= 10) {
-		bcd_vect[1] = 0;
-		while (value >= 10) {
-			value -= 10;
-			bcd_vect[1]++;
+	
+	if (value >= 10) { // if larger than 10
+		bcd_vect[1] = 0; // reset to 0
+		while (value >= 10) { // while larger than 9
+			value -= 10; // reduce by 10
+			bcd_vect[1]++; //count the tens
 		}
 	} else {
-		bcd_vect[1] = 10;
+		if (bcd_vect[0] == 10) { // if first digit is clear
+			bcd_vect[1] = 10; // clear digit
+		} else {
+			bcd_vect[1] = 0; // else set to 0
+		}
 	}
-
-	bcd_vect[2] = 0;
-	while (value >= 1) {
-		value -= 1;
-		bcd_vect[2]++;
+	
+	bcd_vect[2] = 0; // reset to 0
+	while (value >= 1) { // while larger than 0
+		value -= 1; // reduce by 1
+		bcd_vect[2]++; // count the ones
 	}
 }
 
+//! Get seven segment representation of number
+/*!
+ * For binary numbers [0, 9] this function returns the seven segment 
+ * representation of the number with an optional decimal point.
+ * 
+ * \param binary number to convert.
+ * \param dp decimal point.
+ */
 uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 	if (binary >= 0 && binary <= 10) {
 		if (!dp) {
@@ -142,6 +210,10 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 	return sev_seg[10];
 }
 
+//! Updates the display
+/*!
+ * Re-populates the shift registers with the latest information available.
+ */
 void update_display(void) {
 	shift_byte(bin_to_7seg(gear, OFF));
 

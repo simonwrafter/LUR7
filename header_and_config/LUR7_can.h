@@ -1,5 +1,5 @@
 /*
- * can_lib.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * LUR7_can.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -118,7 +118,7 @@ extern const uint32_t CAN_DTA_ID; //!< The base ID of CAN messages from the DTA
 extern const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 extern const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
 
-// +  Front-MCU
+// +  Front MCU
 // +  +  Brake Light
 extern const uint32_t CAN_BRAKE_LIGHT_ID; //!< The ID of CAN messages for Brake Light on/off
 extern const uint32_t CAN_BRAKE_LIGHT_MASK; //!< Mask for the Brake Light messages
@@ -130,7 +130,7 @@ extern const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front sus
 extern const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering and braking
 extern const uint8_t CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
 
-// +  Mid-MCU
+// +  Middle MCU
 // +  +  Gear and Clutch
 extern const uint32_t CAN_GEAR_ID; //!< The ID for messages carrying Gear Change information
 extern const uint32_t CAN_CLUTCH_ID; //!< The ID for messages carrying Clutch Position information
@@ -141,6 +141,12 @@ extern const uint8_t CAN_GEAR_CLUTCH_DLC; //!< DLC of Gear Change and Clutch Pos
 extern const uint32_t CAN_LOG_ID; //!< The ID of CAN messages for starting/stoping logging
 extern const uint32_t CAN_LOG_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 extern const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
+
+// +  Rear MCU
+// +  +  Logging
+extern const uint32_t CAN_REAR_LOG_SPEED_ID; //!< Message ID for front wheel speeds
+extern const uint32_t CAN_REAR_LOG_SUSPENSION_ID; //!< Message ID for front suspension
+extern const uint8_t CAN_REAR_LOG_DLC; //!< DLC of messages from front logging node
 
 // Pre-defined messages
 extern const uint64_t CAN_MSG_NONE; //!< No message
@@ -154,7 +160,7 @@ extern const uint16_t CAN_MSG_BRAKE_OFF; //!< Message for Brake Light OFF
 // +  +  Gear and Clutch
 extern const uint16_t CAN_MSG_GEAR_UP; //!< Message for Gear Change UP
 extern const uint16_t CAN_MSG_GEAR_DOWN; //!< Message for Gear Change DOWN
-extern const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change to NEUTRAL
+extern const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change DOWN
 
 // +  +  Logging
 extern const uint8_t CAN_MSG_LOG_START; //!< Start sending log data.
@@ -167,6 +173,7 @@ extern const uint8_t CAN_MSG_LOG_STOP; //!< Stop sending log data.
 void can_init(void);
 uint8_t can_setup_rx(uint32_t mob_id, uint32_t mob_msk, uint8_t mob_dlc);
 uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc);
+uint8_t can_free_rx(uint8_t mob);
 void can_enable(void);
 void can_disable(void);
 

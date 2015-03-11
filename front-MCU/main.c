@@ -190,7 +190,7 @@ void pcISR_in9(void) {}
  * | 9, 19, 29, .. 99 | (x) sent if needed |                 |                |                        |
  * 
  * Commands to turn the brake light on or off are sent should the brake pressure
- * exceed the level defined in \ref BRAKES_ON. Handling the light state in the 
+ * exceed the level defined in BRAKES_ON. Handling the light state in the 
  * front MCU off-loads the rear MCU and reduces the amount of traffic on the CAN
  * bus. The lag from using the timer interrupts to control the brake light is a
  * maximum 10 ms, this is a small delay and concidered acceptable.
@@ -252,6 +252,8 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			pc_int_off(WHEEL_R); //! <li> disable interrupts on \ref WHEEL_R. </ol>
 		} //! </ul>
 	}
+	
+	
 }
 /*!
  * When transmission is complete this function is executed. Upon TXOK of brake 

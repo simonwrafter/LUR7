@@ -77,7 +77,8 @@
 //! Output for Shift cut
 #define SHIFT_CUT			OUT6
 //#define					OUT7
-//#define					OUT8
+//! Output to control availability of ground for sensors.
+#define GROUND_CONTROL			OUT8
 
 
 //External interrupts

@@ -1,5 +1,5 @@
 /*
- * can_lib.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * LUR7_can.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -92,6 +92,13 @@ const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting
 const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
+// +  Rear MCU
+// +  +  Logging
+const uint32_t CAN_REAR_LOG_SPEED_ID = 0x4500; //!< Message ID for front wheel speeds
+const uint32_t CAN_REAR_LOG_SUSPENSION_ID = 0x4501; //!< Message ID for front suspension
+const uint8_t CAN_REAR_LOG_DLC = 4; //!< DLC of messages from front logging node
+
+
 // Pre-defined messages
 const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
 
@@ -102,9 +109,9 @@ const uint16_t CAN_MSG_BRAKE_OFF = 0x20; //!< Message for Brake Light OFF
 
 // +  Mid-MCU
 // +  +  Gear and Clutch
-const uint16_t CAN_MSG_GEAR_UP = 0x0101; //!< Message for Gear Change UP
-const uint16_t CAN_MSG_GEAR_DOWN = 0x0202; //!< Message for Gear Change DOWN
-const uint16_t CAN_MSG_GEAR_NEUTRAL = 0x0404; //!< Message for Gear Change to NEUTRAL
+const uint16_t CAN_MSG_GEAR_UP = 0xF11F; //!< Message for Gear Change UP
+const uint16_t CAN_MSG_GEAR_DOWN = 0xF44F; //!< Message for Gear Change DOWN
+const uint16_t CAN_MSG_GEAR_NEUTRAL = 0xAA00; //!< Message for Gear Change DOWN
 
 // +  +  Logging
 const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.
@@ -236,6 +243,34 @@ void can_enable(void) {
  */
 void can_disable(void) {
 	CANGCON &= ~(1 << ENASTB); //disable CAN
+}
+
+//! Deconfigure reception of messages on \p mob.
+/*!
+ * Should a MOb configured for RX need to be freed, use this function.
+ * 
+ * \param mob Message Object to clear.
+ */
+uint8_t can_free_rx(uint8_t mob) {
+	if (mob >= NBR_OF_MOB) {
+		return 0; // not a mob, error
+	}
+	CANPAGE = mob << MOBNB0;
+	
+	//reset everything to zero
+	CANCDMOB = 0x00;
+	CANSTMOB = 0x00;
+	
+	CANIDT4 = 0x00;
+	CANIDT3 = 0x00;
+	CANIDT2 = 0x00;
+	CANIDT1 = 0x00;
+	CANIDM4 = 0x00;
+	CANIDM3 = 0x00;
+	CANIDM2 = 0x00;
+	CANIDM1 = 0x00;
+	
+	return 1;
 }
 
 /*******************************************************************************
