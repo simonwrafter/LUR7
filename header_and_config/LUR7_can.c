@@ -69,15 +69,11 @@ const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number D
 const uint8_t CAN_DTA_DLC = 8; //!< DLC of DTA messages
 
 // +  Front-MCU
-// +  +  Brake Light
-const uint32_t CAN_BRAKE_LIGHT_ID = 0x00001800; //!< The ID of CAN messages for Brake Light on/off
-const uint32_t CAN_BRAKE_LIGHT_MASK = 0xFFFFFFFC; //!< Mask for the Brake Light messages
-const uint8_t CAN_BRAKE_LIGHT_DLC = 1; //!< DLC of Brake Pressure messages
-
 // +  +  Logging
 const uint32_t CAN_FRONT_LOG_SPEED_ID = 0x00004000; //!< Message ID for front wheel speeds
 const uint32_t CAN_FRONT_LOG_SUSPENSION_ID = 0x00004001; //!< Message ID for front suspension
 const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID = 0x00004002; //!< Message ID for steering and braking
+const uint32_t CAN_FRONT_LOG_BRAKE_MASK = 0xFFFFFFFF; //!< Mask for the Brake log messages
 const uint8_t CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging node
 
 // +  Mid-MCU
@@ -248,7 +244,7 @@ void can_disable(void) {
 //! Deconfigure reception of messages on \p mob.
 /*!
  * Should a MOb configured for RX need to be freed, use this function.
- * 
+ *
  * \param mob Message Object to clear.
  */
 uint8_t can_free_rx(uint8_t mob) {
@@ -256,11 +252,11 @@ uint8_t can_free_rx(uint8_t mob) {
 		return 0; // not a mob, error
 	}
 	CANPAGE = mob << MOBNB0;
-	
+
 	//reset everything to zero
 	CANCDMOB = 0x00;
 	CANSTMOB = 0x00;
-	
+
 	CANIDT4 = 0x00;
 	CANIDT3 = 0x00;
 	CANIDT2 = 0x00;
@@ -269,7 +265,7 @@ uint8_t can_free_rx(uint8_t mob) {
 	CANIDM3 = 0x00;
 	CANIDM2 = 0x00;
 	CANIDM1 = 0x00;
-	
+
 	return 1;
 }
 

@@ -1,7 +1,7 @@
 /*
  * main.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -17,7 +17,7 @@
  */
 
 /*! \file main.c
- * \ref main is the Entry Point for execution of code on the rear MCU used in 
+ * \ref main is the Entry Point for execution of code on the rear MCU used in
  * the LUR7.
  *
  * All code is released under the GPLv3 license.
@@ -54,9 +54,6 @@ volatile uint8_t failsafe = FALSE;
 //! Counter to put system is in failsafe mode.
 volatile uint8_t failsafe_counter = 0;
 
-//! Variable containing information on whether logging is active or not.
-volatile uint8_t logging = FALSE;
-
 //! Counter for pulses from left wheel speed sensor.
 volatile uint16_t wheel_count_l = 0;
 //! Counter for pulses from right wheel speed sensor.
@@ -72,21 +69,19 @@ volatile uint16_t susp_r_atomic = 0;
 
 //! The MOb configured for RX of gear and clutch instructions.
 volatile uint8_t gc_MOb;
-//! The MOb configured for RX of brake light instructions.
-volatile uint8_t bl_MOb;
-//! The MOb configured for RX of logging start/stop instructions.
-volatile uint8_t log_MOb;
+//! The MOb configured for RX of brake pressure.
+volatile uint8_t brk_MOb;
 
 //! Main function.
 /*!
  * The entry point of the execution of code for the rear MCU. All hardware that
  * is to be used is configured and initialised and the remaining peripherals
  * powered off.
- * 
+ *
  * To the largest extent possible tasks are handled through interrupts. When
- * this is not possible the task may be performed in the loop of the 
+ * this is not possible the task may be performed in the loop of the
  * \ref main function.
- * 
+ *
  * The structure of main is:
  */
 int main(void) {
@@ -102,22 +97,21 @@ int main(void) {
 	//! </ol>
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	//power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off. 
+	//power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
-	
+
 	//! <li> Setup CAN RX <ol>
 	gc_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_MASK, CAN_GEAR_CLUTCH_DLC); //! <li> Reception of gear and clutch instructions.
-	bl_MOb = can_setup_rx(CAN_BRAKE_LIGHT_ID, CAN_BRAKE_LIGHT_MASK, CAN_BRAKE_LIGHT_DLC); //! <li> Reception of brake light instructions.
-	log_MOb = can_setup_rx(CAN_LOG_ID, CAN_LOG_MASK, CAN_LOG_DLC); //! <li> Reception of logging instructions.
+	brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
 	//! </ol>
-	
+
 	//! <li> Enable system <ol>
 	set_output(GROUND_CONTROL, GND); //! <li> connect sensors to ground.
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
 	//! </ol>
 	//! </ul>
-	
+
 	//! <li> LOOP <ul>
 	while (1) {
 		//! <li> Always do: <ol>
@@ -134,20 +128,17 @@ int main(void) {
 			gear_neutral_flag = FALSE; //! <li> clear gear_down_flag.
 		} //! </ol>
 		//! </ol>
-		
-		//! <li> If logging, do: <ol>
-		if (logging) {
-			susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
-			ATOMIC_BLOCK(ATOMIC_FORCEON) {
-				susp_l_atomic = susp_l; //! <li> atomic copy of left suspension value.
-			} // end ATOMIC_BLOCK
-			
-			susp_r = adc_get(SUSPENSION_R); //! <li>  update right suspension value.
-			ATOMIC_BLOCK(ATOMIC_FORCEON) {
-				susp_r_atomic = susp_r; //! <li> atomic copy of right suspension value.
-			} // end ATOMIC_BLOCK
-		} //! </ol>
-		
+
+		susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
+		ATOMIC_BLOCK(ATOMIC_FORCEON) {
+			susp_l_atomic = susp_l; //! <li> atomic copy of left suspension value.
+		} // end ATOMIC_BLOCK
+
+		susp_r = adc_get(SUSPENSION_R); //! <li>  update right suspension value.
+		ATOMIC_BLOCK(ATOMIC_FORCEON) {
+			susp_r_atomic = susp_r; //! <li> atomic copy of right suspension value.
+		} // end ATOMIC_BLOCK
+
 		//! <li> If failsafe, do: <ul>
 		if (failsafe) {
 			//! <li> Brake control <ol>
@@ -163,7 +154,7 @@ int main(void) {
 			//! </ol>
 		} //! </ul>
 	} //! </ul>
-	
+
 	//! </ul>
 	return 0;
 }
@@ -214,51 +205,49 @@ void pcISR_in9(void) {}
 /*!
  * In order to schedule tasks or perform them with a well defined time delta,
  * the 100 Hz interrupt generator of LUR7_timer0 is used.
- * 
- * \note To ensure that no corrupted values are sent during logging, only the 
- * atomically written copies of all variables are used.
- * 
- * All tasks scheduled use the CAN bus to transmit information. To not have all 
- * messages sent out simultaneously they are spread out across different 
+ *
+ * \note To ensure that no corrupted values are sent, only atomically written
+ * copies of all variables are used.
+ *
+ * All tasks scheduled use the CAN bus to transmit information. To not have all
+ * messages sent out simultaneously they are spread out across different
  * occurrences of the interrupt using \p interrupt_nbr to identify when to execute.
  * The following table shows how tasks are spread out.
  *
  * | \p interrupt_nbr | Wheel speed log | suspension log |
  * | :--------------: | :-------------: | :------------: |
- * | 0, 10, 20, .. 90 | (x) if logging  |                |
+ * | 0, 10, 20, .. 90 | x               |                |
  * | 1, 11, 21, .. 91 |                 |                |
  * | 2, 12, 22, .. 92 |                 |                |
- * | 3, 13, 23, .. 93 |                 | (x) if logging |
+ * | 3, 13, 23, .. 93 |                 | x              |
  * | 4, 14, 24, .. 94 |                 |                |
  * | 5, 15, 25, .. 95 |                 |                |
  * | 6, 16, 26, .. 96 |                 |                |
  * | 7, 17, 27, .. 97 |                 |                |
- * | 8, 18, 28, .. 98 |                 | (x) if logging |
+ * | 8, 18, 28, .. 98 |                 | x              |
  * | 9, 19, 29, .. 99 |                 |                |
- * 
- * Packages containing logging data are only sent if logging is active.
- * 
+ *
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {
 	if (++failsafe_counter == 50) {
 		failsafe = TRUE;
 		logging = FALSE;
-		can_free_rx(log_MOb);
-		can_free_rx(bl_MOb);
+		can_free_rx(brk_MOb);
 		can_free_rx(gc_MOb);
 		can_disable();
 	}
-	
-	// if logging is active and 10Hz interrupt
-	if (logging && !(interrupt_nbr % 10)) { //10 Hz
+
+	// 10 Hz (avoid other data being sent)
+	if ((interrupt_nbr % 10) == 0) {
 		uint32_t holder = ((uint32_t) wheel_count_l << 16) | wheel_count_r; // build data to send
 		can_setup_tx(CAN_REAR_LOG_SPEED_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
 		wheel_count_l = 0; // reset
 		wheel_count_r = 0; // reset
 	}
-	
-	if (logging && !((interrupt_nbr + 2) % 5)) { //20 Hz (avoid other data being sent)
+
+	//20 Hz (avoid other data being sent)
+	if (((interrupt_nbr + 2) % 5) == 0) {
 		uint32_t holder = ((uint32_t) susp_l_atomic << 16) | susp_r_atomic; // build data
 		can_setup_tx(CAN_REAR_LOG_SPEED_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
 	}
@@ -266,27 +255,15 @@ void timer0_isr_100Hz(uint8_t interrupt_nbr) {
 
 //! CAN message receiver function.
 /*!
- * The Rear MCU listens to messages from the middle and front MCUs, the 
- * information extracted from these packages controls the brake light and gear 
+ * The Rear MCU listens to messages from the middle and front MCUs, the
+ * information extracted from these packages controls the brake light and gear
  * changing / clutch.
- * 
+ *
  * The messages are read as follows:
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
-	if (mob == log_MOb) { //! <li> \ref log_MOb receives a message <ul>
-		if (*data == CAN_MSG_LOG_START) { //! <li> message is CAN_MSG_LOG_START <ol>
-			logging = TRUE; //! <li> set \ref logging to TRUE.
-			pc_int_on(WHEEL_L); //! <li> enable interrupts on \ref WHEEL_L.
-			pc_int_on(WHEEL_R); //! <li> enable interrupts on \ref WHEEL_R.
-			//! </ol>
-		} else if (*data == CAN_MSG_LOG_STOP) { //! <li> message is CAN_MSG_LOG_STOP <ol>
-			logging = FALSE; //! <li> set \ref logging to FALSE.
-			pc_int_off(WHEEL_L); //! <li> disable interrupts on \ref WHEEL_L
-			pc_int_off(WHEEL_R); //! <li> disable interrupts on \ref WHEEL_R.
-		} //! </ol>
-	} //! </ul>
-	
+
 	if (mob == gc_MOb) { //! <li> \ref gc_MOb receives a message <ul>
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
 			if (*data == CAN_MSG_GEAR_UP) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
@@ -302,19 +279,16 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			failsafe_counter = 0; //! <li> reset \ref failsafe_counter
 		} //! </ul>
 	} //! </ul>
-	
-	if (mob == log_MOb) { //! <li> \ref log_MOb receives a message <ul>
-		if (*data == CAN_MSG_LOG_START) { //! <li> message is CAN_MSG_LOG_START <ol>
-			logging = TRUE; //! <li> set \ref logging to TRUE.
-			pc_int_on(WHEEL_L); //! <li> enable interrupts on \ref WHEEL_L.
-			pc_int_on(WHEEL_R); //! <li> enable interrupts on \ref WHEEL_R.
-			//! </ol>
-		} else if (*data == CAN_MSG_LOG_STOP) { //! <li> message is CAN_MSG_LOG_STOP <ol>
-			logging = FALSE; //! <li> set \ref logging to FALSE.
-			pc_int_off(WHEEL_L); //! <li> disable interrupts on \ref WHEEL_L.
-			pc_int_off(WHEEL_R); //! <li> disable interrupts on \ref WHEEL_R.
-		} //! </ol>
+
+	if (mob == brk_MOb) { //! <li> \ref brk_MOb receives a message <ul>
+		uint16_t brake_p = ((uint16_t) data[2] << 8) | data[3];
+		if (brake_p > BRAKE_ON) {
+			set_output(BRAKE_LIGHT, GND);
+		} else if (brake_p < BRAKE_OFF) {
+			set_output(BRAKE_LIGHT, TRI);
+		}
 	} //! </ul>
+
 //! </ul>
 }
 

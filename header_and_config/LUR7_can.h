@@ -119,15 +119,11 @@ extern const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs
 extern const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
 
 // +  Front MCU
-// +  +  Brake Light
-extern const uint32_t CAN_BRAKE_LIGHT_ID; //!< The ID of CAN messages for Brake Light on/off
-extern const uint32_t CAN_BRAKE_LIGHT_MASK; //!< Mask for the Brake Light messages
-extern const uint8_t CAN_BRAKE_LIGHT_DLC; //!< DLC of Brake Pressure messages
-
 // +  +  Logging
 extern const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
 extern const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering and braking
+extern const uint32_t CAN_FRONT_LOG_BRAKE_MASK; //!< Mask for the Brake log messages
 extern const uint8_t CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
 
 // +  Middle MCU

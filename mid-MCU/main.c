@@ -17,7 +17,7 @@
  */
 
 /*! \file main.c
- * \ref main is the Entry Point for execution of code on the mid MCU used in 
+ * \ref main is the Entry Point for execution of code on the mid MCU used in
  * the LUR7.
  *
  * All code is released under the GPLv3 license.
@@ -30,7 +30,7 @@
  *
  * \defgroup main Main source file
  * \ref main.c is the top source code file for the mid LUR7 MCU.
- * 
+ *
  * \todo failsafe / manual gear shift
  *
  * \see \ref main.c
@@ -53,18 +53,20 @@ volatile uint8_t new_info = TRUE;
 //! Clutch position sensor value.
 volatile uint8_t clutch_pos = 0;
 //! Atomically written copy of clutch position sensor value.
-volatile uint8_t clutch_pos_atomic = 0;
+volatile uint8_t clutch_pos_atomic[CLUTCH_ATOMIC_LENGTH];
+//! Clutch average counter.
+volatile uint8_t clutch_pos_counter = 0;
 
 //! Main function.
 /*!
  * The entry point of the execution of code for the middle MCU. All hardware that
  * is to be used is configured and initialised and the remaining peripherals
  * powered off.
- * 
+ *
  * To the largest extent possible tasks are handled through interrupts. When
- * this is not possible the task may be performed in the loop of the 
+ * this is not possible the task may be performed in the loop of the
  * \ref main function.
- * 
+ *
  * The structure of main is:
  */
 int main(void) {
@@ -79,13 +81,13 @@ int main(void) {
 	//! </ol>
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off. 
+	power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
-	
+
 	//! <li> Setup CAN RX <ol>
 	CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); //! <li> Reception of DTA packages, ID 0x2000-3.
 	//! </ol>
-	
+
 	//! <li> Input interrupts <ol>
 	ext_int_on(IO_GEAR_UP, 1, 1); //! <li> Gear up, rising flank trigger external interrupt
 	ext_int_on(IO_GEAR_DOWN, 1, 1); //! <li> Gear down, rising flank trigger external interrupt
@@ -96,13 +98,14 @@ int main(void) {
 	can_enable(); //! <li> enable CAN.
 	//! </ol>
 	//! </ul>
-	
+
 	//! <li> LOOP <ul>
 	while (1) {
 		//! <li> Always do: <ol>
 		clutch_pos = adc_get(IO_CLUTCH); //! <li> get clutch paddle position
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_atomic = clutch_pos; //! <li> copy value to atomic variable
+			clutch_pos_atomic[clutch_pos_counter++] = clutch_pos; //! <li> copy value to atomic variable
+			clutch_pos_counter %= CLUTCH_ATOMIC_LENGTH;
 		} // end ATOMIC_BLOCK
 		//! </ol>
 		//! <li> If new information for panel <ol>
@@ -119,12 +122,12 @@ int main(void) {
 /*!
  * In order to schedule tasks or perform them with a well defined time delta,
  * the 100 Hz interrupt generator of LUR7_timer0 is used.
- * 
- * \note To ensure that no corrupted values are sent, only atomically written 
+ *
+ * \note To ensure that no corrupted values are sent, only atomically written
  * copies of all variables are used.
- * 
- * All tasks scheduled use the CAN bus to transmit information. To not have all 
- * messages sent out simultaneously they are spread out across different 
+ *
+ * All tasks scheduled use the CAN bus to transmit information. To not have all
+ * messages sent out simultaneously they are spread out across different
  * occurrences of the interrupt using \p interrupt_nbr to identify when to execute.
  * The following table shows how tasks are spread out.
  *
@@ -140,16 +143,21 @@ int main(void) {
  * | 7, 17, 27, .. 97 | x               |
  * | 8, 18, 28, .. 98 | x               |
  * | 9, 19, 29, .. 99 | x               |
- * 
+ *
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {
-	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_DLC);
+	uint16_t clutch_average = 0;
+	for (uint16_t i = 0; i<CLUTCH_ATOMIC_LENGTH; i++) {
+		clutch_average += clutch_pos_atomic[i];
+	}
+	clutch_average /= CLUTCH_ATOMIC_LENGTH;
+	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_average, CAN_GEAR_CLUTCH_DLC);
 }
 
 //! Gear Up interrupt handler
 /*!
- * When the paddle for changing gears up is depressed, this ISR is executed 
+ * When the paddle for changing gears up is depressed, this ISR is executed
  * sending a message to the rear MCU to do the shifting.
  */
 ISR (INT_GEAR_UP) { //IN9
@@ -157,7 +165,7 @@ ISR (INT_GEAR_UP) { //IN9
 }
 //! Gear Down interrupt handler
 /*!
- * When the paddle for changing gears down is depressed, this ISR is executed 
+ * When the paddle for changing gears down is depressed, this ISR is executed
  * sending a message to the rear MCU to do the shifting.
  */
 ISR (INT_GEAR_DOWN) { //IN8
@@ -166,8 +174,8 @@ ISR (INT_GEAR_DOWN) { //IN8
 //! Neutral Gear interrupt handler
 /*!
  * When the button finding the neutral gear is pressed, this ISR is executed
- * sending a message to the rear MCU to do the shifting. The message also 
- * contains information on current gear, allowing the rear MCU to behave 
+ * sending a message to the rear MCU to do the shifting. The message also
+ * contains information on current gear, allowing the rear MCU to behave
  * accordingly.
  */
 ISR (INT_GEAR_NEUTRAL) { //IN5
@@ -215,10 +223,10 @@ void pcISR_in9(void) {}
 /*!
  * The Mid MCU listens to messages from the DTA, the information extracted from
  * these packages are presented to the driver on the LED panel.
- * 
+ *
  * The messages are read as follows:
  */
-void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) { 
+void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
 	uint8_t id_lsb = ((uint8_t *) &id)[3]; //! <li> extract message specifier.
 	if (mob == CAN_DTA_MOb) { //! <li> if received from DTA: <ul>

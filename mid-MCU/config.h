@@ -1,7 +1,7 @@
 /*
  * config.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -29,7 +29,7 @@
  *
  * \defgroup config mid MCU - Configuration File
  * The mid MCU has several inputs for measuring the behaviour of the LUR7. In
- * \ref config.h the setup of the MCU is defined. 
+ * \ref config.h the setup of the MCU is defined.
  *
  * \see \ref config.h
  * \see \ref main
@@ -42,6 +42,7 @@
 #define _CONFIG_H_
 
 //Constants
+#define CLUTCH_ATOMIC_LENGTH	10
 
 //Inputs
 //unused					IN1
