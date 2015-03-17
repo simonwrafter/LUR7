@@ -49,10 +49,14 @@ volatile uint8_t gear_down_flag = FALSE;
 //! Flag to set if signal to change to neutral is received
 volatile uint8_t gear_neutral_flag = FALSE;
 
-//! Whether the system is in failsafe mode.
-volatile uint8_t failsafe = FALSE;
-//! Counter to put system is in failsafe mode.
-volatile uint8_t failsafe_counter = 0;
+//! Whether the front MCU is in failsafe mode.
+volatile uint8_t failsafe_front = FALSE;
+//! Counter to put front MCU is in failsafe mode.
+volatile uint8_t failsafe_front_counter = 0;
+//! Whether the front MCU is in failsafe mode.
+volatile uint8_t failsafe_mid = FALSE;
+//! Counter to put front MCU is in failsafe mode.
+volatile uint8_t failsafe_mid_counter = 0;
 
 //! Counter for pulses from left wheel speed sensor.
 volatile uint16_t wheel_count_l = 0;
@@ -97,7 +101,6 @@ int main(void) {
 	//! </ol>
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	//power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
 
 	//! <li> Setup CAN RX <ol>
@@ -106,7 +109,7 @@ int main(void) {
 	//! </ol>
 
 	//! <li> Enable system <ol>
-	set_output(GROUND_CONTROL, GND); //! <li> connect sensors to ground.
+	set_output(GND_CONTROL, GND); //! <li> connect sensors to ground.
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
 	//! </ol>
@@ -140,21 +143,20 @@ int main(void) {
 		} // end ATOMIC_BLOCK
 
 		//! <li> If failsafe, do: <ul>
-		if (failsafe) {
+		if (failsafe_front) {
 			//! <li> Brake control <ol>
 			uint16_t brake = adc_get(BAK_IN_BRAKE); //! <li> update the brake pressure value.
-			if (brake > BRAKES_ON) { //! <li>  check if brakes are being applied
-				set_output(BRAKE_LIGHT, GND); //! <li>  turn light on
-			} else if (brake < BRAKES_OFF) { //! <li>  check if brakes are not being applied
-				set_output(BRAKE_LIGHT, TRI); //! <li> turn light off
-			} //! </ol>
+			brake_light(brake); //! <li> set brake light on/off.
+		} //! </ul>
+		
+		//! <li> If failsafe, do: <ul>
+		if (failsafe_mid) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.
 			clutch_set(clutch);//! <li> set clutch pwm.
 			//! </ol>
 		} //! </ul>
 	} //! </ul>
-
 	//! </ul>
 	return 0;
 }
@@ -230,12 +232,13 @@ void pcISR_in9(void) {}
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer0_isr_100Hz(uint8_t interrupt_nbr) {
-	if (++failsafe_counter == 50) {
-		failsafe = TRUE;
-		logging = FALSE;
+	if (++failsafe_front_counter == 100) {
+		failsafe_front= TRUE;
 		can_free_rx(brk_MOb);
+	}
+	if (++failsafe_mid_counter == 100) {
+		failsafe_mid = TRUE;
 		can_free_rx(gc_MOb);
-		can_disable();
 	}
 
 	// 10 Hz (avoid other data being sent)
@@ -263,7 +266,6 @@ void timer0_isr_100Hz(uint8_t interrupt_nbr) {
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
-
 	if (mob == gc_MOb) { //! <li> \ref gc_MOb receives a message <ul>
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
 			if (*data == CAN_MSG_GEAR_UP) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
@@ -276,19 +278,15 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		}
 		if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
 			clutch_set(*data); //! <li> set clutch pwm.
-			failsafe_counter = 0; //! <li> reset \ref failsafe_counter
+			failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		} //! </ul>
 	} //! </ul>
 
 	if (mob == brk_MOb) { //! <li> \ref brk_MOb receives a message <ul>
-		uint16_t brake_p = ((uint16_t) data[2] << 8) | data[3];
-		if (brake_p > BRAKE_ON) {
-			set_output(BRAKE_LIGHT, GND);
-		} else if (brake_p < BRAKE_OFF) {
-			set_output(BRAKE_LIGHT, TRI);
-		}
+		failsafe_front_counter == 0; //! <li> reset \ref failsafe_front_counter
+		uint16_t brake_p = ((uint16_t) data[2] << 8) | data[3]; //! <li> reconstruct brake pressure
+		brake_light(brake_p); //! <li> control brake light
 	} //! </ul>
-
 //! </ul>
 }
 

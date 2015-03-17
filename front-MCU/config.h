@@ -61,7 +61,7 @@
 #define SUSPENSION_L	ADC_IN9
 
 //Outputs
-//none
+#define GND_CONTROL			OUT8
 
 //External interrupts
 //none
