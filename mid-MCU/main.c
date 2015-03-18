@@ -179,7 +179,7 @@ ISR (INT_GEAR_DOWN) { //IN8
  * accordingly.
  */
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	uint16_t holder = CAN_MSG_GEAR_NEUTRAL + get_current_gear();
+	uint16_t holder = CAN_MSG_GEAR_NEUTRAL;
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &holder, CAN_GEAR_CLUTCH_DLC);
 }
 
@@ -243,7 +243,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				update_oiltemp((data[3] << 8) | data[2]);  //! <li> extract oil temperature [C].
 				break; //! </ul>
 			case 3 : //! <li> ID = 0x2003. <ul>
-				update_gear(data[1]);  //! <li> extract current gear.
+				update_gear(data[0]);  //! <li> extract current gear.
 				break; //! </ul>
 			default :
 				break;

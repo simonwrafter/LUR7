@@ -114,9 +114,14 @@
 
 // Addresses, Masks and DLCs
 // +  DTA
+// +  +  General (0x2000 - 0x2003)
 extern const uint32_t CAN_DTA_ID; //!< The base ID of CAN messages from the DTA
 extern const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 extern const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
+
+// +  +  Gear (0x2003)
+extern const uint32_t CAN_DTA_GEAR_ID; //!< The ID of CAN messages containging gear from the DTA
+extern const uint32_t CAN_DTA_GEAR_MASK; //!< Mask for the DTA message containging current gear
 
 // +  Front MCU
 // +  +  Logging

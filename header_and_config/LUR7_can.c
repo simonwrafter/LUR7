@@ -64,9 +64,14 @@
  ******************************************************************************/
 // Addresses, Masks and DLCs
 // +  DTA
+// +  +  General (0x2000 - 0x2003)
 const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from the DTA
 const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t CAN_DTA_DLC = 8; //!< DLC of DTA messages
+
+// +  +  Gear (0x2003)
+const uint32_t CAN_DTA_GEAR_ID = 0x00002003; //!< The ID of CAN messages containging gear from the DTA
+const uint32_t CAN_DTA_GEAR_MASK = 0xFFFFFFFF; //!< Mask for the DTA message containging current gear
 
 // +  Front-MCU
 // +  +  Logging
@@ -107,7 +112,7 @@ const uint16_t CAN_MSG_BRAKE_OFF = 0x20; //!< Message for Brake Light OFF
 // +  +  Gear and Clutch
 const uint16_t CAN_MSG_GEAR_UP = 0xF11F; //!< Message for Gear Change UP
 const uint16_t CAN_MSG_GEAR_DOWN = 0xF44F; //!< Message for Gear Change DOWN
-const uint16_t CAN_MSG_GEAR_NEUTRAL = 0xAA00; //!< Message for Gear Change DOWN
+const uint16_t CAN_MSG_GEAR_NEUTRAL = 0xAA0A; //!< Message for Gear Change DOWN
 
 // +  +  Logging
 const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.
