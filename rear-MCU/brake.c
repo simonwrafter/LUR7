@@ -31,7 +31,7 @@
  * \ref brake.c controls braking of the LUR7.
  *
  * \see \ref brake.c
- * \see \ref brake.h1
+ * \see \ref brake.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0

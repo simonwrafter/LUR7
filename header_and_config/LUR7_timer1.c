@@ -48,7 +48,7 @@
 
 //! Identifies interrupt
 /*! Interrupt_nbr is used to identify which interrupt in the 100Hz cycle occured
- * last. Passed on to extern \ref timer0_isr_100Hz function.
+ * last. Passed on to extern \ref timer1_isr_100Hz function.
  */
 static volatile uint8_t interrupt_nbr = 0;
 //! Interrupt counter 'prescaler'

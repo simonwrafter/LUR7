@@ -45,13 +45,15 @@
 #include "LUR7.h"
 #include "LUR7_timer0.h"
 
+//! Counter of time.
 static volatile uint16_t counter = 0;
+//! Holds the time to delay for.
 static volatile uint16_t compare = 0;
 
 //! Hardware initialisation function.
 /*!
  * Initialises Timer0. CTC mode, timer is stoped. To start a delay use 
- * \ref timer0_start, when the specified time has elapsed \ref timer0_stop 
+ * \ref timer0_start, when the specified time has elapsed \ref timer0_isr_stop 
  * executes.
  */
 void timer0_init(void) {
@@ -63,7 +65,7 @@ void timer0_init(void) {
 //! Start delay
 /*!
  * Resets counter and starts a timed delay. after \p time has elapsed 
- * \ref timer0_stop executes. \p time can be given with a resolution of 100µs.
+ * \ref timer0_isr_stop executes. \p time can be given with a resolution of 100µs.
  * 
  * \param time time in ms*10 (100µs resolution)
  */
@@ -77,7 +79,7 @@ void timer0_start(uint16_t time) {
 //! Interrupt Service Routine, Timer0
 /*!
  * Interrupt handler. Handles the timer and counts the time passed. Executes 
- * \ref timer0_stop when \p time has elapsed and stops the timer.
+ * \ref timer0_isr_stop when \p time has elapsed and stops the timer.
  */
 ISR(TIMER0_COMPA_vect) {
 	if (++counter == compare) {

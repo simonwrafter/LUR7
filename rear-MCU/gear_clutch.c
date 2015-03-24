@@ -46,36 +46,85 @@
 #include "gear_clutch.h"
 #include "config.h"
 
+//! Set to TRUE when gear change system is working.
 static volatile uint8_t busy = FALSE;
+//! Set to TRUE during the shift cut delay.
 static volatile uint8_t shift_cut_flag = FALSE;
+//! Set to TRUE during the gear up sequence.
 static volatile uint8_t gear_up_flag = FALSE;
+//! Set to TRUE during the gear down sequence.
 static volatile uint8_t gear_down_flag = FALSE;
+//! Set to TRUE during the neutral-from-first-gear sequence.
 static volatile uint8_t neutral_up_flag = FALSE;
+//! Set to TRUE during the neutral-from-second-gear sequence.
 static volatile uint8_t neutral_down_flag = FALSE;
 
+//! Delay between engaging shift cut and running the solenoid.
 static const uint16_t SHIFT_CUT_DELAY = 1000;
+//! time to run the solenoid for gear up.
 static const uint16_t GEAR_UP_DELAY = 1000;
+//! time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY = 1000;
+//! time to run the solenoid for neutral up.
 static const uint16_t NEUTRAL_UP_DELAY = 1000;
+//! time to run the solenoid for neutral down.
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
-//! H
-/*
- * b
+//! Change gear up
+/*!
+ * Changing up a gear is the most intricate of the gear changing routines. Shift 
+ * cut needs to be applied and allowed to take effect before the solenoid is 
+ * engaged. There being two long delays to consider in this routine means 
+ * the more straight forward method used in \ref gear_down is not applicable.
+ * 
+ * The steps to change gear are thus:
+ * <ol>
+ * <li> In \ref gear_up function.
+ *   <ol>
+ *   <li> set \ref busy flag, and \ref shift_cut_flag.
+ *   <li> start shift cut by setting \ref SHIFT_CUT to GND.
+ *   <li> start timer0, \ref SHIFT_CUT_DELAY.
+ *   </ol>
+ * <li> In \ref timer0_isr_stop with \ref shift_cut_flag set.
+ *   <ol>
+ *   <li> clear \ref shift_cut_flag.
+ *   <li> turn off \ref SHIFT_CUT signal, the actual shift cut will be dissengaged by the DTA.
+ *   <li> set \ref gear_up_flag.
+ *   <li> run solenoid on \ref GEAR_UP.
+ *   <li> start timer0, \ref GEAR_UP_DELAY.
+ *   </ol>
+ * <li> In \ref timer0_isr_stop with \ref gear_up_flag set.
+ *   <ol>
+ *   <li> clear \ref gear_up_flag.
+ *   <li> turn of solenoid.
+ *   <li> clear busy flag.
+ *   </ol>
+ * </ol>
+ * 
+ * The flag \ref busy is set at the start of each operation and cleared once 
+ * timer0 finishes, hindering more than one action at a time. If \ref busy is set
+ * when the function is triggered no gear change will happen.
  */
 void gear_up(void) {
 	if (!busy) {
 		busy = TRUE;
 		shift_cut_flag = TRUE;
-		gear_up_flag = TRUE;
 		set_output(SHIFT_CUT, GND);
 		timer0_start(SHIFT_CUT_DELAY);
 	}
 }
 
-//! H
-/*
- * b
+//! Change gear down
+/*!
+ * This function assumes that the clutch is engaged when triggered. The flag 
+ * \ref busy is set at the start of each operation and cleared once timer0 
+ * finishes, hindering more than one action at a time. If \ref busy is set when
+ * the function is triggered no gear change will happen. 
+ * 
+ * The procedure is straight forward, \ref gear_down_flag is set and the 
+ * \ref GEAR_DOWN output set to activate the solenoid for the time defined in
+ * \ref GEAR_DOWN_DELAY. Once \ref timer0_isr_stop is triggered, the output is 
+ * reset and the flags cleared.
  */
 void gear_down(void) {
 	if (!busy) {
@@ -86,9 +135,23 @@ void gear_down(void) {
 	}
 }
 
-//! H
-/*
- * b
+//! Find neutral gear
+/*!
+ * This function assumes that the clutch is engaged when triggered. The flag 
+ * \ref busy is set at the start of each operation and cleared once timer0 
+ * finishes, hindering more than one action at a time. If \ref busy is set when
+ * the function is triggered no gear change will happen.
+ * 
+ * The procedure is fairly straight forward, depending on the currently selected 
+ * gear (1 or 2, others disregarded) the solenoid is set to give a pulse in the
+ * appropriate direction. \ref neutral_up_flag (from gear 1) or 
+ * \ref neutral_down_flag (from gear 2) is set and the \ref GEAR_UP (1) or 
+ * \ref GEAR_DOWN (2) output set to activate the solenoid for the time defined in
+ * either \ref NEUTRAL_UP_DELAY (1) or \ref NEUTRAL_DOWN_DELAY (2). Once 
+ * \ref timer0_isr_stop is triggered, the output is reset and the flags cleared.
+ * 
+ * All delay times are static and no adaptive scaling of the force to find the
+ * neutral is implemented.
  */
 void gear_neutral(uint8_t current_gear) {
 	if (!busy) {
@@ -106,9 +169,9 @@ void gear_neutral(uint8_t current_gear) {
 	}
 }
 
-//! H
-/*
- * b
+//! Position the clutch servo.
+/*!
+ * not implemented
  */
 void clutch_set(uint16_t pos) {
 	
@@ -116,29 +179,30 @@ void clutch_set(uint16_t pos) {
 
 
 /*!
- * Used for ending gear change routine.
+ * Used for ending gear change routines.
  */
 void timer0_isr_stop(void) {
-	if (shift_cut_flag) {
-		shift_cut_flag = FALSE;
-		set_output(SHIFT_CUT, TRI);
-		set_output(GEAR_UP, GND);
-		timer0_start(GEAR_UP_DELAY);
+	if (shift_cut_flag) { // shift cut is used for changing up a gear
+		shift_cut_flag = FALSE; // clear flag
+		set_output(SHIFT_CUT, TRI); // reset shift cut output
+		gear_up_flag = TRUE; // set gear up flag
+		set_output(GEAR_UP, GND); // run solenoid
+		timer0_start(GEAR_UP_DELAY); // new delay for actual gear change
 	} else if (gear_up_flag) {
-		gear_up_flag = FALSE;
-		set_output(GEAR_UP, TRI);
-		busy = FALSE;
+		gear_up_flag = FALSE; // clear flag
+		set_output(GEAR_UP, TRI); // reset output
+		busy = FALSE; // free unit
 	} else if (gear_down_flag) {
-		gear_down_flag = FALSE;
-		set_output(GEAR_DOWN, TRI);
-		busy = FALSE;
-	} else if (neutral_up_flag) {
-		neutral_up_flag = FALSE;
-		set_output(GEAR_UP, TRI);
-		busy = FALSE;
-	} else if (neutral_down_flag) {
-		neutral_down_flag = FALSE;
-		set_output(GEAR_DOWN, TRI);
-		busy = FALSE;
+		gear_down_flag = FALSE; // clear flag
+		set_output(GEAR_DOWN, TRI); // reset output
+		busy = FALSE; // free unit
+	} else if (neutral_up_flag) { // from 1
+		neutral_up_flag = FALSE; // clear flag
+		set_output(GEAR_UP, TRI); // reset output
+		busy = FALSE; // free unit
+	} else if (neutral_down_flag) { // from 2
+		neutral_down_flag = FALSE; // clear flag
+		set_output(GEAR_DOWN, TRI); // reset output
+		busy = FALSE; // free unit
 	}
 }

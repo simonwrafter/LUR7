@@ -61,6 +61,7 @@
 #define SUSPENSION_L	ADC_IN9
 
 //Outputs
+//! Output to control ground for sensors.
 #define GND_CONTROL			OUT8
 
 //External interrupts

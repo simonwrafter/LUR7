@@ -152,14 +152,15 @@ int main(void) {
 			susp_r_atomic = susp_r; //! <li> atomic copy of right suspension value.
 		} // end ATOMIC_BLOCK
 
-		//! <li> If failsafe, do: <ul>
+		//! <li> If front in failsafe, do: <ul>
 		if (failsafe_front) {
 			//! <li> Brake control <ol>
 			uint16_t brake = adc_get(BAK_IN_BRAKE); //! <li> update the brake pressure value.
 			brake_light(brake); //! <li> set brake light on/off.
+			//! </ol>
 		} //! </ul>
 		
-		//! <li> If failsafe, do: <ul>
+		//! <li> If mid in failsafe, do: <ul>
 		if (failsafe_mid) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.

@@ -94,9 +94,9 @@ int main(void) {
 	pc_int_on(WHEEL_R); //! <li> enable interrupts on \ref WHEEL_R.
 	//! </ol>
 
-	//! <li> Setup CAN RX <ol>
+	// ! <li> Setup CAN RX <ol>
 
-	//! </ol>
+	// ! </ol>
 
 	//! <li> Enable system <ol>
 	set_output(GND_CONTROL, GND); //! <li> connect sensors to ground.

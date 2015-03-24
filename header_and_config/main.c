@@ -64,9 +64,11 @@ int main(void) {
 	can_init(); //! <li> initialise \ref LUR7_CAN.
 	//timer0_init(); //! <li> initialise \ref LUR7_timer0.
 	timer1_init(OFF); //! <li> initialise \ref LUR7_timer1.
-	//! </ol> <li> \ref LUR7_power. <ol>
+	//! </ol> 
+	//! <li> \ref LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	power_off_timer0(); //! <li> \ref LUR7_timer0 is powered off. </ol>
+	power_off_timer0(); //! <li> \ref LUR7_timer0 is powered off. 
+	//! </ol>
 	
 	//! <li> Setup CAN RX <ol>
 	; //! <li> nothing yet.
@@ -81,7 +83,6 @@ int main(void) {
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
 	//! </ol>
-	//! </ul>
 	//! </ul>
 	
 	//! <li> LOOP

@@ -42,6 +42,7 @@
 #define _CONFIG_H_
 
 //Constants
+//! The number of clutch readings to average
 #define CLUTCH_ATOMIC_LENGTH	10
 
 //Inputs
