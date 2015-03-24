@@ -72,16 +72,16 @@
 //Outputs
 //! Output for Clutch Servo, PWM
 #define CLUTCH				OUT1
-//#define 					OUT2
+//unused 					OUT2
 //! Output for Brakelight
 #define BRAKE_LIGHT			OUT3
 //! Output for Gear Up signal to solenoid.
 #define GEAR_UP				OUT4
 //! Output for Gear Down signal to solenoid.
 #define GEAR_DOWN			OUT5
-//! Output for Shift cut
+//! Output for Shift cut (DTA pin 14)
 #define SHIFT_CUT			OUT6
-//#define					OUT7
+//unused					OUT7
 //! Output to control availability of ground for sensors.
 #define GND_CONTROL			OUT8
 

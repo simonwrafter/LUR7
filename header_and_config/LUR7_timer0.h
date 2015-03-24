@@ -17,8 +17,7 @@
  */
 
 /*! \file LUR7_timer0.h
- * \ref LUR7_timer0 sets up timer interrupts with a frequency of 100Hz for
- * the LUR7 project. 
+ * \ref LUR7_timer0 Interrupt based delay functionality.
  * 
  * All code is released under the GPLv3 license.
  *
@@ -41,5 +40,13 @@
 
 //doc in .c file
 void timer0_init(void);
+
+void timer0_start(uint16_t);
+
+//! Delay complete
+/*!
+ * Executes when the time specified by timer0_start has elapsed.
+ */
+extern void timer0_isr_stop(void);
 
 #endif //_LUR7_TIMER0_H_

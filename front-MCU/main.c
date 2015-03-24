@@ -218,6 +218,12 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_setup_tx(CAN_FRONT_LOG_STEER_BRAKE_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC); // send
 	}
 }
+
+/*!
+ * not used.
+ */
+void timer0_isr_stop(void) {}
+
 /*!
  * Completion of message reception triggers this function.
  */

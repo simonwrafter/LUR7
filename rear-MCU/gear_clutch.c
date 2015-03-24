@@ -44,13 +44,33 @@
 
 #include "../header_and_config/LUR7.h"
 #include "gear_clutch.h"
+#include "config.h"
+
+static volatile uint8_t busy = FALSE;
+static volatile uint8_t shift_cut_flag = FALSE;
+static volatile uint8_t gear_up_flag = FALSE;
+static volatile uint8_t gear_down_flag = FALSE;
+static volatile uint8_t neutral_up_flag = FALSE;
+static volatile uint8_t neutral_down_flag = FALSE;
+
+static const uint16_t SHIFT_CUT_DELAY = 1000;
+static const uint16_t GEAR_UP_DELAY = 1000;
+static const uint16_t GEAR_DOWN_DELAY = 1000;
+static const uint16_t NEUTRAL_UP_DELAY = 1000;
+static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
 //! H
 /*
  * b
  */
 void gear_up(void) {
-	
+	if (!busy) {
+		busy = TRUE;
+		shift_cut_flag = TRUE;
+		gear_up_flag = TRUE;
+		set_output(SHIFT_CUT, GND);
+		timer0_start(SHIFT_CUT_DELAY);
+	}
 }
 
 //! H
@@ -58,7 +78,12 @@ void gear_up(void) {
  * b
  */
 void gear_down(void) {
-	
+	if (!busy) {
+		busy = TRUE;
+		gear_down_flag = TRUE;
+		set_output(GEAR_DOWN, GND);
+		timer0_start(GEAR_DOWN_DELAY);
+	}
 }
 
 //! H
@@ -66,7 +91,19 @@ void gear_down(void) {
  * b
  */
 void gear_neutral(uint8_t current_gear) {
-	
+	if (!busy) {
+		if (current_gear == 1) {
+			busy = TRUE;
+			neutral_up_flag = TRUE;
+			set_output(GEAR_UP, GND);
+			timer0_start(NEUTRAL_UP_DELAY);
+		} else if (current_gear == 2) {
+			busy = TRUE;
+			neutral_down_flag = TRUE;
+			set_output(GEAR_DOWN, GND);
+			timer0_start(NEUTRAL_DOWN_DELAY);
+		}
+	}
 }
 
 //! H
@@ -75,4 +112,33 @@ void gear_neutral(uint8_t current_gear) {
  */
 void clutch_set(uint16_t pos) {
 	
+}
+
+
+/*!
+ * Used for ending gear change routine.
+ */
+void timer0_isr_stop(void) {
+	if (shift_cut_flag) {
+		shift_cut_flag = FALSE;
+		set_output(SHIFT_CUT, TRI);
+		set_output(GEAR_UP, GND);
+		timer0_start(GEAR_UP_DELAY);
+	} else if (gear_up_flag) {
+		gear_up_flag = FALSE;
+		set_output(GEAR_UP, TRI);
+		busy = FALSE;
+	} else if (gear_down_flag) {
+		gear_down_flag = FALSE;
+		set_output(GEAR_DOWN, TRI);
+		busy = FALSE;
+	} else if (neutral_up_flag) {
+		neutral_up_flag = FALSE;
+		set_output(GEAR_UP, TRI);
+		busy = FALSE;
+	} else if (neutral_down_flag) {
+		neutral_down_flag = FALSE;
+		set_output(GEAR_DOWN, TRI);
+		busy = FALSE;
+	}
 }

@@ -60,6 +60,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		toggle_output(OUT2);
 	}
 }
+void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}

@@ -5,7 +5,7 @@
 MCU = atmega32m1
 FORMAT = ihex
 TARGET = main
-SRC = $(TARGET).c ../header_and_config/LUR7_io.c ../header_and_config/LUR7_adc.c ../header_and_config/LUR7_ancomp.c ../header_and_config/LUR7_can.c ../header_and_config/LUR7_interrupt.c ../header_and_config/LUR7_power.c ../header_and_config/LUR7_timer0.c ../header_and_config/LUR7_timer1.c gear_clutch.c
+SRC = $(TARGET).c ../header_and_config/LUR7_io.c ../header_and_config/LUR7_adc.c ../header_and_config/LUR7_ancomp.c ../header_and_config/LUR7_can.c ../header_and_config/LUR7_interrupt.c ../header_and_config/LUR7_power.c ../header_and_config/LUR7_timer0.c ../header_and_config/LUR7_timer1.c gear_clutch.c brake.c
 ASRC =
 OPT = s
 

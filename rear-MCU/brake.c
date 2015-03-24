@@ -53,7 +53,7 @@
 void brake_light(uint16_t brake_pressure) {
 	if (brake_pressure > BRAKES_ON) {
 		set_output(BRAKE_LIGHT, GND);
-	} else if (brake < BRAKES_OFF) {
+	} else if (brake_pressure < BRAKES_OFF) {
 		set_output(BRAKE_LIGHT, TRI);
 	}
 }

@@ -43,6 +43,7 @@ void CAN_ISR_OTHER() {}
 
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer0_isr_stop(void) {}
 
 void early_bod_warning_ISR(void) {}
 void early_bod_safe_ISR(void) {}

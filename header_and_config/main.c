@@ -148,6 +148,10 @@ void pcISR_in9(void) {}
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
 /*!
+ * Executed when timer0 delay end.
+ */
+void timer0_isr_stop(void) {}
+/*!
  * CAN messages received are handled here.
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}

@@ -52,9 +52,8 @@ int main(void) {
 	return 0;
 }
 
-void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-
-}
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer0_isr_stop(void) {}
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}

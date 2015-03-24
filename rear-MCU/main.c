@@ -41,6 +41,7 @@
 #include "../header_and_config/LUR7.h"
 #include "config.h"
 #include "gear_clutch.h"
+#include "brake.h"
 
 //! Flag to set if signal to change up is received.
 volatile uint8_t gear_up_flag = FALSE;
@@ -281,6 +282,9 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	}
 }
 
+//see gear_clutch.c
+//void timer0_isr_stop(void) {}
+
 //! CAN message receiver function.
 /*!
  * The Rear MCU listens to messages from the middle and front MCUs, the
@@ -297,7 +301,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_up_flag = TRUE;
 			} else if (*data == CAN_MSG_GEAR_DOWN) { //! <li> if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
 				gear_down_flag = TRUE;
-			} else if(*data & 0xFF00 == CAN_MSG_GEAR_NEUTRAL) { //! <li> if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
+			} else if(*data == CAN_MSG_GEAR_NEUTRAL) { //! <li> if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
 				gear_neutral_flag = TRUE;
 			} //! </ul>
 		}
@@ -308,13 +312,13 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	} //! </ul>
 
 	if (mob == brk_MOb) { //! <li> \ref brk_MOb receives a message <ul>
-		failsafe_front_counter == 0; //! <li> reset \ref failsafe_front_counter
+		failsafe_front_counter = 0; //! <li> reset \ref failsafe_front_counter
 		uint16_t brake_p = ((uint16_t) data[2] << 8) | data[3]; //! <li> reconstruct brake pressure
 		brake_light(brake_p); //! <li> control brake light
 	} //! </ul>
 	
 	if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
-		failsafe_dta_counter == 0; //! <li> reset \ref failsafe_front_counter
+		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
 		current_gear = data[0];
 	} //! </ul>
 	

@@ -155,6 +155,11 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_average, CAN_GEAR_CLUTCH_DLC);
 }
 
+/*!
+ * not used.
+ */
+void timer0_isr_stop(void) {}
+
 //! Gear Up interrupt handler
 /*!
  * When the paddle for changing gears up is depressed, this ISR is executed
