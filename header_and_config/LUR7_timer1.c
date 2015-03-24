@@ -18,7 +18,7 @@
 
 /*! \file LUR7_timer1.c
  * \ref LUR7_timer1 generates a high precision PWM signal on \ref OUT1 at a 
- * frequency of 400Hz.
+ * frequency of 400Hz and timer interrupts at 100Hz.
  * 
  * All code is released under the GPLv3 license.
  *
@@ -33,7 +33,8 @@
  * 
  * \defgroup LUR7_timer1 Shared - Timer 1
  * Timer 1 generates a high precision PWM signal on \ref OUT1 at a frequency of
- * 400Hz. The dutycycle can be set to any value from 0 to 20000.
+ * 400Hz. The dutycycle can be set to any value from 0 to 20000. Also a 100 Hz 
+ * timer interrupt is generated.
  *
  * \see LUR7_timer1.c
  * \see LUR7_timer1.h
@@ -45,6 +46,18 @@
 #include "LUR7.h"
 #include "LUR7_timer1.h"
 
+//! Identifies interrupt
+/*! Interrupt_nbr is used to identify which interrupt in the 100Hz cycle occured
+ * last. Passed on to extern \ref timer0_isr_100Hz function.
+ */
+static volatile uint8_t interrupt_nbr = 0;
+//! Interrupt counter 'prescaler'
+/*!
+ * timer interrupts are triggered at 400Hz, but dividev by 4 to generate 100Hz 
+ * interrupts.
+ */
+static volatile uint8_t interrupt_divider = 0;
+
 //! Hardware initialisation function.
 /*!
  * The timer is setup up in phase and frequency correct PWM mode with OC1B
@@ -52,14 +65,24 @@
  * \f[f_{PWM} = \frac {f_{IO}}{2 \times N \times TOP} = \frac {16000000}{2 \times 1 \times 20000} = 400.000 Hz\f]
  * TOP is defined in Output Compare Register 1A (OCR1A) as 20000 meaning the 
  * frequency is 400Hz.
+ * 
+ * Interrupts are enabled for TOP, generating a steady 400 Hz timer interrupt.
+ * This is divided by 4 and used to call the extern function \ref timer1_isr_100Hz.
+ * 
+ * \param pwm_on wheter to output pwm on OUT1 or not.
  */
-void timer1_init(void) {
-	TCCR1A = (1 << COM1B1) | (1 << WGM10); // non-inverting output on PC1 (OC1B), phase and frequency correct PWM mode
+void timer1_init(uint8_t pwm_on) {
+	if (pwm_on) {
+		TCCR1A = (1 << COM1B1) | (1 << WGM10); // non-inverting output on PC1 (OC1B), phase and frequency correct PWM mode
+	} else {
+		TCCR1A = (1 << WGM10); // no pwm output on PC1 (OC1B), normal operation.
+	}
+	
 	TCCR1B = (1 << WGM13) | (1 << CS10); // phase and frequency correct PWM mode, prescaler = 1
 	TCCR1C = 0x00; // no force compare match
 	OCR1A  = 0x4E20; // 20000 => 400Hz
 	OCR1B  = 0x0000; // duytcycle = 0 to start
-	TIMSK1 = 0x00; // no interrupts
+	TIMSK1 = (1 << OCIE1A); // timer interrupts 400Hz
 }
 
 //! Sets the dutycycle of the output.
@@ -76,4 +99,20 @@ void timer1_dutycycle(uint16_t dutycycle) {
 		dutycycle = 20000;
 	}
 	OCR1B = dutycycle;
+}
+
+//! Interrupt Service Routine, Timer1
+/*!
+ * Interrupts are triggered every 10ms, the counter \ref interrupt_nbr is
+ * incresed each time and cycled modulo 100. The extern function
+ * \ref timer1_isr_100Hz is called and can be used for scheduling tasks.
+ */
+ISR(TIMER1_COMPA_vect) {
+	interrupt_divider = (interrupt_divider + 1) % 4;
+	if (interrupt_divider == 0) {
+		timer1_isr_100Hz(interrupt_nbr++);
+		if (interrupt_nbr == 100) {
+			interrupt_nbr = 0;
+		}
+	}
 }

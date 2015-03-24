@@ -42,14 +42,4 @@
 //doc in .c file
 void timer0_init(void);
 
-//! Timer interrupt function triggered at 100 Hz.
-/*!
- * Triggered every 10ms, this function is suited for tasks that need scheduling
- * and repeated at a known frequency.
- * 
- * \param interrupt_nbr The id of the interrupt, [0, 100]
- * \return void
- */
-extern void timer0_isr_100Hz(uint8_t interrupt_nbr);
-
 #endif //_LUR7_TIMER0_H_

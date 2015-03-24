@@ -56,9 +56,8 @@ void power_off_default(void) {
 }
 
 //! Dissable Timer1
-/*! If \ref LUR7_timer1 is unused (no PWM output on \ref OUT1), this function
- * disables the \ref LUR7_timer1 hardware.
+/*! If \ref LUR7_timer0 is unused, this function disables the hardware.
  */
-void power_off_timer1(void) {
-	PRR |= (1 << PRTIM1);
+void power_off_timer0(void) {
+	PRR |= (1 << PRTIM0);
 }

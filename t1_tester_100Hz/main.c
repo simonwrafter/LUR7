@@ -23,10 +23,10 @@ int main(void) {
 	//adc_init();
 	//ancomp_init();
 	//can_init();
-	timer0_init();
-	//timer1_init(); // if PWM output
+	//timer0_init();
+	timer1_init(OFF);
 	//power_off_default();
-	//power_off_timer1(); //if no PWM output
+	//power_off_timer1();
 
 	interrupts_on();
 	//can_enable();
@@ -55,7 +55,7 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (interrupt_nbr % 10 == 0) {
 		toggle_output(OUT2);
 	}

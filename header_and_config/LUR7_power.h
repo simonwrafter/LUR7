@@ -39,6 +39,6 @@
 
 void power_off_default(void);
 
-void power_off_timer1(void);
+void power_off_timer0(void);
 
 #endif  // _LUR7_POWER_H_

@@ -36,9 +36,17 @@
 #ifndef _LUR7_TIMER1_H_
 #define _LUR7_TIMER1_H_
 
-void timer1_init(void);
+void timer1_init(uint8_t);
 void timer1_dutycycle(uint16_t);
 
-// extern void timer1_isr_400Hz(uint8_t);
+//! Timer interrupt function triggered at 100 Hz.
+/*!
+ * Triggered every 10ms, this function is suited for tasks that need scheduling
+ * and repeated at a known frequency.
+ * 
+ * \param interrupt_nbr The id of the interrupt, [0, 100]
+ * \return void
+ */
+extern void timer1_isr_100Hz(uint8_t);
 
 #endif //_LUR7_TIMER1_H_

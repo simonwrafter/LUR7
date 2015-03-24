@@ -77,11 +77,11 @@ int main(void) {
 	adc_init(); //! <li> initialise LUR7_adc.
 	ancomp_init(); //! <li> initialise LUR7_ancomp.
 	can_init(); //! <li> initialise LUR7_CAN.
-	timer0_init(); //! <li> initialise LUR7_timer0.
+	timer1_init(OFF); //! <li> initialise LUR7_timer0.
 	//! </ol>
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
+	power_off_timer0(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
 
 	//! <li> Setup CAN RX <ol>
@@ -146,7 +146,7 @@ int main(void) {
  *
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	uint16_t clutch_average = 0;
 	for (uint16_t i = 0; i<CLUTCH_ATOMIC_LENGTH; i++) {
 		clutch_average += clutch_pos_atomic[i];

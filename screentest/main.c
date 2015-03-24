@@ -27,9 +27,9 @@ int main(void) {
 	adc_init();
 	ancomp_init();
 	can_init();
-	timer0_init();
+	timer1_init(OFF);
 	power_off_default();
-	power_off_timer1();
+	power_off_timer0();
 
 	interrupts_on();
 
@@ -52,7 +52,7 @@ int main(void) {
 	return 0;
 }
 
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
 }
 

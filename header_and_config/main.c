@@ -62,11 +62,11 @@ int main(void) {
 	adc_init(); //! <li> initialise \ref LUR7_adc.
 	ancomp_init(); //! <li> initialise \ref LUR7_ancomp.
 	can_init(); //! <li> initialise \ref LUR7_CAN.
-	timer0_init(); //! <li> initialise \ref LUR7_timer0.
-	timer1_init(); //! <li> initialise \ref LUR7_timer1.
+	//timer0_init(); //! <li> initialise \ref LUR7_timer0.
+	timer1_init(OFF); //! <li> initialise \ref LUR7_timer1.
 	//! </ol> <li> \ref LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	//power_off_timer1(); //! <li> no PWM output is required, so \ref LUR7_timer1 is powered off. </ol>
+	power_off_timer0(); //! <li> \ref LUR7_timer0 is powered off. </ol>
 	
 	//! <li> Setup CAN RX <ol>
 	; //! <li> nothing yet.
@@ -95,10 +95,6 @@ int main(void) {
 		//! <ul> <li> Always do: <ol>
 		; //! <li> nothing yet.
 		//! </ol>
-		//! <li> If logging, do: <ol>
-		if (logging) {
-			; //! <li> nothing yet.
-		} //! </ol>
 	} //! </ul>
 	//! </ul>
 	return 0;
@@ -150,7 +146,7 @@ void pcISR_in9(void) {}
  * 
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
 /*!
  * CAN messages received are handled here.
  */

@@ -105,7 +105,7 @@ int main(void) {
 	ancomp_init(); //! <li> initialise LUR7_ancomp.
 	can_init(); //! <li> initialise LUR7_CAN.
 	timer0_init(); //! <li> initialise LUR7_timer0.
-	timer1_init(); //! <li> initialise LUR7_timer1.
+	timer1_init(ON); //! <li> initialise LUR7_timer1.
 	//! </ol>
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
@@ -223,7 +223,7 @@ void pcISR_in9(void) {}
 //! Timer Interrupt, 100 Hz
 /*!
  * In order to schedule tasks or perform them with a well defined time delta,
- * the 100 Hz interrupt generator of LUR7_timer0 is used.
+ * the 100 Hz interrupt generator of LUR7_timer1 is used.
  *
  * \note To ensure that no corrupted values are sent, only atomically written
  * copies of all variables are used.
@@ -248,7 +248,7 @@ void pcISR_in9(void) {}
  *
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (++failsafe_front_counter == 100) {
 		failsafe_front= TRUE;
 		can_free_rx(brk_MOb);

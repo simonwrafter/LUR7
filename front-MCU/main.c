@@ -82,11 +82,11 @@ int main(void) {
 	adc_init(); //! <li> initialise LUR7_adc.
 	ancomp_init(); //! <li> initialise LUR7_ancomp.
 	can_init(); //! <li> initialise LUR7_CAN.
-	timer0_init(); //! <li> initialise LUR7_timer0.
+	timer1_init(OFF); //! <li> initialise LUR7_timer1.
 	//! </ol>
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	power_off_timer1(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
+	power_off_timer0(); //! <li> LUR7_timer0 is powered off.
 	//! </ol>
 
 	//! <li> Setup interrupts <ol>
@@ -197,7 +197,7 @@ void pcISR_in9(void) {}
  *
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	// 10Hz interrupt (avoid other data being sent)
 	if ((interrupt_nbr % 10) == 0) { //10 Hz
 		uint32_t holder = ((uint32_t) wheel_count_l << 16) | wheel_count_r; // build data to send
