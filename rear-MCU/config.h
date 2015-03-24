@@ -28,8 +28,8 @@
  * \copyright GNU Public License v3.0
  *
  * \defgroup config Rear MCU - Configuration File
- * The rear MCU has several inputs for measuring the behaviour of the LUR7 and 
- * outputs for gear changing. In \ref config.h the setup of the MCU is defined. 
+ * The rear MCU has several inputs for measuring the behaviour of the LUR7 and
+ * outputs for gear changing. In \ref config.h the setup of the MCU is defined.
  *
  * \see \ref config.h
  * \see \ref main
@@ -42,6 +42,11 @@
 #define _CONFIG_H_
 
 //Constants
+
+//! The value above which the brakes are considered to have been applied.
+#define BRAKES_ON	100 // MUST above BRAKES_OFF
+//! The value below which the brakes are considered to have been released.
+#define BRAKES_OFF	80 // MUST below BRAKES_ON
 
 //Inputs
 //! Input for speed measurment of rear right wheel.

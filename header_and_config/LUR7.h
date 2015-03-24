@@ -60,12 +60,6 @@
 //! The baudrate at which the CAN bus operates, must be identical for all attached units.
 #define CAN_BAUDRATE	1000        // in kBit
 
-// SHARED CONSTANTS
-//! The value above which the brakes are considered to have been applied.
-#define BRAKES_ON	100 // MUST above BRAKES_OFF
-//! The value below which the brakes are considered to have been released.
-#define BRAKES_OFF	80 // MUST below BRAKES_ON
-
 // SYSTEM DEFINITION
 
 //! IN1 is defined as PD3 and used as an input on the PCB.
