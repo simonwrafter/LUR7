@@ -1,6 +1,6 @@
 /*
  * main.c - A collection of functions to setup and ease the use of the LUR7 PCB
- * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,30 +17,17 @@
  */
 
 #include "../header_and_config/LUR7.h"
-
+#include "config.h"
 int main(void) {
 	io_init();
-	//adc_init();
-	//ancomp_init();
-	//can_init();
-	//timer0_init();
-	timer1_init(OFF);
-	//power_off_default();
-	//power_off_timer1();
-
+	timer0_init();
+	
 	interrupts_on();
-	//can_enable();
-
-	/*
-	 * Space for more setup code
-	 * This code will be run once.
-	 */
-
+	
 	while (1) {
-		/*
-		 * Space for main code
-		 * This code will be run repeatedly.
-		 */
+		set_output(OUT1, HIGH);
+		timer0_start(10); //1000µs
+		_delay_us(3000); //3000µs
 	}
 	return 0;
 }
@@ -55,13 +42,13 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	toggle_output(OUT1)
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer0_isr_stop(void) {
+	set_output(OUT1, LOW);
 }
-void timer0_isr_stop(void) {}
 
-void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 
 void early_bod_warning_ISR(void) {}
