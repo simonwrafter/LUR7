@@ -91,6 +91,10 @@ int main(void) {
 	//! <li> Input interrupts <ol>
 	ext_int_on(IO_GEAR_UP, 1, 1); //! <li> Gear up, rising flank trigger external interrupt
 	ext_int_on(IO_GEAR_DOWN, 1, 1); //! <li> Gear down, rising flank trigger external interrupt
+	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); //! <li> Neutral gear, rising flank trigger external interrupt
+	
+	pc_int_on(IO_GP_BTN);
+	pc_int_on(IO_LOG_BTN);
 	//! </ol>
 
 	//! <li> Enable system <ol>
@@ -196,7 +200,9 @@ void pcISR_in1(void) {}
 void pcISR_in2(void) {}
 //! Pin Change Interrupt handler for IN3.
 /*! General purpose button, no job yet */
-void pcISR_in3(void) {}
+void pcISR_in3(void) {
+	; //nothing
+}
 //! Pin Change Interrupt handler for IN4.
 /*! Logging start/stop button.broadcasts a messabe to start or stop logging. */
 void pcISR_in4(void) {
