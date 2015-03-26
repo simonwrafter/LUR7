@@ -1,5 +1,5 @@
 /*
- * gear_clutch.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * brake.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,31 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file gear_clutch.h
- * The \ref gear_clutch defines inputs and constants used on the rear MCU.
+/*! \file brake.h
+ * \ref brake controls braking of the LUR7.
  *
  * All code is released under the GPLv3 license.
  *
- * \see \ref gear_clutch
- * \see \ref gear_clutch.c
- * \see \ref main.c
- * \see \ref config.h
+ * \see \ref brake
+ * \see \ref brake.c
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
  *
- * \addtogroup gear_clutch
+ * \addtogroup brake
  */
 
-#ifndef _GEAR_CLUTCH_H_
-#define _GEAR_CLUTCH_H_
+#ifndef _BRAKE_H_
+#define _BRAKE_H_
 
-void gear_up(uint8_t);
+void brake_light(uint16_t);
 
-void gear_down(uint8_t);
-
-void gear_neutral(uint8_t);
-
-void clutch_set(uint16_t);
-
-#endif // _GEAR_CLUTCH_H_
+#endif // _BRAKE_H_

@@ -129,11 +129,11 @@ int main(void) {
 	while (1) {
 		//! <li> Always do: <ol>
 		if (gear_up_flag) { //! <li> if gear_up_flag is set. <ol>
-			gear_up(); //! <li> change up a gear.
+			gear_up(current_gear); //! <li> change up a gear.
 			gear_up_flag = FALSE;  //! <li> clear gear_up_flag.
 		} //! </ol>
 		if (gear_down_flag) { //! <li> if gear_down_flag is set. <ol>
-			gear_down(); //! <li> change down a gear.
+			gear_down(current_gear); //! <li> change down a gear.
 			gear_down_flag = FALSE; //! <li> clear gear_down_flag.
 		} //! </ol>
 		if (gear_neutral_flag) { //! <li> if gear_down_flag is set. <ol>
@@ -164,7 +164,7 @@ int main(void) {
 		if (failsafe_mid) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.
-			clutch_set(clutch);//! <li> set clutch pwm.
+			clutch_set(clutch); //! <li> set clutch pwm.
 			//! </ol>
 		} //! </ul>
 	} //! </ul>
@@ -265,9 +265,9 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (++failsafe_mid_counter == 100) {
 		failsafe_mid = TRUE;
 		can_free_rx(gc_MOb);
-		pc_int_on(IN3); // gear up backup
-		pc_int_on(IN5); // gear down backup
-		pc_int_on(IN7); // gear neutral backup
+		pc_int_on(BAK_IN_GEAR_UP); // gear up backup
+		pc_int_on(BAK_IN_GEAR_DOWN); // gear down backup
+		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
 	}
 	
 	if (++failsafe_dta_counter == 100) {
