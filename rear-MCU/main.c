@@ -313,7 +313,8 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			} //! </ul>
 		}
 		if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			clutch_set(*data); //! <li> set clutch pwm.
+			uint16_t clutch_p = ((uint16_t) data[0] << 8) | data[1]; //! <li> reconstruct clutch position
+			clutch_set(clutch_p); //! <li> set clutch pwm.
 			failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		} //! </ul>
 	} //! </ul>
