@@ -191,7 +191,9 @@ void pcISR_in2(void) {
 //! Pin Change Interrupt handler for IN3.
 /*! Gear Up backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in3(void) {
-	gear_up_flag = TRUE;
+	if (IN3) {
+		gear_up_flag = TRUE;
+	}
 }
 
 //! Pin Change Interrupt handler for IN4.
@@ -201,7 +203,9 @@ void pcISR_in4(void) {}
 //! Pin Change Interrupt handler for IN5.
 /*! Gear Down backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in5(void) {
-	gear_down_flag = TRUE;
+	if (IN5) {
+		gear_down_flag = TRUE;
+	}
 }
 
 //! Pin Change Interrupt handler for IN6.
@@ -211,7 +215,9 @@ void pcISR_in6(void) {}
 //! Pin Change Interrupt handler for IN7.
 /*! Neutral Gear backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in7(void) {
-	gear_neutral_flag = TRUE;
+	if (IN7) {
+		gear_neutral_flag = TRUE;
+	}
 }
 
 //! Pin Change Interrupt handler for IN8.
