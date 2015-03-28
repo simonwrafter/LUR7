@@ -18,18 +18,27 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
+
 int main(void) {
 	io_init();
 	timer0_init();
-	
+	timer1_init(OFF);
+
 	interrupts_on();
-	
+
 	while (1) {
-		set_output(OUT1, HIGH);
-		timer0_start(10); //1000µs
-		_delay_us(3000); //3000µs
 	}
 	return 0;
+}
+
+
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {
+	set_output(OUT1, HIGH);
+	timer0_start(10);
+}
+
+void timer0_isr_stop(void) {
+	set_output(OUT1, LOW);
 }
 
 void pcISR_in1(void) {}
@@ -41,11 +50,6 @@ void pcISR_in6(void) {}
 void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
-
-void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
-void timer0_isr_stop(void) {
-	set_output(OUT1, LOW);
-}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}

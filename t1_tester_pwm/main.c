@@ -20,23 +20,13 @@
 
 int main(void) {
 	io_init();
-	//adc_init();
-	//ancomp_init();
-	//can_init();
-	//timer0_init();
-	timer1_init(); // if PWM output
-	//power_off_default();
-	//power_off_timer1(); //if no PWM output
+	timer1_init(ON); // if PWM output
 
 	interrupts_on();
-	//can_enable();
-
-	//timer1_dutycycle(3300);
-	//timer1_dutycycle(13500);
 
 	uint16_t high = 13700;
 	uint16_t low = 2000;
-	uint16_t delay = 1000;
+	uint16_t delay = 100;
 	uint16_t step = 1;
 
 	while (1) {
@@ -62,7 +52,7 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void timer0_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
 void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}

@@ -27,11 +27,14 @@ volatile uint8_t clutch_pos = 0;
 // Atomically written copy of clutch position sensor value.
 volatile uint8_t clutch_pos_atomic = 0;
 
+//! The MOb configured for RX of logging start/stop instructions.
+volatile uint8_t CAN_DTA_MOb;
+
 int main(void) {
 	io_init(); // initialise LUR_io.
 	adc_init(); // initialise LUR7_adc.
 	can_init(); // initialise LUR7_CAN.
-	timer1_init(OFF); // initialise LUR7_timer0.
+	timer1_init(ON); // initialise LUR7_timer0.
 
 	power_off_default(); // power off unused periferals.
 	power_off_timer0(); // no PWM output is required, so LUR7_timer1 is powered off.
@@ -50,7 +53,7 @@ int main(void) {
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			clutch_pos_atomic = clutch_pos; // copy value to atomic variable
 		} // end ATOMIC_BLOCK
-		
+
 		if (new_info) {
 			new_info = FALSE; //clear flag
 			update_display(); // update panel
@@ -60,6 +63,7 @@ int main(void) {
 }
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
+	timer1_dutycycle(clutch_pos_atomic * 10);
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_DLC);
 }
 
@@ -68,12 +72,11 @@ void timer0_isr_stop(void) {}
 ISR (INT_GEAR_UP) { //IN9
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_DLC);
 }
-ISR (INT_GEAR_DOWN) { //IN8
+ISR (INT_IN8_vect) { //IN8
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_DLC);
 }
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	uint16_t holder = CAN_MSG_GEAR_NEUTRAL;
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &holder, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL, CAN_GEAR_CLUTCH_DLC);
 }
 
 void pcISR_in1(void) {}

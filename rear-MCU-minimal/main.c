@@ -28,7 +28,7 @@ volatile uint8_t gear_down_flag = FALSE;
 // Flag to set if signal to change to neutral is received.
 volatile uint8_t gear_neutral_flag = FALSE;
 // Variable holding the current gear as perceived by the DTA S60pro.
-volatile uint8_t current_gear = 0;
+volatile uint8_t current_gear = 3;
 
 // The MOb configured for RX of gear and clutch instructions.
 volatile uint8_t gc_MOb;
@@ -52,6 +52,8 @@ int main(void) {
 
 	interrupts_on(); // enable interrupts.
 	can_enable(); // enable CAN.
+
+	clutch_set(5000);
 
 	while (1) {
 		if (gear_up_flag) { // if gear_up_flag is set.
@@ -81,29 +83,31 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
+//void timer0_isr_stop(void) {} in gear_clutch.c
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
-	if (mob == gc_MOb) { // \ref gc_MOb receives a message
+	if (mob == gc_MOb) { // gc_MOb receives a message
 		if (id == CAN_GEAR_ID) { // gear change message
-			if (*data == CAN_MSG_GEAR_UP) { // if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
+			uint16_t gear_data = ((uint16_t) data[1] << 8) | data[0];
+			if (gear_data == CAN_MSG_GEAR_UP) { // if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
 				gear_up_flag = TRUE;
-			} else if (*data == CAN_MSG_GEAR_DOWN) { // if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
+			} else if (gear_data == CAN_MSG_GEAR_DOWN) { // if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
 				gear_down_flag = TRUE;
-			} else if(*data == CAN_MSG_GEAR_NEUTRAL) { // if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL) { // if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
 				gear_neutral_flag = TRUE;
 			}
-		}
-		if (id == CAN_CLUTCH_ID) { // if message ID is CAN_CLUTCH_ID
-			uint16_t clutch_p = ((uint16_t) data[0] << 8) | data[1];
+		} else if (id == CAN_CLUTCH_ID) { // if message ID is CAN_CLUTCH_ID
+			toggle_output(OUT6);
+			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0];
 			clutch_set(clutch_p); // set clutch pwm.
 		}
 	}
 
 	if (mob == brk_MOb) { // brk_MOb receives a message
-		uint16_t brake_p = ((uint16_t) data[2] << 8) | data[3]; // reconstruct brake pressure
+		uint16_t brake_p = ((uint16_t) data[3] << 8) | data[2]; // reconstruct brake pressure
 		brake_light(brake_p); // control brake light
 	}
-	
+
 	if (mob == dta_MOb) { // dta_MOb receives a message
 		current_gear = data[0];
 	}

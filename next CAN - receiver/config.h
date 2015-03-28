@@ -28,7 +28,7 @@
 
 //Outputs
 // Output for Clutch Servo, PWM
-#define CLUTCH				OUT1 //PWM on Timer1
+#define CLUTCH				OUT1
 // Output for Brakelight
 #define BRAKE_LIGHT			OUT3
 // Output for Gear Up signal to solenoid.

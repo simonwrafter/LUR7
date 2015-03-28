@@ -1,6 +1,6 @@
 /*
  * main.c - A collection of functions to setup and ease the use of the LUR7 PCB
- * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,11 @@
 
 int main(void) {
 	io_init();
-	timer1_init(OFF);
-
+	can_init();
+	power_off_default();
+	power_off_timer0();
 	interrupts_on();
+	can_enable();
 
 	while (1) {}
 	return 0;
@@ -38,9 +40,7 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	toggle_output(OUT1);
-}
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
 void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}

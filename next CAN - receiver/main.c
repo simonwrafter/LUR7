@@ -1,33 +1,69 @@
-#include "../header_and_config/LUR7.h"
+/*
+ * main.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-uint8_t string_test(uint8_t *, uint8_t *, uint8_t);
+#include "../header_and_config/LUR7.h"
+#include "config.h"
+
+// Flag to set if signal to change up is received.
+volatile uint8_t gear_up_flag = FALSE;
+// Flag to set if signal to change down is received.
+volatile uint8_t gear_down_flag = FALSE;
+// Flag to set if signal to change to neutral is received.
+volatile uint8_t gear_neutral_flag = FALSE;
+// Variable holding the current gear as perceived by the DTA S60pro.
+volatile uint8_t current_gear = 3;
+
+// The MOb configured for RX of gear and clutch instructions.
+volatile uint8_t gc_MOb = 0;
+
+void gear_up(uint8_t a) {}
+void gear_down(uint8_t a) {}
+void gear_neutral(uint8_t a) {}
 
 int main(void) {
-	io_init();
+	io_init(); // initialise LUR_io.
+	can_init(); // initialise LUR7_CAN.
+	timer0_init(); // initialise LUR7_timer0.
+	timer1_init(OFF); // initialise LUR7_timer1.
 
-	can_init();
-	can_setup_rx(0x0f0f0f00, 0xffffff00, 0);
+	//power_off_default(); // power off unused periferals.
 
-	interrupts_on();
-	can_enable();
+	can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_MASK, CAN_GEAR_CLUTCH_DLC); // Reception of gear and clutch instructions.
 
-	set_output(OUT1, OFF);
+	interrupts_on(); // enable interrupts.
+	can_enable(); // enable CAN.
 
-	while(1) {
-	}
-	return(0);
-}
-/*
-uint8_t string_test(uint8_t * s1, uint8_t * s2, uint8_t nbr_to_compare) {
-	for (uint8_t pos = 0; pos < nbr_to_compare; pos++) {
-		if (s1[pos] != s2[pos]) {
-			return FALSE;
-		} else if (s1[pos] == '\0') {
-			return TRUE;
+	while (1) {
+		if (gear_up_flag) { // if gear_up_flag is set.
+			gear_up(current_gear); // change up a gear.
+			gear_up_flag = FALSE;  // clear gear_up_flag.
+		}
+		if (gear_down_flag) { // if gear_down_flag is set.
+			gear_down(current_gear); // change down a gear.
+			gear_down_flag = FALSE; // clear gear_down_flag.
+		}
+		if (gear_neutral_flag) { // if gear_down_flag is set.
+			gear_neutral(current_gear); // change down a gear.
+			gear_neutral_flag = FALSE; // clear gear_down_flag.
 		}
 	}
-	return TRUE;
-}*/
+	return 0;
+}
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
@@ -39,15 +75,26 @@ void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
-void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {
+void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
+void timer0_isr_stop(void) {}
+
+void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	toggle_output(OUT1);
+	if (mob == gc_MOb) { // gc_MOb receives a message
+		if (id == CAN_GEAR_ID) { // gear change message
+			uint16_t gear_data = ((uint16_t) data[0] << 8) | data[1];
+			if (gear_data == CAN_MSG_GEAR_UP) { // if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
+				gear_up_flag = TRUE;
+			} else if (gear_data == CAN_MSG_GEAR_DOWN) { // if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
+				gear_down_flag = TRUE;
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL) { // if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
+				gear_neutral_flag = TRUE;
+			}
+		}
+	}
 }
 
-void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_OTHER() {}
-
-
-void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
-
+void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_OTHER(void) {}
 void early_bod_warning_ISR(void) {}
 void early_bod_safe_ISR(void) {}
