@@ -28,7 +28,7 @@ volatile uint8_t gear_down_flag = FALSE;
 // Flag to set if signal to change to neutral is received.
 volatile uint8_t gear_neutral_flag = FALSE;
 // Variable holding the current gear as perceived by the DTA S60pro.
-volatile uint8_t current_gear = 0;
+volatile uint8_t current_gear = 11;
 
 volatile uint8_t failsafe_front = TRUE;
 volatile uint8_t failsafe_mid = TRUE;
@@ -75,7 +75,7 @@ int main(void) {
 		}
 		
 		if (failsafe_dta) {
-			current_gear = 3;
+			current_gear = 11;
 		}
 	}
 	return 0;
@@ -85,7 +85,7 @@ void pcISR_in1(void) {}
 void pcISR_in2(void) {}
 
 void pcISR_in3(void) {
-	if (IN3) {
+	if (get_input(IN3)) {
 		gear_up_flag = TRUE;
 	}
 }
@@ -93,7 +93,7 @@ void pcISR_in3(void) {
 void pcISR_in4(void) {}
 
 void pcISR_in5(void) {
-	if (IN5) {
+	if (get_input(IN5)) {
 		gear_down_flag = TRUE;
 	}
 }
@@ -101,7 +101,7 @@ void pcISR_in5(void) {
 void pcISR_in6(void) {}
 
 void pcISR_in7(void) {
-	if (IN7) {
+	if (get_input(IN7)) {
 		gear_neutral_flag = TRUE;
 	}
 }
