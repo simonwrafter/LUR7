@@ -20,15 +20,15 @@
 #include "config.h"
 #include "display.h"
 
+// The MOb configured for RX of logging start/stop instructions.
+volatile uint8_t CAN_DTA_MOb;
 // Flag set when new information has been received and the panel is ready to be updated
 volatile uint8_t new_info = TRUE;
 // Clutch position sensor value.
-volatile uint8_t clutch_pos = 0;
+volatile uint16_t clutch_pos = 0;
 // Atomically written copy of clutch position sensor value.
-volatile uint8_t clutch_pos_atomic = 0;
+volatile uint16_t clutch_pos_atomic = 0;
 
-//! The MOb configured for RX of logging start/stop instructions.
-volatile uint8_t CAN_DTA_MOb;
 
 int main(void) {
 	io_init(); // initialise LUR_io.
@@ -72,7 +72,7 @@ void timer0_isr_stop(void) {}
 ISR (INT_GEAR_UP) { //IN9
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_DLC);
 }
-ISR (INT_IN8_vect) { //IN8
+ISR (INT_GEAR_DOWN) { //IN8
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_DLC);
 }
 ISR (INT_GEAR_NEUTRAL) { //IN5

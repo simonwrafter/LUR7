@@ -28,7 +28,7 @@ volatile uint8_t gear_down_flag = FALSE;
 // Flag to set if signal to change to neutral is received.
 volatile uint8_t gear_neutral_flag = FALSE;
 // Variable holding the current gear as perceived by the DTA S60pro.
-volatile uint8_t current_gear = 3;
+volatile uint8_t current_gear = 11;
 
 // The MOb configured for RX of gear and clutch instructions.
 volatile uint8_t gc_MOb;
@@ -53,9 +53,9 @@ int main(void) {
 	interrupts_on(); // enable interrupts.
 	can_enable(); // enable CAN.
 
-	clutch_set(5000);
 
 	while (1) {
+
 		if (gear_up_flag) { // if gear_up_flag is set.
 			gear_up(); // change up a gear.
 			gear_up_flag = FALSE;  // clear gear_up_flag.
@@ -83,7 +83,9 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
-//void timer0_isr_stop(void) {} in gear_clutch.c
+
+//see gear_clutch.c
+//void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	if (mob == gc_MOb) { // gc_MOb receives a message
@@ -97,7 +99,6 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { // if message ID is CAN_CLUTCH_ID
-			toggle_output(OUT6);
 			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0];
 			clutch_set(clutch_p); // set clutch pwm.
 		}

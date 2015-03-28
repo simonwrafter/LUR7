@@ -50,7 +50,7 @@ volatile uint8_t gear_down_flag = FALSE;
 //! Flag to set if signal to change to neutral is received.
 volatile uint8_t gear_neutral_flag = FALSE;
 //! Variable holding the current gear as perceived by the DTA S60pro.
-volatile uint8_t current_gear = 0;
+volatile uint8_t current_gear = 11;
 
 //! Whether the front MCU is in failsafe mode.
 volatile uint8_t failsafe_front = FALSE;
@@ -108,6 +108,7 @@ int main(void) {
 	timer0_init(); //! <li> initialise LUR7_timer0.
 	timer1_init(ON); //! <li> initialise LUR7_timer1.
 	//! </ol>
+
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
 	//! </ol>
@@ -127,6 +128,7 @@ int main(void) {
 
 	//! <li> LOOP <ul>
 	while (1) {
+
 		//! <li> Always do: <ol>
 		if (gear_up_flag) { //! <li> if gear_up_flag is set. <ol>
 			gear_up(current_gear); //! <li> change up a gear.
@@ -167,6 +169,13 @@ int main(void) {
 			clutch_set(clutch); //! <li> set clutch pwm.
 			//! </ol>
 		} //! </ul>
+
+		//! <li> If DTA in failsafe, do: <ul>
+		if (failsafe_dta) {
+			//! <li> Gear workaround <ol>
+			current_gear = 11; //! <li> set to fail mode gear.
+			//! </ol>
+		} //! </ul>
 	} //! </ul>
 	//! </ul>
 	return 0;
@@ -191,7 +200,7 @@ void pcISR_in2(void) {
 //! Pin Change Interrupt handler for IN3.
 /*! Gear Up backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in3(void) {
-	if (IN3) {
+	if (get_input(IN3)) {
 		gear_up_flag = TRUE;
 	}
 }
@@ -203,7 +212,7 @@ void pcISR_in4(void) {}
 //! Pin Change Interrupt handler for IN5.
 /*! Gear Down backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in5(void) {
-	if (IN5) {
+	if (get_input(IN5)) {
 		gear_down_flag = TRUE;
 	}
 }
@@ -215,7 +224,7 @@ void pcISR_in6(void) {}
 //! Pin Change Interrupt handler for IN7.
 /*! Neutral Gear backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in7(void) {
-	if (IN7) {
+	if (get_input(IN7)) {
 		gear_neutral_flag = TRUE;
 	}
 }
@@ -272,6 +281,8 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
 	if (++failsafe_dta_counter == 100) {
 		failsafe_dta = TRUE;
+		can_free_rx(dta_MOb);
+		current_gear = 11;
 	}
 
 	// 10 Hz (avoid other data being sent)
@@ -304,16 +315,16 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
 	if (mob == gc_MOb) { //! <li> \ref gc_MOb receives a message <ul>
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
-			if (*data == CAN_MSG_GEAR_UP) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
+			uint16_t gear_data = ((uint16_t) data[1] << 8) | data[0];
+			if (gear_data == CAN_MSG_GEAR_UP) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
 				gear_up_flag = TRUE;
-			} else if (*data == CAN_MSG_GEAR_DOWN) { //! <li> if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
+			} else if (gear_data == CAN_MSG_GEAR_DOWN) { //! <li> if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
 				gear_down_flag = TRUE;
-			} else if(*data == CAN_MSG_GEAR_NEUTRAL) { //! <li> if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL) { //! <li> if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
 				gear_neutral_flag = TRUE;
 			} //! </ul>
-		}
-		if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			uint16_t clutch_p = ((uint16_t) data[0] << 8) | data[1]; //! <li> reconstruct clutch position
+		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
+			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct clutch position
 			clutch_set(clutch_p); //! <li> set clutch pwm.
 			failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		} //! </ul>
@@ -321,7 +332,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 
 	if (mob == brk_MOb) { //! <li> \ref brk_MOb receives a message <ul>
 		failsafe_front_counter = 0; //! <li> reset \ref failsafe_front_counter
-		uint16_t brake_p = ((uint16_t) data[2] << 8) | data[3]; //! <li> reconstruct brake pressure
+		uint16_t brake_p = ((uint16_t) data[3] << 8) | data[2]; //! <li> reconstruct brake pressure
 		brake_light(brake_p); //! <li> control brake light
 	} //! </ul>
 	

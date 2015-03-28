@@ -28,6 +28,7 @@ int main(void) {
 	io_init(); // initialise LUR_io.
 	adc_init(); // initialise LUR7_adc.
 	can_init(); // initialise LUR7_CAN.
+	timer1_init(OFF); // initialise LUR7_timer1.
 	
 	power_off_default(); // power off unused periferals.
 	power_off_timer0(); // LUR7_timer0 is powered off.

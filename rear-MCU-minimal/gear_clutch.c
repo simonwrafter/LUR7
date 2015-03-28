@@ -1,7 +1,7 @@
 /*
  * gear_clutch.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -46,16 +46,16 @@ static const uint16_t NEUTRAL_UP_DELAY = 1000;
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
 //! Threshold value for closed clutch
-static const uint16_t CLUTCH_POS_LOW = 600;
+static const uint16_t CLUTCH_POS_CLOSED = 600;
 //! Threshold value for open clutch
-static const uint16_t CLUTCH_POS_HIGH = 900;
+static const uint16_t CLUTCH_POS_OPEN = 900;
 //! PWM value for closed clutch
-static const uint16_t CLUTCH_DC_LOW = 2000;
+static const uint16_t CLUTCH_DC_CLOSED = 4000;
 //! PWM value for open clutch
-static const uint16_t CLUTCH_DC_HIGH = 137000;
+static const uint16_t CLUTCH_DC_OPEN = 9000;
 
-void gear_up(void) {
-	if (!busy) {
+void gear_up(uint8_t current_gear) {
+	if (!busy && current_gear != 5) {
 		busy = TRUE;
 		shift_cut_flag = TRUE;
 		set_output(SHIFT_CUT, GND);
@@ -63,8 +63,8 @@ void gear_up(void) {
 	}
 }
 
-void gear_down(void) {
-	if (!busy) {
+void gear_down(uint8_t current_gear) {
+	if (!busy && current_gear != 1) {
 		busy = TRUE;
 		gear_down_flag = TRUE;
 		set_output(GEAR_DOWN, GND);
@@ -74,7 +74,7 @@ void gear_down(void) {
 
 void gear_neutral(uint8_t current_gear) {
 	if (!busy) {
-		if (current_gear == 1) {
+		if (current_gear == 1 || current_gear == 11) {
 			busy = TRUE;
 			neutral_up_flag = TRUE;
 			set_output(GEAR_UP, GND);
@@ -92,14 +92,12 @@ void clutch_set(uint16_t pos) {
 	if (pos < 512) {
 		pos = 1024 - pos;
 	}
-	if (pos < CLUTCH_POS_LOW) {
-		timer1_dutycycle(CLUTCH_DC_LOW);
-	} else if (pos > CLUTCH_POS_HIGH) {
-		timer1_dutycycle(CLUTCH_DC_HIGH);
+	if (pos < CLUTCH_POS_CLOSED) {
+		timer1_dutycycle(CLUTCH_DC_CLOSED);
+	} else if (pos > CLUTCH_POS_OPEN) {
+		timer1_dutycycle(CLUTCH_DC_OPEN);
 	} else {
-		//timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
-
-		timer1_dutycycle((pos - CLUTCH_POS_LOW) * (CLUTCH_DC_HIGH - CLUTCH_DC_LOW) / (CLUTCH_POS_HIGH - CLUTCH_POS_LOW) + CLUTCH_DC_LOW);
+		timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
 	}
 }
 

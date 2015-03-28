@@ -116,7 +116,7 @@ static const uint16_t CLUTCH_DC_OPEN = 9000;
  * when the function is triggered no gear change will happen.
  */
 void gear_up(uint8_t current_gear) {
-	if (!busy && current_gear < 5) {
+	if (!busy && current_gear != 5) {
 		busy = TRUE;
 		shift_cut_flag = TRUE;
 		set_output(SHIFT_CUT, GND);
@@ -137,7 +137,7 @@ void gear_up(uint8_t current_gear) {
  * reset and the flags cleared.
  */
 void gear_down(uint8_t current_gear) {
-	if (!busy && current_gear > 1) {
+	if (!busy && current_gear != 1) {
 		busy = TRUE;
 		gear_down_flag = TRUE;
 		set_output(GEAR_DOWN, GND);
@@ -165,7 +165,7 @@ void gear_down(uint8_t current_gear) {
  */
 void gear_neutral(uint8_t current_gear) {
 	if (!busy) {
-		if (current_gear == 1) {
+		if (current_gear == 1 || current_gear == 11) {
 			busy = TRUE;
 			neutral_up_flag = TRUE;
 			set_output(GEAR_UP, GND);
@@ -181,7 +181,7 @@ void gear_neutral(uint8_t current_gear) {
 
 //! Position the clutch servo.
 /*!
- * not implemented
+ *  implemented
  */
 void clutch_set(uint16_t pos) {
 	if (pos < 512) {

@@ -51,9 +51,9 @@ volatile uint8_t logging = FALSE;
 //! Flag set when new information has been received and the panel is ready to be updated
 volatile uint8_t new_info = TRUE;
 //! Clutch position sensor value.
-volatile uint8_t clutch_pos = 0;
+volatile uint16_t clutch_pos = 0;
 //! Atomically written copy of clutch position sensor value.
-volatile uint8_t clutch_pos_atomic[CLUTCH_ATOMIC_LENGTH];
+volatile uint16_t clutch_pos_atomic[CLUTCH_ATOMIC_LENGTH];
 //! Clutch average counter.
 volatile uint8_t clutch_pos_counter = 0;
 
@@ -188,8 +188,7 @@ ISR (INT_GEAR_DOWN) { //IN8
  * accordingly.
  */
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	uint16_t holder = CAN_MSG_GEAR_NEUTRAL;
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &holder, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL, CAN_GEAR_CLUTCH_DLC);
 }
 
 //! Pin Change Interrupt handler for IN1.
