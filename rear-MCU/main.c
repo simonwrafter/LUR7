@@ -314,6 +314,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
 	if (mob == gc_MOb) { //! <li> \ref gc_MOb receives a message <ul>
+		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
 			uint16_t gear_data = ((uint16_t) data[1] << 8) | data[0];
 			if (gear_data == CAN_MSG_GEAR_UP) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
@@ -326,7 +327,6 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
 			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct clutch position
 			clutch_set(clutch_p); //! <li> set clutch pwm.
-			failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		} //! </ul>
 	} //! </ul>
 
