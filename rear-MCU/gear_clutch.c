@@ -114,6 +114,11 @@ static const uint16_t CLUTCH_DC_OPEN = 9000;
  * The flag \ref busy is set at the start of each operation and cleared once 
  * timer0 finishes, hindering more than one action at a time. If \ref busy is set
  * when the function is triggered no gear change will happen.
+ * 
+ * If the car is in fifth gear, trying to shift up will have no effect. However,
+ * this is only a feature as long as the DTA is not in fail mode.
+ * 
+ * \todo special case for neutral -> 1st. 
  */
 void gear_up(uint8_t current_gear) {
 	if (!busy && current_gear != 5) {
@@ -135,6 +140,9 @@ void gear_up(uint8_t current_gear) {
  * \ref GEAR_DOWN output set to activate the solenoid for the time defined in
  * \ref GEAR_DOWN_DELAY. Once \ref timer0_isr_stop is triggered, the output is 
  * reset and the flags cleared.
+ * 
+ * If the car is in first gear, trying to shift down will have no effect. However,
+ * this is only a feature as long as the DTA is not in fail mode.
  */
 void gear_down(uint8_t current_gear) {
 	if (!busy && current_gear != 1) {
@@ -160,6 +168,9 @@ void gear_down(uint8_t current_gear) {
  * either \ref NEUTRAL_UP_DELAY (1) or \ref NEUTRAL_DOWN_DELAY (2). Once 
  * \ref timer0_isr_stop is triggered, the output is reset and the flags cleared.
  * 
+ * Should the DTA be in fail mode the neutral finder will be active in all gears,
+ * it will assume being in first gear and try to find neutral above the current gear.
+ * 
  * All delay times are static and no adaptive scaling of the force to find the
  * neutral is implemented.
  */
@@ -181,7 +192,16 @@ void gear_neutral(uint8_t current_gear) {
 
 //! Position the clutch servo.
 /*!
- *  implemented
+ * The sensor positioned in the steering wheel givves an analog signal which is 
+ * converted to a 10 bit digital number (0 - 1023). As the clutch paddle moves 
+ * in both directions the position of the clutch is calculated as the displacement 
+ * from the mid-point (512). To avoid having the servo move due to any vibrations 
+ * that find their way in to the steering wheel the paddle must be moved by a 
+ * minimum threshold angle. A maximum value also exists to prevent over extension 
+ * of the clutch. Between the lower threshold and maximum values a linear mapping 
+ * function transforms the ADC value to a useable PWM dutycycle for the servo.
+ * 
+ * \todo possibly divide the range into three zones.
  */
 void clutch_set(uint16_t pos) {
 	if (pos < 512) {
