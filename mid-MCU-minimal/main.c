@@ -29,7 +29,6 @@ volatile uint16_t clutch_pos = 0;
 // Atomically written copy of clutch position sensor value.
 volatile uint16_t clutch_pos_atomic = 0;
 
-
 int main(void) {
 	io_init(); // initialise LUR_io.
 	adc_init(); // initialise LUR7_adc.
@@ -37,7 +36,7 @@ int main(void) {
 	timer1_init(ON); // initialise LUR7_timer0.
 
 	power_off_default(); // power off unused periferals.
-	power_off_timer0(); // no PWM output is required, so LUR7_timer1 is powered off.
+	power_off_timer0(); //
 
 	CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); // Reception of DTA packages, ID 0x2000-3.
 
@@ -63,7 +62,6 @@ int main(void) {
 }
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	timer1_dutycycle(clutch_pos_atomic * 10);
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_DLC);
 }
 
@@ -73,6 +71,7 @@ ISR (INT_GEAR_UP) { //IN9
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_DLC);
 }
 ISR (INT_GEAR_DOWN) { //IN8
+	toggle_output(OUT1);
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_DLC);
 }
 ISR (INT_GEAR_NEUTRAL) { //IN5

@@ -1,7 +1,7 @@
 /*
  * gear_clutch.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -46,13 +46,13 @@ static const uint16_t NEUTRAL_UP_DELAY = 1000;
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
 //! Threshold value for closed clutch
-static const uint16_t CLUTCH_POS_CLOSED = 600;
+static const uint16_t CLUTCH_POS_CLOSED = 650;
 //! Threshold value for open clutch
 static const uint16_t CLUTCH_POS_OPEN = 900;
 //! PWM value for closed clutch
-static const uint16_t CLUTCH_DC_CLOSED = 4000;
+static const uint16_t CLUTCH_DC_CLOSED = 3000;
 //! PWM value for open clutch
-static const uint16_t CLUTCH_DC_OPEN = 9000;
+static const uint16_t CLUTCH_DC_OPEN = 13000;
 
 void gear_up(uint8_t current_gear) {
 	if (!busy && current_gear != 5) {
@@ -97,7 +97,7 @@ void clutch_set(uint16_t pos) {
 	} else if (pos > CLUTCH_POS_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
 	} else {
-		timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
+		timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * ((float) (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
 	}
 }
 

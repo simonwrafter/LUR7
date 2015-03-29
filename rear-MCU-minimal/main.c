@@ -57,11 +57,11 @@ int main(void) {
 	while (1) {
 
 		if (gear_up_flag) { // if gear_up_flag is set.
-			gear_up(); // change up a gear.
+			gear_up(current_gear); // change up a gear.
 			gear_up_flag = FALSE;  // clear gear_up_flag.
 		}
 		if (gear_down_flag) { // if gear_down_flag is set.
-			gear_down(); // change down a gear.
+			gear_down(current_gear); // change down a gear.
 			gear_down_flag = FALSE; // clear gear_down_flag.
 		}
 		if (gear_neutral_flag) { // if gear_down_flag is set.
@@ -94,6 +94,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			if (gear_data == CAN_MSG_GEAR_UP) { // if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
 				gear_up_flag = TRUE;
 			} else if (gear_data == CAN_MSG_GEAR_DOWN) { // if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
+				toggle_output(OUT6);
 				gear_down_flag = TRUE;
 			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL) { // if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
 				gear_neutral_flag = TRUE;

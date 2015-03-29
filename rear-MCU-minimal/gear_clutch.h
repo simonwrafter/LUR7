@@ -35,9 +35,9 @@
 #ifndef _GEAR_CLUTCH_H_
 #define _GEAR_CLUTCH_H_
 
-void gear_up(void);
+void gear_up(uint8_t);
 
-void gear_down(void);
+void gear_down(uint8_t);
 
 void gear_neutral(uint8_t);
 

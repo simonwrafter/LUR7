@@ -19,7 +19,7 @@
 /*! \file LUR7_adc.c
  * \ref LUR7_adc sets up and retreives analog input values through 10 bit ADC for
  * the LUR7 project.
- * 
+ *
  * All code is released under the GPLv3 license.
  *
  * When writing code for the LUR7 PCB this file should not be included directly,
