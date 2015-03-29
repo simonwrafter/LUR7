@@ -1,7 +1,7 @@
 /*
  * gear_clutch.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
- *
+ * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -45,6 +45,8 @@ static const uint16_t NEUTRAL_UP_DELAY = 1000;
 //! time to run the solenoid for neutral down.
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
+//! Symmetry point, the resting value of the clutch position sensor.
+static const uint16_t CLUTCH_BIAS_MID = 512;
 //! Threshold value for closed clutch
 static const uint16_t CLUTCH_POS_CLOSED = 650;
 //! Threshold value for open clutch
@@ -89,7 +91,7 @@ void gear_neutral(uint8_t current_gear) {
 }
 
 void clutch_set(uint16_t pos) {
-	if (pos < 512) {
+	if (pos < CLUTCH_BIAS_MID) {
 		pos = 1024 - pos;
 	}
 	if (pos < CLUTCH_POS_CLOSED) {

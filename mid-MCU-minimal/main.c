@@ -33,16 +33,16 @@ int main(void) {
 	io_init(); // initialise LUR_io.
 	adc_init(); // initialise LUR7_adc.
 	can_init(); // initialise LUR7_CAN.
-	timer1_init(ON); // initialise LUR7_timer0.
+	timer1_init(OFF); // initialise LUR7_timer0.
 
 	power_off_default(); // power off unused periferals.
-	power_off_timer0(); //
+	power_off_timer0(); // no timer delays, power off timer0
 
 	CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); // Reception of DTA packages, ID 0x2000-3.
 
 	ext_int_on(IO_GEAR_UP, 1, 1); // Gear up, rising flank trigger external interrupt
 	ext_int_on(IO_GEAR_DOWN, 1, 1); // Gear down, rising flank trigger external interrupt
-	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); // neutral Gear, rising flank trigger external interrupt
+	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); // Neutral gear, rising flank trigger external interrupt
 
 	interrupts_on(); // enable interrupts.
 	can_enable(); // enable CAN.
@@ -62,7 +62,12 @@ int main(void) {
 }
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_DLC);
+	uint16_t clutch_average = 0;
+	for (uint16_t i = 0; i<CLUTCH_ATOMIC_LENGTH; i++) {
+		clutch_average += clutch_pos_atomic[i];
+	}
+	clutch_average /= CLUTCH_ATOMIC_LENGTH;
+	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_average, CAN_GEAR_CLUTCH_DLC);
 }
 
 void timer0_isr_stop(void) {}
@@ -71,7 +76,6 @@ ISR (INT_GEAR_UP) { //IN9
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_DLC);
 }
 ISR (INT_GEAR_DOWN) { //IN8
-	toggle_output(OUT1);
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_DLC);
 }
 ISR (INT_GEAR_NEUTRAL) { //IN5

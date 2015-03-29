@@ -70,14 +70,16 @@ static const uint16_t NEUTRAL_UP_DELAY = 1000;
 //! time to run the solenoid for neutral down.
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
+//! Symmetry point, the resting value of the clutch position sensor.
+static const uint16_t CLUTCH_BIAS_MID = 512;
 //! Threshold value for closed clutch
-static const uint16_t CLUTCH_POS_CLOSED = 600;
+static const uint16_t CLUTCH_POS_CLOSED = 650;
 //! Threshold value for open clutch
 static const uint16_t CLUTCH_POS_OPEN = 900;
 //! PWM value for closed clutch
-static const uint16_t CLUTCH_DC_CLOSED = 4000;
+static const uint16_t CLUTCH_DC_CLOSED = 3000;
 //! PWM value for open clutch
-static const uint16_t CLUTCH_DC_OPEN = 9000;
+static const uint16_t CLUTCH_DC_OPEN = 13000;
 
 
 //! Change gear up
@@ -204,7 +206,7 @@ void gear_neutral(uint8_t current_gear) {
  * \todo possibly divide the range into three zones.
  */
 void clutch_set(uint16_t pos) {
-	if (pos < 512) {
+	if (pos < CLUTCH_BIAS_MID) {
 		pos = 1024 - pos;
 	}
 	if (pos < CLUTCH_POS_CLOSED) {
@@ -212,7 +214,7 @@ void clutch_set(uint16_t pos) {
 	} else if (pos > CLUTCH_POS_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
 	} else {
-		timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
+		timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * ((float) (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
 	}
 }
 

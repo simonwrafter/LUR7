@@ -79,6 +79,7 @@ int main(void) {
 	can_init(); //! <li> initialise LUR7_CAN.
 	timer1_init(OFF); //! <li> initialise LUR7_timer0.
 	//! </ol>
+
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
 	power_off_timer0(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.

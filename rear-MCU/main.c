@@ -169,13 +169,7 @@ int main(void) {
 			clutch_set(clutch); //! <li> set clutch pwm.
 			//! </ol>
 		} //! </ul>
-
-		//! <li> If DTA in failsafe, do: <ul>
-		if (failsafe_dta) {
-			//! <li> Gear workaround <ol>
-			current_gear = 11; //! <li> set to fail mode gear.
-			//! </ol>
-		} //! </ul>
+		// dta failsafe not needed here, all sorted in timer1_isr_100Hz
 	} //! </ul>
 	//! </ul>
 	return 0;
@@ -266,12 +260,12 @@ void pcISR_in9(void) {}
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	if (++failsafe_front_counter == 100) {
-		failsafe_front= TRUE;
+	if (!failsafe_front && ++failsafe_front_counter == 100) {
+		failsafe_front = TRUE;
 		can_free_rx(brk_MOb);
 	}
 	
-	if (++failsafe_mid_counter == 100) {
+	if (!failsafe_mid && ++failsafe_mid_counter == 100) {
 		failsafe_mid = TRUE;
 		can_free_rx(gc_MOb);
 		pc_int_on(BAK_IN_GEAR_UP); // gear up backup
@@ -279,7 +273,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
 	}
 	
-	if (++failsafe_dta_counter == 100) {
+	if (!failsafe_dta && ++failsafe_dta_counter == 100) {
 		failsafe_dta = TRUE;
 		can_free_rx(dta_MOb);
 		current_gear = 11;
