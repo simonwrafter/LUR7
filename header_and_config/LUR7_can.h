@@ -123,7 +123,7 @@ extern const uint8_t CAN_DTA_DLC; //!< DLC of DTA messages
 extern const uint32_t CAN_DTA_GEAR_ID; //!< The ID of CAN messages containging gear from the DTA
 extern const uint32_t CAN_DTA_GEAR_MASK; //!< Mask for the DTA message containging current gear
 
-// +  Front MCU
+// +  Front-MCU
 // +  +  Logging
 extern const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
@@ -131,23 +131,25 @@ extern const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering
 extern const uint32_t CAN_FRONT_LOG_BRAKE_MASK; //!< Mask for the Brake log messages
 extern const uint8_t CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
 
-// +  Middle MCU
-// +  +  Gear and Clutch
+// +  Mid-MCU
+// +  +  Gear, Clutch and Launch
 extern const uint32_t CAN_GEAR_ID; //!< The ID for messages carrying Gear Change information
 extern const uint32_t CAN_CLUTCH_ID; //!< The ID for messages carrying Clutch Position information
-extern const uint32_t CAN_GEAR_CLUTCH_MASK; //!< Mask for Gear Change and Clutch Position IDs
-extern const uint8_t CAN_GEAR_CLUTCH_DLC; //!< DLC of Gear Change and Clutch Position messages
+extern const uint32_t CAN_LAUNCH_ID; //!< The ID of CAN messages for lunch control
+extern const uint32_t CAN_GEAR_CLUTCH_LAUNCH_MASK; //!< Mask for Gear Change and Clutch Position IDs
+extern const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC; //!< DLC of Gear Change and Clutch Position messages
 
 // +  +  Logging
 extern const uint32_t CAN_LOG_ID; //!< The ID of CAN messages for starting/stoping logging
-extern const uint32_t CAN_LOG_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 extern const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
+
 
 // +  Rear MCU
 // +  +  Logging
 extern const uint32_t CAN_REAR_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_REAR_LOG_SUSPENSION_ID; //!< Message ID for front suspension
 extern const uint8_t CAN_REAR_LOG_DLC; //!< DLC of messages from front logging node
+
 
 // Pre-defined messages
 extern const uint64_t CAN_MSG_NONE; //!< No message
@@ -166,6 +168,9 @@ extern const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change DOWN
 // +  +  Logging
 extern const uint8_t CAN_MSG_LOG_START; //!< Start sending log data.
 extern const uint8_t CAN_MSG_LOG_STOP; //!< Stop sending log data.
+
+// +  +  Launch Control
+extern const uint8_t CAN_MSG_LAUNCH; //!< Enable/(disable) launch control system.
 
 
 /*******************************************************************************

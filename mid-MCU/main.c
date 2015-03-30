@@ -53,9 +53,7 @@ volatile uint8_t new_info = TRUE;
 //! Clutch position sensor value.
 volatile uint16_t clutch_pos = 0;
 //! Atomically written copy of clutch position sensor value.
-volatile uint16_t clutch_pos_atomic[CLUTCH_ATOMIC_LENGTH];
-//! Clutch average counter.
-volatile uint8_t clutch_pos_counter = 0;
+volatile uint16_t clutch_pos_atomic = 0;
 
 //! Main function.
 /*!
@@ -94,7 +92,7 @@ int main(void) {
 	ext_int_on(IO_GEAR_DOWN, 1, 1); //! <li> Gear down, rising flank trigger external interrupt
 	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); //! <li> Neutral gear, rising flank trigger external interrupt
 	
-	pc_int_on(IO_GP_BTN);
+	//pc_int_on(IO_GP_BTN);
 	pc_int_on(IO_LOG_BTN);
 	//! </ol>
 
@@ -109,8 +107,7 @@ int main(void) {
 		//! <li> Always do: <ol>
 		clutch_pos = adc_get(IO_CLUTCH); //! <li> get clutch paddle position
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_atomic[clutch_pos_counter++] = clutch_pos; //! <li> copy value to atomic variable
-			clutch_pos_counter %= CLUTCH_ATOMIC_LENGTH;
+			clutch_pos_atomic = clutch_pos; //! <li> copy value to atomic variable
 		} // end ATOMIC_BLOCK
 		//! </ol>
 		//! <li> If new information for panel <ol>
@@ -152,12 +149,7 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	uint16_t clutch_average = 0;
-	for (uint16_t i = 0; i<CLUTCH_ATOMIC_LENGTH; i++) {
-		clutch_average += clutch_pos_atomic[i];
-	}
-	clutch_average /= CLUTCH_ATOMIC_LENGTH;
-	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_average, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 
 /*!
@@ -171,7 +163,7 @@ void timer0_isr_stop(void) {}
  * sending a message to the rear MCU to do the shifting.
  */
 ISR (INT_GEAR_UP) { //IN9
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 //! Gear Down interrupt handler
 /*!
@@ -179,7 +171,7 @@ ISR (INT_GEAR_UP) { //IN9
  * sending a message to the rear MCU to do the shifting.
  */
 ISR (INT_GEAR_DOWN) { //IN8
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 //! Neutral Gear interrupt handler
 /*!
@@ -189,7 +181,7 @@ ISR (INT_GEAR_DOWN) { //IN8
  * accordingly.
  */
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL, CAN_GEAR_CLUTCH_DLC);
+	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 
 //! Pin Change Interrupt handler for IN1.
@@ -203,15 +195,22 @@ void pcISR_in2(void) {}
 void pcISR_in3(void) {
 	; //nothing
 }
+
 //! Pin Change Interrupt handler for IN4.
 /*! Logging start/stop button.broadcasts a messabe to start or stop logging. */
 void pcISR_in4(void) {
-	if (logging) {
-		can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_STOP, CAN_LOG_DLC);
-		logging = TRUE;
-	} else {
-		can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_START, CAN_LOG_DLC);
-		logging = FALSE;
+	if (get_input(IO_LOG_BTN))
+		if (!get_input(IO_GP_BTN)) {
+			if (logging) {
+				can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_STOP, CAN_LOG_DLC);
+				logging = TRUE;
+			} else {
+				can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_START, CAN_LOG_DLC);
+				logging = FALSE;
+			}
+		} else {
+			can_setup_tx(CAN_LAUNCH_ID, (uint8_t *) &CAN_MSG_LAUNCH, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+		}
 	}
 }
 //! Pin Change Interrupt handler for IN5.

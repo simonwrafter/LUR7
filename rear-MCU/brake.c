@@ -39,7 +39,6 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
-#include "gear_clutch.h"
 
 //! Turns brake light on or off.
 /*!

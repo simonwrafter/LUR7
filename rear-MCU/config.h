@@ -71,7 +71,7 @@
 
 //Outputs
 //! Output for Clutch Servo, PWM
-#define CLUTCH				OUT1
+#define CLUTCH				OUT1 //PWM on Timer1
 //unused 					OUT2
 //! Output for Brakelight
 #define BRAKE_LIGHT			OUT3
@@ -81,7 +81,8 @@
 #define GEAR_DOWN			OUT5
 //! Output for Shift cut (DTA pin 14)
 #define SHIFT_CUT			OUT6
-//unused					OUT7
+//! Output for controling Launch Control.
+#define LAUNCH				OUT7
 //! Output to control availability of ground for sensors.
 #define GND_CONTROL			OUT8
 

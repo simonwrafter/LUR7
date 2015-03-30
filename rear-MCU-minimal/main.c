@@ -18,7 +18,7 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
-#include "gear_clutch.h"
+#include "gear_clutch_launch.h"
 #include "brake.h"
 
 // Flag to set if signal to change up is received.
@@ -31,7 +31,7 @@ volatile uint8_t gear_neutral_flag = FALSE;
 volatile uint8_t current_gear = 11;
 
 // The MOb configured for RX of gear and clutch instructions.
-volatile uint8_t gc_MOb;
+volatile uint8_t gcl_MOb;
 // The MOb configured for RX of brake pressure.
 volatile uint8_t brk_MOb;
 // The MOb configured for RX of current gear.
@@ -46,7 +46,7 @@ int main(void) {
 
 	power_off_default(); // power off unused periferals.
 
-	gc_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_MASK, CAN_GEAR_CLUTCH_DLC); // Reception of gear and clutch instructions.
+	gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC); // Reception of gear and clutch instructions.
 	brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_BRAKE_MASK, CAN_FRONT_LOG_DLC); // Reception of brake light instructions.
 	dta_MOb = can_setup_rx(CAN_DTA_GEAR_ID, CAN_DTA_GEAR_MASK, CAN_DTA_DLC); // Reception of current gear from DTA.
 
@@ -86,7 +86,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
 //void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
-	if (mob == gc_MOb) { // gc_MOb receives a message
+	if (mob == gcl_MOb) { // gc_MOb receives a message
 		if (id == CAN_GEAR_ID) { // gear change message
 			uint16_t gear_data = ((uint16_t) data[1] << 8) | data[0];
 			if (gear_data == CAN_MSG_GEAR_UP) { // if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
@@ -99,6 +99,8 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		} else if (id == CAN_CLUTCH_ID) { // if message ID is CAN_CLUTCH_ID
 			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0];
 			clutch_set(clutch_p); // set clutch pwm.
+		} else if (id == CAN_LAUNCH_ID) { // <li> if message ID is CAN_LAUNCH_ID <ul>
+			launch_control(); // engage launch control.
 		}
 	}
 

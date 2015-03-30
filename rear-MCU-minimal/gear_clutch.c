@@ -18,33 +18,25 @@
 
 
 #include "../header_and_config/LUR7.h"
-#include "gear_clutch.h"
+#include "gear_clutch_launch.h"
 #include "config.h"
 
-//! Set to TRUE when gear change system is working.
+//! Set to TRUE when system is working.
 static volatile uint8_t busy = FALSE;
-//! Set to TRUE during the shift cut delay.
-static volatile uint8_t shift_cut_flag = FALSE;
-//! Set to TRUE during the gear up sequence.
-static volatile uint8_t gear_up_flag = FALSE;
-//! Set to TRUE during the gear down sequence.
-static volatile uint8_t gear_down_flag = FALSE;
-//! Set to TRUE during the neutral-from-first-gear sequence.
-static volatile uint8_t neutral_up_flag = FALSE;
-//! Set to TRUE during the neutral-from-second-gear sequence.
-static volatile uint8_t neutral_down_flag = FALSE;
 
 //! Delay between engaging shift cut and running the solenoid.
 static const uint16_t SHIFT_CUT_DELAY = 1000;
-//! time to run the solenoid for gear up.
+//! Time to run the solenoid for gear up.
 static const uint16_t GEAR_UP_DELAY = 1000;
-//! time to run the solenoid for gear down.
+//! Time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY = 1000;
-//! time to run the solenoid for neutral up.
+//! Time to run the solenoid for neutral up.
 static const uint16_t NEUTRAL_UP_DELAY = 1000;
-//! time to run the solenoid for neutral down.
+//! Time to run the solenoid for neutral down.
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
 
+//! Number of cluych readings to average
+static const uint16_t CLUTCH_AVERAGE_NUMBER = 10;
 //! Symmetry point, the resting value of the clutch position sensor.
 static const uint16_t CLUTCH_BIAS_MID = 512;
 //! Threshold value for closed clutch
@@ -56,20 +48,46 @@ static const uint16_t CLUTCH_DC_CLOSED = 3000;
 //! PWM value for open clutch
 static const uint16_t CLUTCH_DC_OPEN = 13000;
 
+//! Array holding the \ref CLUTCH_AVERAGE_NUMBER number of readings to average.
+volatile static uint16_t clutch_array[CLUTCH_AVERAGE_NUMBER];
+volatile static uint8_t clutch_array_counter = 0;
+
+//! Pointer to function call after time elapses.
+static void (*volatile end_fun_ptr)(void);
+//! Function to start second part of gear up.
+static void mid_gear_up(void);
+//! Function to end gear up routine.
+static void end_gear_change(void);
+//! Launch Control, end signal
+static void end_launch_signal(void);
+
 void gear_up(uint8_t current_gear) {
 	if (!busy && current_gear != 5) {
 		busy = TRUE;
-		shift_cut_flag = TRUE;
 		set_output(SHIFT_CUT, GND);
+		end_fun_ptr = mid_gear_up;
 		timer0_start(SHIFT_CUT_DELAY);
 	}
+}
+
+static void mid_gear_up(void) {
+	set_output(SHIFT_CUT, TRI); // reset shift cut output
+	set_output(GEAR_UP, GND); // run solenoid
+	end_fun_ptr = end_gear_change;
+	timer0_start(GEAR_UP_DELAY); // new delay for actual gear change
+}
+
+static void end_gear_change(void) {
+	set_output(GEAR_UP, TRI); // reset output
+	set_output(GEAR_DOWN, TRI); // reset output
+	busy = FALSE; // free unit
 }
 
 void gear_down(uint8_t current_gear) {
 	if (!busy && current_gear != 1) {
 		busy = TRUE;
-		gear_down_flag = TRUE;
 		set_output(GEAR_DOWN, GND);
+		end_fun_ptr = end_gear_change;
 		timer0_start(GEAR_DOWN_DELAY);
 	}
 }
@@ -78,56 +96,55 @@ void gear_neutral(uint8_t current_gear) {
 	if (!busy) {
 		if (current_gear == 1 || current_gear == 11) {
 			busy = TRUE;
-			neutral_up_flag = TRUE;
 			set_output(GEAR_UP, GND);
+			end_fun_ptr = end_gear_change;
 			timer0_start(NEUTRAL_UP_DELAY);
 		} else if (current_gear == 2) {
 			busy = TRUE;
-			neutral_down_flag = TRUE;
 			set_output(GEAR_DOWN, GND);
+			end_fun_ptr = end_gear_change;
 			timer0_start(NEUTRAL_DOWN_DELAY);
 		}
 	}
 }
 
 void clutch_set(uint16_t pos) {
-	if (pos < CLUTCH_BIAS_MID) {
-		pos = 1024 - pos;
+	
+	clutch_array[clutch_array_counter++] = pos;
+	clutch_array_counter %= CLUTCH_AVERAGE_NUMBER;
+	
+	float clutch_ = 0;
+	for (uint8_t i = 0; i<CLUTCH_AVERAGE_NUMBER; i++) {
+		clutch_average += clutch_array[i];
 	}
-	if (pos < CLUTCH_POS_CLOSED) {
+	clutch_average /= CLUTCH_AVERAGE_NUMBER;
+	
+	if (clutch_average < CLUTCH_BIAS_MID) {
+		clutch_average = 1024 - clutch_average;
+	}
+	if (clutch_average < CLUTCH_POS_CLOSED) {
 		timer1_dutycycle(CLUTCH_DC_CLOSED);
-	} else if (pos > CLUTCH_POS_OPEN) {
+	} else if (clutch_average > CLUTCH_POS_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
 	} else {
-		timer1_dutycycle((pos - CLUTCH_POS_CLOSED) * ((float) (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED);
+		timer1_dutycycle((uint16_t) ((clutch_average - CLUTCH_POS_CLOSED) * ((float) (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED));
 	}
 }
 
-/*!
- * Used for ending gear change routines.
- */
-void timer0_isr_stop(void) {
-	if (shift_cut_flag) { // shift cut is used for changing up a gear
-		shift_cut_flag = FALSE; // clear flag
-		set_output(SHIFT_CUT, TRI); // reset shift cut output
-		gear_up_flag = TRUE; // set gear up flag
-		set_output(GEAR_UP, GND); // run solenoid
-		timer0_start(GEAR_UP_DELAY); // new delay for actual gear change
-	} else if (gear_up_flag) {
-		gear_up_flag = FALSE; // clear flag
-		set_output(GEAR_UP, TRI); // reset output
-		busy = FALSE; // free unit
-	} else if (gear_down_flag) {
-		gear_down_flag = FALSE; // clear flag
-		set_output(GEAR_DOWN, TRI); // reset output
-		busy = FALSE; // free unit
-	} else if (neutral_up_flag) { // from 1
-		neutral_up_flag = FALSE; // clear flag
-		set_output(GEAR_UP, TRI); // reset output
-		busy = FALSE; // free unit
-	} else if (neutral_down_flag) { // from 2
-		neutral_down_flag = FALSE; // clear flag
-		set_output(GEAR_DOWN, TRI); // reset output
-		busy = FALSE; // free unit
+void launch_control(void) {
+	if (!busy) {
+		busy = TRUE;
+		set_output(LAUNCH, GND);
+		end_fun_ptr = end_launch_signal;
+		timer0_start(LAUNCH_SIGNAL_DELAY);
 	}
+}
+
+static void end_launch_signal(void) {
+	set_output(LAUNCH, TRI);
+	busy = FALSE;
+}
+
+void timer0_isr_stop(void) {
+	(*end_fun_ptr)();
 }

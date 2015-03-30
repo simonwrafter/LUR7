@@ -40,7 +40,7 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
-#include "gear_clutch.h"
+#include "gear_clutch_launch.h"
 #include "brake.h"
 
 //! Flag to set if signal to change up is received.
@@ -78,8 +78,11 @@ volatile uint16_t susp_l_atomic = 0;
 //! An atomically written and safe copy of suspension sensor for use in interrupt.
 volatile uint16_t susp_r_atomic = 0;
 
-//! The MOb configured for RX of gear and clutch instructions.
-volatile uint8_t gc_MOb;
+//! backup atomic clutch readings
+volatile uint16_t atomic_clutch_pos = 0;
+
+//! The MOb configured for RX of gear, clutch and launch control instructions.
+volatile uint8_t gcl_MOb;
 //! The MOb configured for RX of brake pressure.
 volatile uint8_t brk_MOb;
 //! The MOb configured for RX of current gear.
@@ -114,7 +117,7 @@ int main(void) {
 	//! </ol>
 
 	//! <li> Setup CAN RX <ol>
-	gc_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_MASK, CAN_GEAR_CLUTCH_DLC); //! <li> Reception of gear and clutch instructions.
+	gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC); //! <li> Reception of gear and clutch instructions.
 	brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
 	dta_MOb = can_setup_rx(CAN_DTA_GEAR_ID, CAN_DTA_GEAR_MASK, CAN_DTA_DLC); //! <li> Reception of current gear from DTA.
 	//! </ol>
@@ -166,7 +169,9 @@ int main(void) {
 		if (failsafe_mid) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.
-			clutch_set(clutch); //! <li> set clutch pwm.
+			ATOMIC_BLOCK(ATOMIC_FORCEON) {
+				atomic_clutch_pos = clutch;
+			}
 			//! </ol>
 		} //! </ul>
 		// dta failsafe not needed here, all sorted in timer1_isr_100Hz
@@ -267,10 +272,14 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
 	if (!failsafe_mid && ++failsafe_mid_counter == 100) {
 		failsafe_mid = TRUE;
-		can_free_rx(gc_MOb);
+		can_free_rx(gcl_MOb);
 		pc_int_on(BAK_IN_GEAR_UP); // gear up backup
 		pc_int_on(BAK_IN_GEAR_DOWN); // gear down backup
 		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
+	}
+	
+	if (failsafe_mid) {
+		clutch_set(atomic_clutch_pos);
 	}
 	
 	if (!failsafe_dta && ++failsafe_dta_counter == 100) {
@@ -290,7 +299,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	//20 Hz (avoid other data being sent)
 	if (((interrupt_nbr + 2) % 5) == 0) {
 		uint32_t holder = ((uint32_t) susp_l_atomic << 16) | susp_r_atomic; // build data
-		can_setup_tx(CAN_REAR_LOG_SPEED_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
+		can_setup_tx(CAN_REAR_LOG_SUSPENSION_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
 	}
 }
 
@@ -307,7 +316,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
-	if (mob == gc_MOb) { //! <li> \ref gc_MOb receives a message <ul>
+	if (mob == gcl_MOb) { //! <li> \ref gc_MOb receives a message <ul>
 		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
 			uint16_t gear_data = ((uint16_t) data[1] << 8) | data[0];
@@ -321,6 +330,8 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
 			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct clutch position
 			clutch_set(clutch_p); //! <li> set clutch pwm.
+		} else if (id == CAN_LAUNCH_ID) { //! <li> if message ID is CAN_LAUNCH_ID <ul>
+			launch_control(); //! engage launch control.
 		} //! </ul>
 	} //! </ul>
 

@@ -37,5 +37,11 @@
 #define GEAR_DOWN			OUT5
 // Output for Shift cut (DTA pin 14)
 #define SHIFT_CUT			OUT6
+// Output for controling Launch Control.
+#define LAUNCH				OUT7
+
+
+//External interrupts
+//none
 
 #endif // _CONFIG_H_

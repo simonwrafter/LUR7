@@ -85,12 +85,12 @@ const uint8_t CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging nod
 // +  +  Gear and Clutch
 const uint32_t CAN_GEAR_ID = 0x00001500; //!< The ID for messages carrying Gear Change information
 const uint32_t CAN_CLUTCH_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
-const uint32_t CAN_GEAR_CLUTCH_MASK = 0xFFFFFFFE; //!< Mask for Gear Change and Clutch Position IDs
-const uint8_t CAN_GEAR_CLUTCH_DLC = 2; //!< DLC of Gear Change and Clutch Position messages
+const uint32_t CAN_LAUNCH_ID = 0x00001502; //!< The ID of CAN messages for lunch control
+const uint32_t CAN_GEAR_CLUTCH_LAUNCH_MASK = 0xFFFFFFFC; //!< Mask for Gear Change, Clutch Position and Launch Control IDs
+const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC = 2; //!< DLC of Gear Change and Clutch Position messages
 
 // +  +  Logging
 const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
-const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
 // +  Rear MCU
@@ -103,16 +103,14 @@ const uint8_t CAN_REAR_LOG_DLC = 4; //!< DLC of messages from front logging node
 // Pre-defined messages
 const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
 
-// +  Front-MCU
-// +  +  Brake Light
-const uint16_t CAN_MSG_BRAKE_ON = 0x01; //!< Message for Brake Light ON
-const uint16_t CAN_MSG_BRAKE_OFF = 0x20; //!< Message for Brake Light OFF
-
 // +  Mid-MCU
-// +  +  Gear and Clutch
+// +  +  Gear
 const uint16_t CAN_MSG_GEAR_UP = 0xF11F; //!< Message for Gear Change UP
 const uint16_t CAN_MSG_GEAR_DOWN = 0xF44F; //!< Message for Gear Change DOWN
 const uint16_t CAN_MSG_GEAR_NEUTRAL = 0xAA0A; //!< Message for Gear Change DOWN
+
+// +  +  Launch Control
+const uint8_t CAN_MSG_LAUNCH = 0xB00B; //!< Enable/(disable) launch control system.
 
 // +  +  Logging
 const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.

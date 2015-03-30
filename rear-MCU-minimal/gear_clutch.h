@@ -16,24 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file gear_clutch.h
- * The \ref gear_clutch defines inputs and constants used on the rear MCU.
- *
- * All code is released under the GPLv3 license.
- *
- * \see \ref gear_clutch
- * \see \ref gear_clutch.c
- * \see \ref main.c
- * \see \ref config.h
- * \see <http://www.gnu.org/copyleft/gpl.html>
- * \author Simon Wrafter
- * \copyright GNU Public License v3.0
- *
- * \addtogroup gear_clutch
- */
-
-#ifndef _GEAR_CLUTCH_H_
-#define _GEAR_CLUTCH_H_
+#ifndef _GEAR_CLUTCH_LAUNCH_H_
+#define GEAR_CLUTCH_LAUNCH_H_
 
 void gear_up(uint8_t);
 
@@ -43,4 +27,6 @@ void gear_neutral(uint8_t);
 
 void clutch_set(uint16_t);
 
-#endif // _GEAR_CLUTCH_H_
+void launch_control(void);
+
+#endif // _GEAR_CLUTCH_LAUNCH_H_
