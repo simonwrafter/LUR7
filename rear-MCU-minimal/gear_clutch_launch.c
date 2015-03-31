@@ -1,7 +1,7 @@
 /*
  * gear_clutch.c - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -34,23 +34,23 @@ static const uint16_t GEAR_DOWN_DELAY = 1000;
 static const uint16_t NEUTRAL_UP_DELAY = 1000;
 //! Time to run the solenoid for neutral down.
 static const uint16_t NEUTRAL_DOWN_DELAY = 1000;
+//! Time to run the signal for launch control
+static const uint16_t LAUNCH_SIGNAL_DELAY = 500;
 
-//! Number of cluych readings to average
-static const uint16_t CLUTCH_AVERAGE_NUMBER = 10;
 //! Symmetry point, the resting value of the clutch position sensor.
-static const uint16_t CLUTCH_BIAS_MID = 512;
+static const float CLUTCH_BIAS_MID = 512;
 //! Threshold value for closed clutch
-static const uint16_t CLUTCH_POS_CLOSED = 650;
+static const float CLUTCH_POS_CLOSED = 650;
 //! Threshold value for open clutch
-static const uint16_t CLUTCH_POS_OPEN = 900;
+static const float CLUTCH_POS_OPEN = 900;
 //! PWM value for closed clutch
-static const uint16_t CLUTCH_DC_CLOSED = 3000;
+static const float CLUTCH_DC_CLOSED = 4000;
 //! PWM value for open clutch
-static const uint16_t CLUTCH_DC_OPEN = 13000;
+static const float CLUTCH_DC_OPEN = 12000;
 
 //! Array holding the \ref CLUTCH_AVERAGE_NUMBER number of readings to average.
-volatile static uint16_t clutch_array[CLUTCH_AVERAGE_NUMBER];
-volatile static uint8_t clutch_array_counter = 0;
+volatile static float clutch_old = 0;
+static const float clutch_factor = 0.1;
 
 //! Pointer to function call after time elapses.
 static void (*volatile end_fun_ptr)(void);
@@ -109,25 +109,19 @@ void gear_neutral(uint8_t current_gear) {
 }
 
 void clutch_set(uint16_t pos) {
-	
-	clutch_array[clutch_array_counter++] = pos;
-	clutch_array_counter %= CLUTCH_AVERAGE_NUMBER;
-	
-	float clutch_ = 0;
-	for (uint8_t i = 0; i<CLUTCH_AVERAGE_NUMBER; i++) {
-		clutch_average += clutch_array[i];
+
+	volatile float clutch_new = clutch_factor * pos + (1 - clutch_factor) * clutch_old;
+	clutch_old = clutch_new;
+
+	if (clutch_new < CLUTCH_BIAS_MID) {
+		clutch_new = 1024 - clutch_new;
 	}
-	clutch_average /= CLUTCH_AVERAGE_NUMBER;
-	
-	if (clutch_average < CLUTCH_BIAS_MID) {
-		clutch_average = 1024 - clutch_average;
-	}
-	if (clutch_average < CLUTCH_POS_CLOSED) {
+	if (clutch_new < CLUTCH_POS_CLOSED) {
 		timer1_dutycycle(CLUTCH_DC_CLOSED);
-	} else if (clutch_average > CLUTCH_POS_OPEN) {
+	} else if (clutch_new > CLUTCH_POS_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
 	} else {
-		timer1_dutycycle((uint16_t) ((clutch_average - CLUTCH_POS_CLOSED) * ((float) (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED));
+		timer1_dutycycle(((clutch_new - CLUTCH_POS_CLOSED) * ((CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED));
 	}
 }
 

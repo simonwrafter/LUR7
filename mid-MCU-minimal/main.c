@@ -81,7 +81,7 @@ void pcISR_in1(void) {}
 void pcISR_in2(void) {}
 void pcISR_in3(void) {}
 void pcISR_in4(void) {
-	if (get_input(IO_LOG_BTN))
+	if (get_input(IO_LOG_BTN)) {
 		if (!get_input(IO_GP_BTN)) {
 			;
 		} else {
