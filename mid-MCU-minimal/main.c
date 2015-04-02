@@ -74,7 +74,11 @@ ISR (INT_GEAR_DOWN) { //IN8
 	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	if (!get_input(IO_ALT_BTN)) {
+		can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL_SINGLE, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	} else {
+		can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	}
 }
 
 void pcISR_in1(void) {}
@@ -82,7 +86,7 @@ void pcISR_in2(void) {}
 void pcISR_in3(void) {}
 void pcISR_in4(void) {
 	if (get_input(IO_LOG_BTN)) {
-		if (!get_input(IO_GP_BTN)) {
+		if (!get_input(IO_ALT_BTN)) {
 			;
 		} else {
 			can_setup_tx(CAN_LAUNCH_ID, (uint8_t *) &CAN_MSG_LAUNCH, CAN_GEAR_CLUTCH_LAUNCH_DLC);

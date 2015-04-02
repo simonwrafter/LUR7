@@ -60,19 +60,21 @@ static volatile uint16_t neutral_down_try_time = 500;
 //! Number of tries for neutral
 static volatile uint8_t neutral_counter = 0;
 
-//***** LINEAR
+//***** SINGLE
+static void neutral_single_stabiliser_up(void);
+static void neutral_single_end_up(void);
+static void neutral_single_stabiliser_down(void);
+static void neutral_single_end_down(void);
 
-//! Time to add to or subtract from neutral delay time when searching
+//***** LINEAR
 static const uint16_t NEUTRAL_DELAY_ADJUST = 50; //5 ms
 
 static void neutral_repeat_worker_linear(void);
 static void neutral_repeat_stabiliser_linear(void);
 
 //***** BINARY
-
 static volatile uint16_t neutral_up_limit_high = 700;
 static volatile uint16_t neutral_up_limit_low = 300;
-
 static volatile uint16_t neutral_down_limit_high = 700;
 static volatile uint16_t neutral_down_limit_low = 300;
 
@@ -155,15 +157,45 @@ void gear_neutral_single() {
 	if (!busy) {
 		if (current_gear == 1 || current_gear == 11) {
 			set_output(GEAR_UP, GND);
-			end_fun_ptr = end_gear_change;
+			end_fun_ptr = neutral_single_stabiliser_up;
 			timer0_start(neutral_up_try_time);
 		} else if (current_gear == 2) {
 			busy = TRUE;
 			set_output(GEAR_DOWN, GND);
-			end_fun_ptr = end_gear_change;
+			end_fun_ptr = neutral_single_stabiliser_down;
 			timer0_start(neutral_down_try_time);
 		}
 	}
+}
+
+static void neutral_single_stabiliser_up(void) {
+	set_output(GEAR_UP, TRI); // reset output
+	end_fun_ptr = neutral_single_end_up;
+	timer0_start(NEUTRAL_STABILISATION_DELAY);
+}
+
+static void neutral_single_end_up(void) {
+	if (current_gear == 1) {
+		neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+	} else if (current_gear == 2) {
+		neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+	}
+	busy = FALSE;
+}
+
+static void neutral_single_stabiliser_down(void) {
+	set_output(GEAR_DOWN, TRI); // reset output
+	end_fun_ptr = neutral_single_end_down;
+	timer0_start(NEUTRAL_STABILISATION_DELAY);
+}
+
+static void neutral_single_end_down(void) {
+	if (current_gear == 1) {
+		neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
+	} else if (current_gear == 2) {
+		neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
+	}
+	busy = FALSE;
 }
 
 //***** LINEAR

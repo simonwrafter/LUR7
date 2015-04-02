@@ -25,8 +25,10 @@
 volatile uint8_t gear_up_flag = FALSE;
 // Flag to set if signal to change down is received.
 volatile uint8_t gear_down_flag = FALSE;
-// Flag to set if signal to change to neutral is received.
-volatile uint8_t gear_neutral_flag = FALSE;
+// Flag to set if signal to change to neutral (single attempt) is received.
+volatile uint8_t gear_neutral_single_flag = FALSE;
+// Flag to set if signal to change to neutral (repeated attempts) is received.
+volatile uint8_t gear_neutral_repeat_flag = FALSE;
 // Variable holding the current gear as perceived by the DTA S60pro.
 volatile uint8_t current_gear = 11;
 
@@ -62,9 +64,14 @@ int main(void) {
 			gear_down(); // change down a gear.
 			gear_down_flag = FALSE; // clear gear_down_flag.
 		}
-		if (gear_neutral_flag) { // if gear_down_flag is set.
-			gear_neutral_single(); // change down a gear.
-			gear_neutral_flag = FALSE; // clear gear_down_flag.
+		if (gear_neutral_single_flag) { // if neutral flag is set.
+			gear_neutral_single(); // change to neutral gear. (single attempt)
+			gear_neutral_single_flag = FALSE; // clear neutral flag.
+		}
+		if (gear_neutral_repeat_flag) { // if neutral flag is set.
+			gear_neutral_repeat_linear(); // change to neutral gear. (repeat attempt)
+			//gear_neutral_repeat_binary(); // change to neutral gear. (repeat attempt)
+			gear_neutral_repeat_flag = FALSE; // clear neutral flag.
 		}
 	}
 	return 0;
@@ -93,8 +100,10 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_up_flag = TRUE;
 			} else if (gear_data == CAN_MSG_GEAR_DOWN) { // if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
 				gear_down_flag = TRUE;
-			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL) { // if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
-				gear_neutral_flag = TRUE;
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL_SINGLE) { // if msg is CAN_MSG_GEAR_NEUTRAL_SINGLE, set neutral_s to TRUE.
+				gear_neutral_single_flag = TRUE;
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL_REPEAT) { // if msg is CAN_MSG_GEAR_NEUTRAL_REAPEAT, set neutral_r to TRUE.
+				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { // if message ID is CAN_CLUTCH_ID
 			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0];

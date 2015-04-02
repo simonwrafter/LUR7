@@ -107,10 +107,11 @@ const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
 // +  +  Gear
 const uint16_t CAN_MSG_GEAR_UP = 0xF11F; //!< Message for Gear Change UP
 const uint16_t CAN_MSG_GEAR_DOWN = 0xF44F; //!< Message for Gear Change DOWN
-const uint16_t CAN_MSG_GEAR_NEUTRAL = 0xAA0A; //!< Message for Gear Change DOWN
+const uint16_t CAN_MSG_GEAR_NEUTRAL_SINGLE = 0x0A0A; //!< Message for Neutral Gear (single attempt)
+const uint16_t CAN_MSG_GEAR_NEUTRAL_REPEAT = 0x44AA; //!< Message for Neutral Gear (repeat attempt)
 
 // +  +  Launch Control
-const uint8_t CAN_MSG_LAUNCH = 0xB00B; //!< Enable/(disable) launch control system.
+const uint16_t CAN_MSG_LAUNCH = 0xB00B; //!< Enable/(disable) launch control system.
 
 // +  +  Logging
 const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.

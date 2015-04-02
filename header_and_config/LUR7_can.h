@@ -163,15 +163,15 @@ extern const uint16_t CAN_MSG_BRAKE_OFF; //!< Message for Brake Light OFF
 // +  +  Gear and Clutch
 extern const uint16_t CAN_MSG_GEAR_UP; //!< Message for Gear Change UP
 extern const uint16_t CAN_MSG_GEAR_DOWN; //!< Message for Gear Change DOWN
-extern const uint16_t CAN_MSG_GEAR_NEUTRAL; //!< Message for Gear Change DOWN
+extern const uint16_t CAN_MSG_GEAR_NEUTRAL_SINGLE; //!< Message for Neutral gear (single attempt)
+extern const uint16_t CAN_MSG_GEAR_NEUTRAL_REPEAT; //!< Message for Neutral gear (repeat attempt)
+
+// +  +  Launch Control
+extern const uint16_t CAN_MSG_LAUNCH; //!< Enable/(disable) launch control system.
 
 // +  +  Logging
 extern const uint8_t CAN_MSG_LOG_START; //!< Start sending log data.
 extern const uint8_t CAN_MSG_LOG_STOP; //!< Stop sending log data.
-
-// +  +  Launch Control
-extern const uint8_t CAN_MSG_LAUNCH; //!< Enable/(disable) launch control system.
-
 
 /*******************************************************************************
  * public api
