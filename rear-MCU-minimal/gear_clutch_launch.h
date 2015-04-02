@@ -27,7 +27,8 @@ void gear_down(void);
 
 void gear_neutral_single(void);
 
-void gear_neutral_repeat(void);
+void gear_neutral_repeat_linear(void);
+void gear_neutral_repeat_binary(void);
 
 void clutch_set(uint16_t);
 
