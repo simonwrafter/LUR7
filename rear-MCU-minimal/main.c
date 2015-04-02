@@ -55,15 +55,15 @@ int main(void) {
 
 	while (1) {
 		if (gear_up_flag) { // if gear_up_flag is set.
-			gear_up(current_gear); // change up a gear.
+			gear_up(); // change up a gear.
 			gear_up_flag = FALSE;  // clear gear_up_flag.
 		}
 		if (gear_down_flag) { // if gear_down_flag is set.
-			gear_down(current_gear); // change down a gear.
+			gear_down(); // change down a gear.
 			gear_down_flag = FALSE; // clear gear_down_flag.
 		}
 		if (gear_neutral_flag) { // if gear_down_flag is set.
-			gear_neutral(current_gear); // change down a gear.
+			gear_neutral_single(); // change down a gear.
 			gear_neutral_flag = FALSE; // clear gear_down_flag.
 		}
 	}
@@ -110,7 +110,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	}
 
 	if (mob == dta_MOb) { // dta_MOb receives a message
-		current_gear = data[0];
+		set_current_gear(data[0]); // relay to gear system.
 	}
 }
 
