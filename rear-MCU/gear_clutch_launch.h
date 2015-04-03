@@ -1,5 +1,5 @@
 /*
- * gear_clutch.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * gear_clutch_launch.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,11 +35,16 @@
 #ifndef _GEAR_CLUTCH_LAUNCH_H_
 #define GEAR_CLUTCH_LAUNCH_H_
 
-void gear_up(uint8_t);
+void set_current_gear(uint8_t gear);
 
-void gear_down(uint8_t);
+void gear_up(void);
 
-void gear_neutral(uint8_t);
+void gear_down(void);
+
+void gear_neutral_single(void);
+
+void gear_neutral_repeat_linear(void);
+void gear_neutral_repeat_binary(void);
 
 void clutch_set(uint16_t);
 

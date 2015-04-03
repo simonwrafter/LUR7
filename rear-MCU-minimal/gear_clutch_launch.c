@@ -107,7 +107,7 @@ static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
 static void end_launch_signal(void);
 
 //******************************************************************************
-// GEAR CHANGES
+// COMMON
 //******************************************************************************
 
 void set_current_gear(uint8_t gear) {
@@ -156,6 +156,7 @@ static void end_gear_change(void) {
 void gear_neutral_single() {
 	if (!busy) {
 		if (current_gear == 1 || current_gear == 11) {
+			busy = TRUE;
 			set_output(GEAR_UP, GND);
 			end_fun_ptr = neutral_single_stabiliser_up;
 			timer0_start(neutral_up_try_time);

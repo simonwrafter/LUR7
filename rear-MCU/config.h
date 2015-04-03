@@ -81,7 +81,7 @@
 #define GEAR_DOWN			OUT5
 //! Output for Shift cut (DTA pin 14)
 #define SHIFT_CUT			OUT6
-//! Output for controling Launch Control.
+//! Output for controling Launch Control. (DTA pin 4)
 #define LAUNCH				OUT7
 //! Output to control availability of ground for sensors.
 #define GND_CONTROL			OUT8

@@ -47,10 +47,10 @@
 volatile uint8_t gear_up_flag = FALSE;
 //! Flag to set if signal to change down is received.
 volatile uint8_t gear_down_flag = FALSE;
-//! Flag to set if signal to change to neutral is received.
-volatile uint8_t gear_neutral_flag = FALSE;
-//! Variable holding the current gear as perceived by the DTA S60pro.
-volatile uint8_t current_gear = 11;
+//! Flag to set if signal to change to neutral (single attempt) is received.
+volatile uint8_t gear_neutral_single_flag = FALSE;
+//! Flag to set if signal to change to neutral (repeated attempts) is received.
+volatile uint8_t gear_neutral_repeat_flag = FALSE;
 
 //! Whether the front MCU is in failsafe mode.
 volatile uint8_t failsafe_front = FALSE;
@@ -134,16 +134,21 @@ int main(void) {
 
 		//! <li> Always do: <ol>
 		if (gear_up_flag) { //! <li> if gear_up_flag is set. <ol>
-			gear_up(current_gear); //! <li> change up a gear.
+			gear_up(); //! <li> change up a gear.
 			gear_up_flag = FALSE;  //! <li> clear gear_up_flag.
 		} //! </ol>
 		if (gear_down_flag) { //! <li> if gear_down_flag is set. <ol>
-			gear_down(current_gear); //! <li> change down a gear.
+			gear_down(); //! <li> change down a gear.
 			gear_down_flag = FALSE; //! <li> clear gear_down_flag.
 		} //! </ol>
-		if (gear_neutral_flag) { //! <li> if gear_down_flag is set. <ol>
-			gear_neutral(current_gear); //! <li> change down a gear.
-			gear_neutral_flag = FALSE; //! <li> clear gear_down_flag.
+		if (gear_neutral_single_flag) { //! <li> if neutral flag is set. <ol>
+			gear_neutral_single(); //! <li> change to neutral gear. (single attempt)
+			gear_neutral_single_flag = FALSE; //! <li> clear neutral flag.
+		} //! </ol>
+		if (gear_neutral_repeat_flag) { //! <li> if neutral flag is set. <ol>
+			gear_neutral_repeat_linear(); //! <li> change to neutral gear. (repeat attempt)
+			//gear_neutral_repeat_binary(); //! <li> change to neutral gear. (repeat attempt)
+			gear_neutral_repeat_flag = FALSE; //! <li> clear neutral flag.
 		} //! </ol>
 		//! </ol>
 
@@ -164,7 +169,7 @@ int main(void) {
 			brake_light(brake); //! <li> set brake light on/off.
 			//! </ol>
 		} //! </ul>
-		
+
 		//! <li> If mid in failsafe, do: <ul>
 		if (failsafe_mid) {
 			//! <li> Clutch control <ol>
@@ -199,7 +204,7 @@ void pcISR_in2(void) {
 //! Pin Change Interrupt handler for IN3.
 /*! Gear Up backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in3(void) {
-	if (get_input(IN3)) {
+	if (get_input(BAK_IN_GEAR_UP)) {
 		gear_up_flag = TRUE;
 	}
 }
@@ -211,7 +216,7 @@ void pcISR_in4(void) {}
 //! Pin Change Interrupt handler for IN5.
 /*! Gear Down backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in5(void) {
-	if (get_input(IN5)) {
+	if (get_input(BAK_IN_GEAR_DOWN)) {
 		gear_down_flag = TRUE;
 	}
 }
@@ -223,8 +228,8 @@ void pcISR_in6(void) {}
 //! Pin Change Interrupt handler for IN7.
 /*! Neutral Gear backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in7(void) {
-	if (get_input(IN7)) {
-		gear_neutral_flag = TRUE;
+	if (get_input(BAK_IN_NEUTRAL)) {
+		gear_neutral_single_flag = TRUE;
 	}
 }
 
@@ -269,7 +274,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		failsafe_front = TRUE;
 		can_free_rx(brk_MOb);
 	}
-	
+
 	if (!failsafe_mid && ++failsafe_mid_counter == 100) {
 		failsafe_mid = TRUE;
 		can_free_rx(gcl_MOb);
@@ -277,15 +282,15 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		pc_int_on(BAK_IN_GEAR_DOWN); // gear down backup
 		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
 	}
-	
+
 	if (failsafe_mid) {
 		clutch_set(atomic_clutch_pos);
 	}
-	
+
 	if (!failsafe_dta && ++failsafe_dta_counter == 100) {
 		failsafe_dta = TRUE;
 		can_free_rx(dta_MOb);
-		current_gear = 11;
+		set_current_gear(11);
 	}
 
 	// 10 Hz (avoid other data being sent)
@@ -324,9 +329,11 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_up_flag = TRUE;
 			} else if (gear_data == CAN_MSG_GEAR_DOWN) { //! <li> if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
 				gear_down_flag = TRUE;
-			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL) { //! <li> if message is CAN_MSG_GEAR_NEUTRAL, set \ref gear_down_flag to TRUE.
-				gear_neutral_flag = TRUE;
-			} //! </ul>
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL_SINGLE) { //! <li> if msg is CAN_MSG_GEAR_NEUTRAL_SINGLE, set neutral_s to TRUE.
+				gear_neutral_single_flag = TRUE;
+			} else if (gear_data == CAN_MSG_GEAR_NEUTRAL_REPEAT) { //! <li> if msg is CAN_MSG_GEAR_NEUTRAL_REAPEAT, set neutral_r to TRUE.
+				gear_neutral_repeat_flag = TRUE;
+			}
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
 			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct clutch position
 			clutch_set(clutch_p); //! <li> set clutch pwm.
@@ -340,12 +347,12 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		uint16_t brake_p = ((uint16_t) data[3] << 8) | data[2]; //! <li> reconstruct brake pressure
 		brake_light(brake_p); //! <li> control brake light
 	} //! </ul>
-	
+
 	if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
-		current_gear = data[0];
+		set_current_gear(data[0]); //! <li> relay to gear system.
 	} //! </ul>
-	
+
 //! </ul>
 }
 

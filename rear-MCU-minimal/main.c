@@ -29,10 +29,8 @@ volatile uint8_t gear_down_flag = FALSE;
 volatile uint8_t gear_neutral_single_flag = FALSE;
 // Flag to set if signal to change to neutral (repeated attempts) is received.
 volatile uint8_t gear_neutral_repeat_flag = FALSE;
-// Variable holding the current gear as perceived by the DTA S60pro.
-volatile uint8_t current_gear = 11;
 
-// The MOb configured for RX of gear and clutch instructions.
+// The MOb configured for RX of gear, clutch and launch control instructions.
 volatile uint8_t gcl_MOb;
 // The MOb configured for RX of brake pressure.
 volatile uint8_t brk_MOb;

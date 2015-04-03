@@ -181,7 +181,11 @@ ISR (INT_GEAR_DOWN) { //IN8
  * accordingly.
  */
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	if (!get_input(IO_ALT_BTN)) {
+		can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL_SINGLE, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	} else {
+		can_setup_tx(CAN_GEAR_ID, (uint8_t *) &CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	}
 }
 
 //! Pin Change Interrupt handler for IN1.
@@ -191,16 +195,14 @@ void pcISR_in1(void) {}
 /*! unused */
 void pcISR_in2(void) {}
 //! Pin Change Interrupt handler for IN3.
-/*! General purpose button, no job yet */
-void pcISR_in3(void) {
-	; //nothing
-}
+/*! Alternate purpose button, not used as interrupt */
+void pcISR_in3(void) {}
 
 //! Pin Change Interrupt handler for IN4.
 /*! Logging start/stop button.broadcasts a messabe to start or stop logging. */
 void pcISR_in4(void) {
-	if (get_input(IO_LOG_BTN))
-		if (!get_input(IO_GP_BTN)) {
+	if (get_input(IO_LOG_BTN)) {
+		if (!get_input(IO_ALT_BTN)) {
 			if (logging) {
 				can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_STOP, CAN_LOG_DLC);
 				logging = TRUE;

@@ -49,7 +49,7 @@
 //unused					IN1
 //#define					IN2
 //! Input for General Purpose button
-#define IO_GP_BTN			IN3
+#define IO_ALT_BTN			IN3
 //! Input for Log Start/Stop button
 #define IO_LOG_BTN			IN4
 //! Input for Neutral Gear button
