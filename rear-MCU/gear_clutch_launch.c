@@ -364,7 +364,13 @@ static void neutral_repeat_worker_linear(void) {
 		timer0_start(neutral_down_try_time += NEUTRAL_DELAY_ADJUST);
 	} else {
 		busy = FALSE;
-		//tx_can_setup send time information of sucessfull neutral search
+		uint32_t time_info = 0x0000;
+		if (last_gear == 1) {
+			time_info = neutral_up_try_time << 16;
+		} else if (last_gear == 2) {
+			time_info = neutral_down_try_time;
+		}
+		tx_can_setup(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) time_info, CAN_REAR_LOG_DLC) // send time of successful neutral find
 		return;
 	}
 	last_gear = current_gear;
@@ -432,10 +438,15 @@ static void neutral_repeat_worker_binary(void) {
 		timer0_start(neutral_down_try_time);
 	} else {
 		busy = FALSE; //assume in neutral. (or in third, but that really shouldn't happen.)
-		//tx_can_setup send time information of sucessfull neutral search
+		uint32_t time_info = 0x0000;
+		if (last_gear == 1) {
+			time_info = neutral_up_try_time << 16;
+		} else if (last_gear == 2) {
+			time_info = neutral_down_try_time;
+		}
+		tx_can_setup(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) time_info, CAN_REAR_LOG_DLC) // send time of successful neutral find
 		return;
 	}
-
 	last_gear = current_gear;
 	end_fun_ptr = neutral_repeat_stabiliser_binary;
 }
@@ -450,8 +461,6 @@ static void neutral_repeat_stabiliser_binary(void) {
 //******************************************************************************
 // CLUTCH
 //******************************************************************************
-
-
 
 //! Position the clutch servo.
 /*!

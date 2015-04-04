@@ -148,8 +148,8 @@ extern const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
 // +  +  Logging
 extern const uint32_t CAN_REAR_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_REAR_LOG_SUSPENSION_ID; //!< Message ID for front suspension
+extern const uint32_t CAN_REAR_LOG_NEUTRAL_ID; //!< Message ID for logging of successful attempts at finding Neutral Gear
 extern const uint8_t CAN_REAR_LOG_DLC; //!< DLC of messages from front logging node
-
 
 // Pre-defined messages
 extern const uint64_t CAN_MSG_NONE; //!< No message

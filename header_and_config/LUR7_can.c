@@ -97,10 +97,8 @@ const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
 // +  +  Logging
 const uint32_t CAN_REAR_LOG_SPEED_ID = 0x4500; //!< Message ID for front wheel speeds
 const uint32_t CAN_REAR_LOG_SUSPENSION_ID = 0x4501; //!< Message ID for front suspension
+const uint32_t CAN_REAR_LOG_NEUTRAL_ID = 0x4502; //!< Message ID for logging of successful attempts at finding Neutral Gear
 const uint8_t CAN_REAR_LOG_DLC = 4; //!< DLC of messages from rear logging node
-
-const uint32_t CAN_REAR_LOG_NEUTRAL_ID = 0x5000; //!< Message ID for logging of successful attempts at finding Neutral Gear
-const uint8_t CAN_REAR_LOG_NEUTRAL_DLC = 2; //!< Message ID for logging of successful attempts at finding Neutral Gear
 
 // Pre-defined messages
 const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
