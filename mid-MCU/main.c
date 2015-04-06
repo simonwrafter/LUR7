@@ -50,10 +50,14 @@ volatile uint8_t CAN_DTA_MOb;
 volatile uint8_t logging = FALSE;
 //! Flag set when new information has been received and the panel is ready to be updated
 volatile uint8_t new_info = TRUE;
-//! Clutch position sensor value.
-volatile uint16_t clutch_pos = 0;
-//! Atomically written copy of clutch position sensor value.
-volatile uint16_t clutch_pos_atomic = 0;
+//! Left clutch position sensor value.
+volatile uint16_t clutch_pos_left = 0;
+//! Right clutch position sensor value.
+volatile uint16_t clutch_pos_right = 0;
+//! Atomically written copy of left clutch position sensor value.
+volatile uint16_t clutch_pos_left_atomic = 0;
+//! Atomically written copy of right clutch position sensor value.
+volatile uint16_t clutch_pos_right_atomic = 0;
 
 //! Main function.
 /*!
@@ -91,7 +95,7 @@ int main(void) {
 	ext_int_on(IO_GEAR_UP, 1, 1); //! <li> Gear up, rising flank trigger external interrupt
 	ext_int_on(IO_GEAR_DOWN, 1, 1); //! <li> Gear down, rising flank trigger external interrupt
 	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); //! <li> Neutral gear, rising flank trigger external interrupt
-	
+
 	//pc_int_on(IO_GP_BTN);
 	pc_int_on(IO_LOG_BTN);
 	//! </ol>
@@ -105,10 +109,16 @@ int main(void) {
 	//! <li> LOOP <ul>
 	while (1) {
 		//! <li> Always do: <ol>
-		clutch_pos = adc_get(IO_CLUTCH); //! <li> get clutch paddle position
+		clutch_pos_left = adc_get(IO_CLUTCH_LEFT); //! <li> get left clutch paddle position
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_atomic = clutch_pos; //! <li> copy value to atomic variable
+			clutch_pos_left_atomic = clutch_pos_left; //! <li> copy value to atomic variable
 		} // end ATOMIC_BLOCK
+
+		clutch_pos_right = adc_get(IO_CLUTCH_RIGHT); //! <li> get right clutch paddle position
+		ATOMIC_BLOCK(ATOMIC_FORCEON) {
+			clutch_pos_left_atomic = clutch_pos_left; //! <li> copy value to atomic variable
+		} // end ATOMIC_BLOCK
+
 		//! </ol>
 		//! <li> If new information for panel <ol>
 		if (new_info) {
@@ -149,7 +159,8 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	uint32_t c_data = (clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
+	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 
 /*!
@@ -191,16 +202,10 @@ ISR (INT_GEAR_NEUTRAL) { //IN5
 //! Pin Change Interrupt handler for IN1.
 /*! \todo manual gear changes on/off, FAILSAFE */
 void pcISR_in1(void) {}
-//! Pin Change Interrupt handler for IN2.
-/*! unused */
-void pcISR_in2(void) {}
-//! Pin Change Interrupt handler for IN3.
-/*! Alternate purpose button, not used as interrupt */
-void pcISR_in3(void) {}
 
-//! Pin Change Interrupt handler for IN4.
+//! Pin Change Interrupt handler for IN2.
 /*! Logging start/stop button.broadcasts a messabe to start or stop logging. */
-void pcISR_in4(void) {
+void pcISR_in2(void) {
 	if (get_input(IO_LOG_BTN)) {
 		if (!get_input(IO_ALT_BTN)) {
 			if (logging) {
@@ -215,6 +220,13 @@ void pcISR_in4(void) {
 		}
 	}
 }
+
+//! Pin Change Interrupt handler for IN3.
+/*! Alternate purpose button, not used as interrupt */
+void pcISR_in3(void) {}
+//! Pin Change Interrupt handler for IN4.
+/*! \warning in6 used as analog input */
+void pcISR_in4(void) {}
 //! Pin Change Interrupt handler for IN5.
 /*! \warning in5 used as external interrupt */
 void pcISR_in5(void) {}

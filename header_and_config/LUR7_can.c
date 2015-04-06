@@ -87,7 +87,7 @@ const uint32_t CAN_GEAR_ID = 0x00001500; //!< The ID for messages carrying Gear 
 const uint32_t CAN_CLUTCH_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
 const uint32_t CAN_LAUNCH_ID = 0x00001502; //!< The ID of CAN messages for lunch control
 const uint32_t CAN_GEAR_CLUTCH_LAUNCH_MASK = 0xFFFFFFFC; //!< Mask for Gear Change, Clutch Position and Launch Control IDs
-const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC = 2; //!< DLC of Gear Change and Clutch Position messages
+const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC = 4; //!< DLC of Gear Change and Clutch Position messages
 
 // +  +  Logging
 const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
@@ -105,13 +105,13 @@ const uint64_t CAN_MSG_NONE = 0x0000000000000000; //!< No message
 
 // +  Mid-MCU
 // +  +  Gear
-const uint16_t CAN_MSG_GEAR_UP = 0xF11F; //!< Message for Gear Change UP
-const uint16_t CAN_MSG_GEAR_DOWN = 0xF44F; //!< Message for Gear Change DOWN
-const uint16_t CAN_MSG_GEAR_NEUTRAL_SINGLE = 0x0A0A; //!< Message for Neutral Gear (single attempt)
-const uint16_t CAN_MSG_GEAR_NEUTRAL_REPEAT = 0x44AA; //!< Message for Neutral Gear (repeat attempt)
+const uint32_t CAN_MSG_GEAR_UP = 0xF110011F; //!< Message for Gear Change UP
+const uint32_t CAN_MSG_GEAR_DOWN = 0xF440044F; //!< Message for Gear Change DOWN
+const uint32_t CAN_MSG_GEAR_NEUTRAL_SINGLE = 0x0A0A0A0A; //!< Message for Neutral Gear (single attempt)
+const uint32_t CAN_MSG_GEAR_NEUTRAL_REPEAT = 0x44AA55BB; //!< Message for Neutral Gear (repeat attempt)
 
 // +  +  Launch Control
-const uint16_t CAN_MSG_LAUNCH = 0xB00B; //!< Enable/(disable) launch control system.
+const uint32_t CAN_MSG_LAUNCH = 0x0B00B1E5; //!< Enable/(disable) launch control system.
 
 // +  +  Logging
 const uint8_t CAN_MSG_LOG_START = 0x11; //!< Start sending log data.

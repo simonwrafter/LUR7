@@ -124,6 +124,7 @@ int main(void) {
 
 	//! <li> Enable system <ol>
 	set_output(GND_CONTROL, GND); //! <li> connect sensors to ground.
+	clutch_init(); //! <li> configure clutch.
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
 	//! </ol>
@@ -335,8 +336,9 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			uint16_t clutch_p = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct clutch position
-			clutch_set(clutch_p); //! <li> set clutch pwm.
+			uint16_t clutch_p_left = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct left clutch position
+			uint16_t clutch_p_right = ((uint16_t) data[3] << 8) | data[2]; //! <li> reconstruct right clutch position
+			clutch_set(clutch_p_left, clutch_p_right); //! <li> set clutch pwm.
 		} else if (id == CAN_LAUNCH_ID) { //! <li> if message ID is CAN_LAUNCH_ID <ul>
 			launch_control(); //! engage launch control.
 		} //! </ul>

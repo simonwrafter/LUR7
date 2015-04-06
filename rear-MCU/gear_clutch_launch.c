@@ -110,19 +110,21 @@ static void neutral_repeat_stabiliser_binary(void);
 
 //********** CLUTCH ************************************************************
 
-//! Symmetry point, the resting value of the clutch position sensor.
-static const float CLUTCH_BIAS_MID = 512;
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_CLOSED = 650;
+static const float CLUTCH_POS_LEFT_CLOSED = 650;
 //! Threshold value for open clutch
-static const float CLUTCH_POS_OPEN = 900;
+static const float CLUTCH_POS_LEFT_OPEN = 900;
+//! Threshold value for closed clutch
+static const float CLUTCH_POS_RIGHT_CLOSED = 650;
+//! Threshold value for open clutch
+static const float CLUTCH_POS_RIGHT_OPEN = 900;
 //! PWM value for closed clutch
 static const float CLUTCH_DC_CLOSED = 4000;
 //! PWM value for open clutch
 static const float CLUTCH_DC_OPEN = 12000;
 
 //! Initial value for the filter.
-volatile static float clutch_old = 512;
+volatile static float clutch_old = 0;
 //! The filter factor for the new clutch position value.
 static const float clutch_factor = 0.1;
 
@@ -462,6 +464,11 @@ static void neutral_repeat_stabiliser_binary(void) {
 // CLUTCH
 //******************************************************************************
 
+void clutch_init(void) {
+	clutch_left_factor = ((CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_LEFT_OPEN - CLUTCH_POS_LEFT_CLOSED);
+	clutch_right_factor = ((CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_RIGHT_OPEN - CLUTCH_POS_RIGHT_CLOSED);
+}
+
 //! Position the clutch servo.
 /*!
  * The sensor positioned in the steering wheel givves an analog signal which is
@@ -477,19 +484,34 @@ static void neutral_repeat_stabiliser_binary(void) {
  *
  * \param pos the angle of the clutch paddle.
  */
-void clutch_set(uint16_t pos) {
-	float clutch_new = clutch_factor * pos + (1 - clutch_factor) * clutch_old;
-	clutch_old = clutch_new;
+void clutch_set(uint16_t pos_left, uint16_t pos_right) {
+	float clutch_right_new = clutch_factor * pos_right + (1 - clutch_factor) * clutch_right_old;
+	clutch_right_old = clutch_right_new;
 
-	if (clutch_new < CLUTCH_BIAS_MID) {
-		clutch_new = 1024 - clutch_new;
-	}
-	if (clutch_new < CLUTCH_POS_CLOSED) {
-		timer1_dutycycle(CLUTCH_DC_CLOSED);
-	} else if (clutch_new > CLUTCH_POS_OPEN) {
+	float clutch_left_new = clutch_factor * pos_left + (1 - clutch_factor) * clutch_left_old;
+	clutch_left_old = clutch_left_new;
+
+	float duty_left = CLUTCH_DC_CLOSED;
+	float duty_right = CLUTCH_DC_CLOSED;
+
+	if (clutch_left_new > CLUTCH_POS_LEFT_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
+		return; //paddle fully depressed keep servo open.
+	} else if (clutch_left_new > CLUTCH_POS_LEFT_CLOSED) {
+		duty_left = ((clutch_left_new - CLUTCH_POS_LEFT_CLOSED) * clutch_left_factor + CLUTCH_DC_CLOSED);
+	}
+
+	if (clutch_right_new > CLUTCH_POS_RIGHT_OPEN) {
+		timer1_dutycycle(CLUTCH_DC_OPEN);
+		return;
+	} else if (clutch_right_new > CLUTCH_POS_RIGHT_CLOSED) {
+		duty_right = ((clutch_right_new - CLUTCH_POS_RIGHT_CLOSED) * clutch_right_factor + CLUTCH_DC_CLOSED);
+	}
+
+	if (duty_left > duty_right) {
+		timer1_dutycycle(duty_left);
 	} else {
-		timer1_dutycycle(((clutch_new - CLUTCH_POS_CLOSED) * ((CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)) / (CLUTCH_POS_OPEN - CLUTCH_POS_CLOSED) + CLUTCH_DC_CLOSED));
+		timer1_dutycycle(duty_right);
 	}
 }
 

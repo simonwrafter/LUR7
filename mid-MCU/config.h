@@ -47,15 +47,15 @@
 
 //Inputs
 //unused					IN1
-//#define					IN2
+#define IO_LOG_BTN			IN2
 //! Input for General Purpose button
 #define IO_ALT_BTN			IN3
 //! Input for Log Start/Stop button
-#define IO_LOG_BTN			IN4
+#define IO_CLUTCH_RIGHT		ADC_IN4
 //! Input for Neutral Gear button
 #define IO_GEAR_NEUTRAL		IN5
 //! Input for Clutch paddle
-#define IO_CLUTCH		ADC_IN6
+#define IO_CLUTCH_LEFT		ADC_IN6
 //#define					IN7
 //! Input for Gear Down paddle
 #define IO_GEAR_DOWN		IN8

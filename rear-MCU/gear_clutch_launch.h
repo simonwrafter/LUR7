@@ -38,14 +38,13 @@
 void set_current_gear(uint8_t gear);
 
 void gear_up(void);
-
 void gear_down(void);
 
 void gear_neutral_single(void);
-
 void gear_neutral_repeat_linear(void);
 void gear_neutral_repeat_binary(void);
 
+void clutch_init(void);
 void clutch_set(uint16_t);
 
 void launch_control(void);
