@@ -285,7 +285,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	}
 
 	if (failsafe_mid) {
-		clutch_set(atomic_clutch_pos);
+		clutch_set(atomic_clutch_pos, 0);
 	}
 
 	if (!failsafe_dta && ++failsafe_dta_counter == 100) {

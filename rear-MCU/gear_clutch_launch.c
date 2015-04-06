@@ -99,14 +99,14 @@ static const uint16_t NEUTRAL_DELAY_ADJUST = 50; //5 ms
 static void neutral_repeat_worker_linear(void);
 static void neutral_repeat_stabiliser_linear(void);
 
-//***** BINARY
+//***** BISECT
 static volatile uint16_t neutral_up_limit_high = 700;
 static volatile uint16_t neutral_up_limit_low = 300;
 static volatile uint16_t neutral_down_limit_high = 700;
 static volatile uint16_t neutral_down_limit_low = 300;
 
-static void neutral_repeat_worker_binary(void);
-static void neutral_repeat_stabiliser_binary(void);
+static void neutral_repeat_worker_bisect(void);
+static void neutral_repeat_stabiliser_bisect(void);
 
 //********** CLUTCH ************************************************************
 
@@ -124,9 +124,14 @@ static const float CLUTCH_DC_CLOSED = 4000;
 static const float CLUTCH_DC_OPEN = 12000;
 
 //! Initial value for the filter.
-volatile static float clutch_old = 0;
+volatile static float clutch_left_old = 0;
+//! Initial value for the filter.
+volatile static float clutch_right_old = 0;
 //! The filter factor for the new clutch position value.
 static const float clutch_factor = 0.1;
+
+static float clutch_left_factor = 0;
+static float clutch_right_factor = 0;
 
 //********** LAUNCH ************************************************************
 
@@ -368,11 +373,11 @@ static void neutral_repeat_worker_linear(void) {
 		busy = FALSE;
 		uint32_t time_info = 0x0000;
 		if (last_gear == 1) {
-			time_info = neutral_up_try_time << 16;
+			time_info = (uint32_t) neutral_up_try_time << 16;
 		} else if (last_gear == 2) {
 			time_info = neutral_down_try_time;
 		}
-		tx_can_setup(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) time_info, CAN_REAR_LOG_DLC) // send time of successful neutral find
+		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
 	}
 	last_gear = current_gear;
@@ -386,30 +391,28 @@ static void neutral_repeat_stabiliser_linear(void) {
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
 }
 
-//***** BINARY
+//***** BISECT
 
-void gear_neutral_repeat_binary() {
+void gear_neutral_repeat_bisect() {
 	if (!busy) {
 		last_gear = 0;
 		neutral_counter = 0;
 
-		//** binary *************
 		neutral_up_limit_high = 700;
 		neutral_up_limit_low  = 300;
 		neutral_down_limit_high = 700;
 		neutral_down_limit_low  = 300;
-		//***********************
 
 		if (current_gear == 1 || current_gear == 2) {
 			busy = TRUE;
-			neutral_repeat_worker_binary();
+			neutral_repeat_worker_bisect();
 		} else if (current_gear == 11) {
 			gear_neutral_single();
 		}
 	}
 }
 
-static void neutral_repeat_worker_binary(void) {
+static void neutral_repeat_worker_bisect(void) {
 	if (current_gear == 11) {
 		gear_neutral_single();
 		return;
@@ -420,7 +423,6 @@ static void neutral_repeat_worker_binary(void) {
 		return;
 	}
 
-	// binary
 	if (current_gear == 1) {
 		if (last_gear == 1) { // if last attempt was to soft
 			neutral_up_limit_low = neutral_up_try_time;
@@ -442,21 +444,21 @@ static void neutral_repeat_worker_binary(void) {
 		busy = FALSE; //assume in neutral. (or in third, but that really shouldn't happen.)
 		uint32_t time_info = 0x0000;
 		if (last_gear == 1) {
-			time_info = neutral_up_try_time << 16;
+			time_info = (uint32_t) neutral_up_try_time << 16;
 		} else if (last_gear == 2) {
 			time_info = neutral_down_try_time;
 		}
-		tx_can_setup(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) time_info, CAN_REAR_LOG_DLC) // send time of successful neutral find
+		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
 	}
 	last_gear = current_gear;
-	end_fun_ptr = neutral_repeat_stabiliser_binary;
+	end_fun_ptr = neutral_repeat_stabiliser_bisect;
 }
 
-static void neutral_repeat_stabiliser_binary(void) {
+static void neutral_repeat_stabiliser_bisect(void) {
 	set_output(GEAR_UP, TRI); // reset output
 	set_output(GEAR_DOWN, TRI); // reset output
-	end_fun_ptr = neutral_repeat_worker_binary;
+	end_fun_ptr = neutral_repeat_worker_bisect;
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
 }
 
