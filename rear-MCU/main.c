@@ -123,8 +123,8 @@ int main(void) {
 	//! </ol>
 
 	//! <li> Enable system <ol>
-	set_output(GND_CONTROL, GND); //! <li> connect sensors to ground.
-	clutch_init(); //! <li> configure clutch.
+	clutch_init();
+	//set_output(GND_CONTROL, GND); //! <li> connect sensors to ground.
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
 	//! </ol>

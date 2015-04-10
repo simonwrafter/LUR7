@@ -116,7 +116,7 @@ int main(void) {
 
 		clutch_pos_right = adc_get(IO_CLUTCH_RIGHT); //! <li> get right clutch paddle position
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_left_atomic = clutch_pos_left; //! <li> copy value to atomic variable
+			clutch_pos_right_atomic = clutch_pos_right; //! <li> copy value to atomic variable
 		} // end ATOMIC_BLOCK
 
 		//! </ol>
@@ -159,7 +159,7 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	uint32_t c_data = (clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
+	uint32_t c_data = ((uint32_t) clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 
