@@ -136,7 +136,7 @@ volatile static float clutch_left_old = 0;
 //! Initial value for the filter.
 volatile static float clutch_right_old = 0;
 //! The filter factor for the new clutch position value.
-static const float clutch_factor = 0.1;
+static const float clutch_factor = 0.05;
 
 volatile static float clutch_left_factor_open    = 0;
 volatile static float clutch_left_factor_mid     = 0;

@@ -325,7 +325,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	if (mob == gcl_MOb) { //! <li> \ref gc_MOb receives a message <ul>
 		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
-			uint16_t gear_data = ((uint16_t) data[1] << 8) | data[0];
+			uint16_t gear_data = ((uint32_t) data[3] << 24) | ((uint32_t) data[2] << 16) | ((uint16_t) data[1] << 8) | data[0];
 			if (gear_data == CAN_MSG_GEAR_UP) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
 				gear_up_flag = TRUE;
 			} else if (gear_data == CAN_MSG_GEAR_DOWN) { //! <li> if message is CAN_MSG_GEAR_DOWN, set \ref gear_down_flag to TRUE.
