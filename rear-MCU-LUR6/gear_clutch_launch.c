@@ -547,32 +547,6 @@ void clutch_set(uint16_t pos_left, uint16_t pos_right) {
 }
 
 //******************************************************************************
-// LAUNCH
-//******************************************************************************
-
-//! Launch Control signal
-/*!
- * Sets a signal to the DTA that initiates its launch control system.
- */
-void launch_control(void) {
-	if (!busy) {
-		busy = TRUE;
-		set_output(LAUNCH, GND);
-		end_fun_ptr = end_launch_signal;
-		timer0_start(LAUNCH_SIGNAL_DELAY);
-	}
-}
-
-//! Launch Control, end signal
-/*!
- * stops the signal to the DTA when Launch Control is active.
- */
-static void end_launch_signal(void) {
-	set_output(LAUNCH, TRI);
-	busy = FALSE;
-}
-
-//******************************************************************************
 // TIMER
 //******************************************************************************
 
