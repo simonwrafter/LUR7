@@ -76,6 +76,11 @@ static volatile uint8_t  bcd_vect[3] = {0,0,0};
 //! Set new RPM value.
 void update_RPM(uint16_t new_RPM) {
 	revs = new_RPM;
+	if (revs > 2000) {
+		set_output(IO_START_BTN_LED, ON);
+	} else {
+		set_output(IO_START_BTN_LED, OFF);
+	}
 }
 
 //! Set new current gear.
@@ -156,7 +161,7 @@ uint8_t temp_to_bar() {
 //! Convert binary to BCD
 /*!
  * Calculates the Binary Coded Decimal representation of \p value.
- * 
+ *
  * \param value number to convert.
  */
 void bcd_convert(uint16_t value) {
@@ -169,7 +174,7 @@ void bcd_convert(uint16_t value) {
 	} else {
 		bcd_vect[0] = 10; // clear digit
 	}
-	
+
 	if (value >= 10) { // if larger than 10
 		bcd_vect[1] = 0; // reset to 0
 		while (value >= 10) { // while larger than 9
@@ -183,7 +188,7 @@ void bcd_convert(uint16_t value) {
 			bcd_vect[1] = 0; // else set to 0
 		}
 	}
-	
+
 	bcd_vect[2] = 0; // reset to 0
 	while (value >= 1) { // while larger than 0
 		value -= 1; // reduce by 1
@@ -193,9 +198,9 @@ void bcd_convert(uint16_t value) {
 
 //! Get seven segment representation of number
 /*!
- * For binary numbers [0, 9] this function returns the seven segment 
+ * For binary numbers [0, 9] this function returns the seven segment
  * representation of the number with an optional decimal point.
- * 
+ *
  * \param binary number to convert.
  * \param dp decimal point.
  */

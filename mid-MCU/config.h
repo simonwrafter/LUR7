@@ -42,7 +42,9 @@
 #define _CONFIG_H_
 
 //Inputs
-//unused					IN1
+//! gear/clutch over CAN disengaged
+#define IO_GEAR_STOP		IN1
+//! start/stop logging
 #define IO_LOG_BTN			IN2
 //! Input for General Purpose button
 #define IO_ALT_BTN			IN3
@@ -66,8 +68,10 @@
 #define IO_SHIFT_DATA		OUT3
 //!Outout for Shift Register Clock
 #define IO_SHIFT_CLK		OUT4
-//unused					OUT5
-//unused					OUT6
+//! gear/clutch disengaged
+#define IO_GEAR_STOP_LED	OUT5
+//! sattrt buttobn led
+#define IO_START_BTN_LED	OUT6
 //unused					OUT7
 //unused					OUT8
 

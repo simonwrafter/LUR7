@@ -48,5 +48,6 @@ void clutch_init(void);
 void clutch_set(uint16_t, uint16_t);
 
 void launch_control(void);
+void launch_stop_clutchw(void);
 
 #endif // _GEAR_CLUTCH_LAUNCH_H_

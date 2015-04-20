@@ -26,22 +26,23 @@ clutch_factor_closed  = ((clutch_dc_break_closed - CLUTCH_DC_CLOSED))       / (c
 clutch_factor_mid     = ((clutch_dc_break_open   - clutch_dc_break_closed)) / (clutch_pos_break_open   - clutch_pos_break_closed)
 clutch_factor_open    = ((CLUTCH_DC_OPEN         - clutch_dc_break_open))   / (CLUTCH_POS_OPEN         - clutch_pos_break_open)
 
-servo_max = 100
+servo_max = 130
 servo_min = 0
 servo_speed = 0.6
 
 time_min = 0
-time_max = 1000
+time_max = 200
 time_break = 1
 time = linspace(time_min, time_max, time_max - time_min + 1)
 
 """
 in_clutch = ones(time_max - time_min + 1)
-in_clutch[0:time_break - time_min] = clutch_start
-in_clutch[time_break - time_min:time_max - time_min + 1] = clutch_end
+in_clutch[0:time_break - time_min] = clutch_end
+in_clutch[time_break - time_min:time_max - time_min + 1] = clutch_start
 """
+in_clutch = (CLUTCH_POS_OPEN-CLUTCH_POS_CLOSED)/7*(sin(10*time/(pi))) + (CLUTCH_POS_CLOSED + CLUTCH_POS_OPEN)/2
+#in_clutch[100: 110] = 490
 
-in_clutch = (CLUTCH_POS_OPEN-CLUTCH_POS_CLOSED)/4*(sin(time/50)) + (CLUTCH_POS_CLOSED + CLUTCH_POS_OPEN)/2
 
 filter_factor = .1
 
@@ -72,18 +73,20 @@ for i in range(time_min, time_max+1):
     else:
         dutycycle.append(CLUTCH_DC_CLOSED / CLUTCH_DC_MAX)
 
+"""
 figure(2)
 clf()
 grid(1)
 
 plot(time, dutycycle)
+"""
 
 angle = list()
 for i in range(time_min, time_max+1):
     if i < time_break:
-        angle.append(servo_max)
+        angle.append(servo_min)
     else:
-        angle.append(max(angle[i-1-time_min] - servo_speed, servo_min))
+        angle.append(min(angle[i-1-time_min] + servo_speed, servo_max))
 
 given_angle = (array(dutycycle) - CLUTCH_DC_CLOSED / CLUTCH_DC_MAX) / ((CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)/CLUTCH_DC_MAX) * servo_max
 
@@ -91,4 +94,4 @@ figure(3)
 clf()
 grid(1)
 axis([time_min, time_max, servo_min, servo_max])
-plot(time, given_angle, 'b')
+plot(time, angle, 'k', time, given_angle, 'b')

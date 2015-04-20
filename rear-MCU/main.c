@@ -352,7 +352,11 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 
 	if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
-		set_current_gear(data[0]); //! <li> relay to gear system.
+		uint8_t gear = data[0];
+		if (gear == 3) {
+			launch_stop_clutch();
+		}
+		set_current_gear(gear); //! <li> relay to gear system.
 	} //! </ul>
 
 //! </ul>

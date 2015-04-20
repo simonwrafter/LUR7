@@ -136,7 +136,11 @@ volatile static float clutch_left_old = 0;
 //! Initial value for the filter.
 volatile static float clutch_right_old = 0;
 //! The filter factor for the new clutch position value.
-static const float clutch_factor = 0.1;
+volatile static float clutch_factor = 0.1;
+
+static const float clutch_filter_main = 0.1;
+static const float clutch_filter_launch = 0.01;
+
 
 volatile static float clutch_left_factor_open    = 0;
 volatile static float clutch_left_factor_mid     = 0;
@@ -149,6 +153,7 @@ volatile static float clutch_right_factor_closed = 0;
 
 //! Time to run the signal for launch control
 static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
+volatile const uint8_t launch_mode = FALSE;
 //! Launch Control, end signal
 static void end_launch_signal(void);
 
@@ -560,7 +565,19 @@ void launch_control(void) {
 		set_output(LAUNCH, GND);
 		end_fun_ptr = end_launch_signal;
 		timer0_start(LAUNCH_SIGNAL_DELAY);
+		if (!launch_mode) {
+			clutch_factor = clutch_filter_launch;
+			launch_mode = TRUE;
+		} else {
+			clutch_factor = clutch_filter_main;
+			launch_mode = FALSE;
+		}
 	}
+}
+
+void launch_stop_clutch(void) {
+	clutch_factor = clutch_filter_main;
+	launch_mode = FALSE;
 }
 
 //! Launch Control, end signal

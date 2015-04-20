@@ -58,6 +58,8 @@ volatile uint16_t clutch_pos_right = 0;
 volatile uint16_t clutch_pos_left_atomic = 0;
 //! Atomically written copy of right clutch position sensor value.
 volatile uint16_t clutch_pos_right_atomic = 0;
+//! Used for stopping clutch CAN messages.
+volatile uint8_t clutch_CAN_disable = FALSE;
 
 //! Main function.
 /*!
@@ -109,16 +111,18 @@ int main(void) {
 	//! <li> LOOP <ul>
 	while (1) {
 		//! <li> Always do: <ol>
-		clutch_pos_left = adc_get(IO_CLUTCH_LEFT); //! <li> get left clutch paddle position
-		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_left_atomic = clutch_pos_left; //! <li> copy value to atomic variable
-		} // end ATOMIC_BLOCK
+		if (!clutch_CAN_disable) {
+			clutch_pos_left = adc_get(IO_CLUTCH_LEFT); //! <li> get left clutch paddle position
+			ATOMIC_BLOCK(ATOMIC_FORCEON) {
+				clutch_pos_left_atomic = clutch_pos_left; //! <li> copy value to atomic variable
+			} // end ATOMIC_BLOCK
 
-		clutch_pos_right = adc_get(IO_CLUTCH_RIGHT); //! <li> get right clutch paddle position
-		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_right_atomic = clutch_pos_right; //! <li> copy value to atomic variable
-		} // end ATOMIC_BLOCK
-
+			clutch_pos_right = adc_get(IO_CLUTCH_RIGHT); //! <li> get right clutch paddle position
+			ATOMIC_BLOCK(ATOMIC_FORCEON) {
+				clutch_pos_right_atomic = clutch_pos_right; //! <li> copy value to atomic variable
+			} // end ATOMIC_BLOCK
+		}
+		
 		//! </ol>
 		//! <li> If new information for panel <ol>
 		if (new_info) {
@@ -201,7 +205,13 @@ ISR (INT_GEAR_NEUTRAL) { //IN5
 
 //! Pin Change Interrupt handler for IN1.
 /*! \todo manual gear changes on/off, FAILSAFE */
-void pcISR_in1(void) {}
+void pcISR_in1(void) {
+	ext_int_off(IO_GEAR_UP);
+	ext_int_off(IO_GEAR_DOWN);
+	ext_int_off(IO_GEAR_NEUTRAL);
+	clutch_CAN_disable = TRUE;
+	set_output(IO_GEAR_STOP_LED, ON);
+}
 
 //! Pin Change Interrupt handler for IN2.
 /*! Logging start/stop button.broadcasts a messabe to start or stop logging. */
