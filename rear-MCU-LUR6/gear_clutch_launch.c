@@ -54,6 +54,8 @@
 static volatile uint8_t busy = FALSE;
 //! Currently selected gear as read by the DTA
 static volatile uint8_t current_gear = 11;
+//! Current engine revs as read by the DTA
+static volatile uint16_t current_revs = 0;
 //! Pointer to function call after time elapses.
 static void (*volatile end_fun_ptr)(void);
 
@@ -65,6 +67,8 @@ static const uint16_t SHIFT_CUT_DELAY = 1000; //100 ms
 static const uint16_t GEAR_UP_DELAY = 1000; //100 ms
 //! Time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY = 1000; //100 ms
+//! Lowest revs needed to change up a gear
+static const uint16_t GEAR_UP_REV_LIMIT = 9000; // TODO: what should the limit be?
 
 //! Function to start second part of gear up.
 static void mid_gear_up(void);
@@ -145,19 +149,16 @@ volatile static float clutch_right_factor_open   = 0;
 volatile static float clutch_right_factor_mid    = 0;
 volatile static float clutch_right_factor_closed = 0;
 
-//********** LAUNCH ************************************************************
-
-//! Time to run the signal for launch control
-static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
-//! Launch Control, end signal
-static void end_launch_signal(void);
-
 //******************************************************************************
 // COMMON
 //******************************************************************************
 
 void set_current_gear(uint8_t gear) {
 	current_gear = gear;
+}
+
+void set_current_revs(uint16_t revs) {
+	current_revs = revs;
 }
 
 //******************************************************************************
@@ -207,6 +208,9 @@ void set_current_gear(uint8_t gear) {
  */
 void gear_up() {
 	if (!busy && current_gear != 5) {
+		if (current_gear != 1 && current_revs < GEAR_UP_REV_LIMIT) {
+			return;
+		}
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
 		end_fun_ptr = mid_gear_up;

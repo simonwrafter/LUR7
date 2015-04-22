@@ -35,7 +35,8 @@
 #ifndef _GEAR_CLUTCH_LAUNCH_H_
 #define GEAR_CLUTCH_LAUNCH_H_
 
-void set_current_gear(uint8_t gear);
+void set_current_gear(uint8_t);
+void set_current_revs(uint16_t);
 
 void gear_up(void);
 void gear_down(void);
@@ -46,7 +47,5 @@ void gear_neutral_repeat_bisect(void);
 
 void clutch_init(void);
 void clutch_set(uint16_t, uint16_t);
-
-void launch_control(void);
 
 #endif // _GEAR_CLUTCH_LAUNCH_H_

@@ -50,7 +50,7 @@ int main(void) {
 	power_off_default();
 
 	gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
-	dta_MOb = can_setup_rx(CAN_DTA_GEAR_ID, CAN_DTA_GEAR_MASK, CAN_DTA_DLC);
+	dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 
 	clutch_init();
 	interrupts_on();
@@ -93,6 +93,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		failsafe_dta = TRUE;
 		can_free_rx(dta_MOb);
 		set_current_gear(11);
+		set_current_revs(13000);
 	}
 }
 
@@ -121,7 +122,12 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 
 	if (mob == dta_MOb) {
 		failsafe_dta_counter = 0;
-		set_current_gear(data[0]);
+		if (id == 0x2000) {
+			set_current_revs(((uint16_t) data[0] << 8) | data[1]);
+		}
+		if (id == 0x2003) {
+			set_current_gear(data[0]);
+		}
 	}
 }
 

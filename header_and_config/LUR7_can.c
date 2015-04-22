@@ -220,8 +220,8 @@ uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 
 	_can_set_id(mob_id); // configure ID
 
-	for (uint8_t i = 0; i < mob_dlc; i++) {
-		CANMSG = mob_data[i]; // set data
+	for (uint8_t i = mob_dlc; i > 0; i--) {
+		CANMSG = mob_data[i-1]; // set data, has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
 	}
 
 	CANCDMOB = (1<<CONMOB0) | (1 << IDE) | (mob_dlc << DLC0); // enable transmission and set DLC
@@ -375,8 +375,8 @@ void _can_handle_RXOK() {
 	uint8_t data[dlc]; // create vector for data
 
 	//read data
-	for (int i = 0; i < dlc; i++) {
-		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
+	for (int i = dlc; i > 0; i--) {
+		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0.  has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
 	}
 
 	// send information to extern function in application to act on information
