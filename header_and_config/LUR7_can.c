@@ -98,6 +98,8 @@ const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
 const uint32_t CAN_REAR_LOG_SPEED_ID = 0x4500; //!< Message ID for front wheel speeds
 const uint32_t CAN_REAR_LOG_SUSPENSION_ID = 0x4501; //!< Message ID for front suspension
 const uint32_t CAN_REAR_LOG_NEUTRAL_ID = 0x4502; //!< Message ID for logging of successful attempts at finding Neutral Gear
+const uint32_t CAN_REAR_LOG_CLUTCH_FILTER_ID = 0x4503; //!< Message ID for logging of filtered clutch paddle position
+const uint32_t CAN_REAR_LOG_SERVO_DC_ID = 0x4504; //!< Message ID for logging of clutch servo dutycycle
 const uint8_t CAN_REAR_LOG_DLC = 4; //!< DLC of messages from rear logging node
 
 // Pre-defined messages
@@ -376,7 +378,7 @@ void _can_handle_RXOK() {
 
 	//read data
 	for (int i = dlc; i > 0; i--) {
-		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0.  has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
+		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
 	}
 
 	// send information to extern function in application to act on information
@@ -398,8 +400,8 @@ void _can_handle_TXOK() {
 	uint8_t data[dlc]; // create vector for data
 
 	//read data
-	for (int i = 0; i < dlc; i++) {
-		data[i] = CANMSG; //CANMSG autoincrements, !AINC = 0.
+	for (int i = dlc; i > 0; i++) {
+		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
 	}
 
 	CAN_ISR_TXOK(mob, id, dlc, data); // extern function if more actions are required after TXOK

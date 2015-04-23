@@ -68,7 +68,7 @@ static const uint16_t GEAR_UP_DELAY = 1000; //100 ms
 //! Time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY = 1000; //100 ms
 //! Lowest revs needed to change up a gear
-static const uint16_t GEAR_UP_REV_LIMIT = 9000; // TODO: what should the limit be?
+//static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
 
 //! Function to start second part of gear up.
 static void mid_gear_up(void);
@@ -97,13 +97,13 @@ static void neutral_single_end_up(void);
 static void neutral_single_stabiliser_down(void);
 static void neutral_single_end_down(void);
 
-//***** LINEAR
+// ***** LINEAR
 static const uint16_t NEUTRAL_DELAY_ADJUST = 50; //5 ms
 
 static void neutral_repeat_worker_linear(void);
 static void neutral_repeat_stabiliser_linear(void);
-
-//***** BISECT
+/*
+// ***** BISECT
 static volatile uint16_t neutral_up_limit_high = 700;
 static volatile uint16_t neutral_up_limit_low = 300;
 static volatile uint16_t neutral_down_limit_high = 700;
@@ -111,7 +111,7 @@ static volatile uint16_t neutral_down_limit_low = 300;
 
 static void neutral_repeat_worker_bisect(void);
 static void neutral_repeat_stabiliser_bisect(void);
-
+*/
 //********** CLUTCH ************************************************************
 
 //! Threshold value for closed clutch
@@ -208,9 +208,6 @@ void set_current_revs(uint16_t revs) {
  */
 void gear_up() {
 	if (!busy && current_gear != 5) {
-		if (current_gear != 1 && current_revs < GEAR_UP_REV_LIMIT) {
-			return;
-		}
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
 		end_fun_ptr = mid_gear_up;
@@ -236,7 +233,7 @@ void gear_up() {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_down() {
-	if (!busy && current_gear != 1) {
+	if (!busy && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
@@ -317,9 +314,9 @@ static void neutral_single_stabiliser_up(void) {
 
 static void neutral_single_end_up(void) {
 	if (current_gear == 1) {
-		neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+		//neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
 	} else if (current_gear == 2) {
-		neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+		//neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
 	}
 	busy = FALSE;
 }
@@ -332,14 +329,14 @@ static void neutral_single_stabiliser_down(void) {
 
 static void neutral_single_end_down(void) {
 	if (current_gear == 1) {
-		neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
+		//neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
 	} else if (current_gear == 2) {
-		neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
+		//neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
 	}
 	busy = FALSE;
 }
 
-//***** LINEAR
+// ***** LINEAR
 
 void gear_neutral_repeat_linear() {
 	if (!busy) {
@@ -407,8 +404,8 @@ static void neutral_repeat_stabiliser_linear(void) {
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
 }
 
-//***** BISECT
-
+// ***** BISECT
+/*
 void gear_neutral_repeat_bisect() {
 	if (!busy) {
 		last_gear = 0;
@@ -477,7 +474,7 @@ static void neutral_repeat_stabiliser_bisect(void) {
 	end_fun_ptr = neutral_repeat_worker_bisect;
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
 }
-
+*/
 //******************************************************************************
 // CLUTCH
 //******************************************************************************
@@ -499,13 +496,12 @@ void clutch_init(void) {
  * \param pos_left the angle of the left clutch paddle.
  * \param pos_right the angle of the right clutch paddle.
  */
-void clutch_set(uint16_t pos_left, uint16_t pos_right) {
+uint32_t clutch_set(uint16_t pos_left, uint16_t pos_right) {
 	float clutch_left_new = clutch_factor * pos_left + (1 - clutch_factor) * clutch_left_old;
 	clutch_left_old = clutch_left_new;
 
 	float clutch_right_new = clutch_factor * pos_right + (1 - clutch_factor) * clutch_right_old;
 	clutch_right_old = clutch_right_new;
-
 
 	//triple linear
 
@@ -514,7 +510,7 @@ void clutch_set(uint16_t pos_left, uint16_t pos_right) {
 
 	if (clutch_left_new > CLUTCH_POS_LEFT_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
-		return;
+		return 0;
 	} else if (clutch_left_new > clutch_pos_left_break_open) {
 		duty_left = ((clutch_left_new - clutch_pos_left_break_open)   * clutch_left_factor_open   + clutch_dc_break_open);
 	} else if (clutch_left_new > clutch_pos_left_break_closed) {
@@ -525,7 +521,7 @@ void clutch_set(uint16_t pos_left, uint16_t pos_right) {
 
 	if (clutch_right_new > CLUTCH_POS_RIGHT_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
-		return;
+		return 0;
 	} else if (clutch_right_new > clutch_pos_right_break_open) {
 		duty_right = ((clutch_right_new - clutch_pos_right_break_open)   * clutch_right_factor_open   + clutch_dc_break_open);
 	} else if (clutch_right_new > clutch_pos_right_break_closed) {
@@ -539,15 +535,25 @@ void clutch_set(uint16_t pos_left, uint16_t pos_right) {
 	} else {
 		timer1_dutycycle(duty_right);
 	}
-
-	/* //single linear
-	if (clutch_right_new < CLUTCH_POS_RIGHT_CLOSED) {
+/*
+	//single linear
+	if (clutch_left_new < CLUTCH_POS_RIGHT_CLOSED) {
 		timer1_dutycycle(CLUTCH_DC_CLOSED);
-	} else if (clutch_right_new > CLUTCH_POS_RIGHT_OPEN) {
+	} else if (clutch_left_new > CLUTCH_POS_RIGHT_OPEN) {
 		timer1_dutycycle(CLUTCH_DC_OPEN);
 	} else {
-		timer1_dutycycle((clutch_right_new - CLUTCH_POS_RIGHT_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_RIGHT_OPEN - CLUTCH_POS_RIGHT_CLOSED) + CLUTCH_DC_CLOSED);
-	} */
+		timer1_dutycycle((clutch_left_new - CLUTCH_POS_RIGHT_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_RIGHT_OPEN - CLUTCH_POS_RIGHT_CLOSED) + CLUTCH_DC_CLOSED);
+	}
+*/
+	uint16_t filter_left  = (uint16_t) clutch_left_new;
+	uint16_t filter_right = (uint16_t) clutch_right_new;
+	uint32_t filter_data  = (((uint32_t) filter_left) << 16) | filter_right;
+	//can_setup_tx(CAN_REAR_LOG_CLUTCH_FILTER_ID, (uint8_t *) &filter_data, CAN_REAR_LOG_DLC);
+
+	//uint16_t dc_left  = (uint16_t) duty_left;
+	//uint16_t dc_right = (uint16_t) duty_right;
+
+	return filter_data;
 }
 
 //******************************************************************************

@@ -43,9 +43,9 @@ void gear_down(void);
 
 void gear_neutral_single(void);
 void gear_neutral_repeat_linear(void);
-void gear_neutral_repeat_bisect(void);
+//void gear_neutral_repeat_bisect(void);
 
 void clutch_init(void);
-void clutch_set(uint16_t, uint16_t);
+uint32_t clutch_set(uint16_t, uint16_t);
 
 #endif // _GEAR_CLUTCH_LAUNCH_H_
