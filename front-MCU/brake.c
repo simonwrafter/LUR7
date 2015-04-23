@@ -50,10 +50,10 @@
  * 
  * \param brake_pressure The pressure in the brake system.
  */
-void brake_light(uint16_t brake_pressure) {
+uint8_t * brake_light(uint16_t brake_pressure) {
 	if (brake_pressure > BRAKES_ON) {
-		set_output(BRAKE_LIGHT, GND);
+		return CAN_MSG_BRAKE_ON;
 	} else if (brake_pressure < BRAKES_OFF) {
-		set_output(BRAKE_LIGHT, TRI);
+		return CAN_MSG_BRAKE_OFF;
 	}
 }

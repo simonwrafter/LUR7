@@ -18,13 +18,16 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
+#include "clutch.h"
 
 //! The MOb configured for RX of logging start/stop instructions.
-volatile uint8_t CAN_DTA_MOb;
-//! Right clutch position sensor value.
-volatile uint16_t clutch_pos_right = 0;
+//volatile uint8_t CAN_DTA_MOb;
 //! Atomically written copy of right clutch position sensor value.
-volatile uint16_t clutch_pos_right_atomic = 0;
+volatile uint32_t clutch_pos_atomic = 0;
+//! Atomically written copy of clutch dutycycle.
+volatile uint32_t clutch_dutycycle_atomic = 0;
+//! Atomically written copy of filtered clutch position.
+volatile uint32_t clutch_filtered_atomic = 0;
 
 int main(void) {
 	io_init();
@@ -36,27 +39,35 @@ int main(void) {
 	power_off_default();
 	power_off_timer0();
 
-	CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
+	//CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 
 	ext_int_on(IO_GEAR_UP, 1, 1);
 	ext_int_on(IO_GEAR_DOWN, 1, 1);
 	ext_int_on(IO_GEAR_NEUTRAL, 1, 1);
-
+	
+	clutch_init();
 	interrupts_on();
 	can_enable();
 
 	while (1) {
-		clutch_pos_right = adc_get(IO_CLUTCH_RIGHT);
+		uint16_t clutch_pos_right = adc_get(IO_CLUTCH_RIGHT);
+		clutch_filter_right(clutch_pos_right);
+		clutch_dutycycle_right();
+		
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_right_atomic = clutch_pos_right;
+			clutch_pos_atomic = (uint32_t) 0x00 << 16 | clutch_pos_right;
+			clutch_filtered_atomic = clutch_get_filtered();
+			clutch_dutycycle_atomic = clutch_get_dutycycle();
 		} // end ATOMIC_BLOCK
+		
 	}
 	return 0;
 }
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	uint32_t c_data = ((uint32_t) 0 << 16) | clutch_pos_right_atomic;
-	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	can_setup_tx(CAN_SERVO_ID, (uint8_t *) &clutch_dutycycle_atomic, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	can_setup_tx(CAN_MID_LOG_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_MID_LOG_DLC);
+	can_setup_tx(CAN_MID_LOG_FILTER_ID, (uint8_t *) &clutch_filtered_atomic, CAN_MID_LOG_DLC);
 }
 
 void timer0_isr_stop(void) {}

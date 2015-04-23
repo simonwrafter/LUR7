@@ -1,5 +1,5 @@
 /*
- * brake.c - A collection of functions to setup and ease the use of the LUR7 PCB
+ * brake.h - A collection of functions to setup and ease the use of the LUR7 PCB
  * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,44 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file brake.c
+/*! \file brake.h
  * \ref brake controls braking of the LUR7.
  *
  * All code is released under the GPLv3 license.
  *
  * \see \ref brake
- * \see \ref brake.h
- * \see <http://www.gnu.org/copyleft/gpl.html>
- * \author Simon Wrafter
- * \copyright GNU Public License v3.0
- *
- * \defgroup brake Brake Control
- * \ref brake.c controls braking of the LUR7.
- *
  * \see \ref brake.c
- * \see \ref brake.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
  * \author Simon Wrafter
  * \copyright GNU Public License v3.0
+ *
+ * \addtogroup brake
  */
 
-#include "../header_and_config/LUR7.h"
-#include "config.h"
-#include "brake.h"
+#ifndef _BRAKE_H_
+#define _BRAKE_H_
 
-//! Turns brake light on or off.
-/*!
- * The brake light is a mandatory component. When brake pressure rises over a 
- * the \ref BRAKES_ON level in the hydraulic system the light is turned on. A
- * small hysterisis is implemented turning the light of at the slightly lower 
- * \ref BRAKES_OFF level.
- * 
- * \param brake_pressure The pressure in the brake system.
- */
-void brake_light(uint16_t brake_pressure) {
-	if (brake_pressure > BRAKES_ON) {
-		set_output(BRAKE_LIGHT, GND);
-	} else if (brake_pressure < BRAKES_OFF) {
-		set_output(BRAKE_LIGHT, TRI);
-	}
-}
+//! The value above which the brakes are considered to have been applied.
+#define BRAKES_ON	100 // MUST above BRAKES_OFF
+//! The value below which the brakes are considered to have been released.
+#define BRAKES_OFF	80 // MUST below BRAKES_ON
+
+uint8_t * brake_light(uint16_t);
+
+#endif // _BRAKE_H_

@@ -40,6 +40,7 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
+#include "brake.h"
 
 //! Counter for pulses from left wheel speed sensor.
 volatile uint16_t wheel_count_l = 0;
@@ -112,7 +113,7 @@ int main(void) {
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			brake_atomic = brake; //! <li> atomic copy of brake pressure value.
 		} // end ATOMIC_BLOCK
-
+		
 		susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			susp_l_atomic = susp_l; //! <li> atomic copy of left suspension value.
@@ -129,7 +130,6 @@ int main(void) {
 		} // end ATOMIC_BLOCK
 		//! </ol>
 	} //! </ul>
-
 	//! </ul>
 	return 0;
 }
@@ -214,6 +214,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
 	// 20 Hz (avoid other data being sent)
 	if (((interrupt_nbr + 4) % 5) == 0) {
+		can_setup_tx(CAN_BRAKE_LIGHT_ID, brake_light(brake_atomic), CAN_BRAKE_LIGHT_DLC);
 		uint32_t holder = ((uint32_t) brake_atomic << 16) | steering_atomic; // build data
 		can_setup_tx(CAN_FRONT_LOG_STEER_BRAKE_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC); // send
 	}
