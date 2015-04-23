@@ -18,7 +18,7 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
-#include "gear_launch.h"
+#include "gear_clutch_launch.h"
 
 //! Flag to set if signal to change up is received.
 volatile uint8_t gear_up_flag = FALSE;
@@ -34,8 +34,6 @@ volatile uint8_t failsafe_dta = FALSE;
 //! Counter to put DTA is in failsafe mode.
 volatile uint8_t failsafe_dta_counter = 0;
 
-volatile uint32_t clutch_data = 0;
-
 //! The MOb configured for RX of gear, clutch and launch control instructions.
 volatile uint8_t gcl_MOb;
 //! The MOb configured for RX of current gear.
@@ -43,8 +41,8 @@ volatile uint8_t dta_MOb;
 
 int main(void) {
 	io_init();
-	//adc_init();
-	//ancomp_init();
+	adc_init();
+	ancomp_init();
 	can_init();
 	timer0_init();
 	timer1_init(ON);
@@ -54,6 +52,7 @@ int main(void) {
 	gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 
+	clutch_init();
 	interrupts_on();
 	can_enable();
 
@@ -104,23 +103,19 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	if (mob == gcl_MOb) {
 		if (id == CAN_GEAR_ID) {
-			if (can_data_equals(CAN_MSG_GEAR_UP, data, dlc)) {
+			if (can_data_equals(data, CAN_MSG_GEAR_UP, dlc)) {
 				gear_up_flag = TRUE;
-			} else if (can_data_equals(CAN_MSG_GEAR_DOWN, data, dlc)) {
+			} else if (can_data_equals(data, CAN_MSG_GEAR_DOWN, dlc)) {
 				gear_down_flag = TRUE;
-			} else if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_SINGLE, data, dlc)) {
+			} else if (can_data_equals(data, CAN_MSG_GEAR_NEUTRAL_SINGLE, dlc)) {
 				gear_neutral_single_flag = TRUE;
-			} else if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_REPEAT, data, dlc)) {
+			} else if (can_data_equals(data, CAN_MSG_GEAR_NEUTRAL_REPEAT, dlc)) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_SERVO_ID) {
-			uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
-			uint16_t clutch_right = ((uint16_t) data[3] << 8) | data[2];
-			if (clutch_left > clutch_right) {
-				timer1_dutycycle(clutch_left);
-			} else {
-				timer1_dutycycle(clutch_right);
-			}
+			uint16_t clutch_p_left = ((uint16_t) data[1] << 8) | data[0];
+			uint16_t clutch_p_right = ((uint16_t) data[3] << 8) | data[2];
+			clutch_set(clutch_p_left, clutch_p_right);
 		}
 	}
 

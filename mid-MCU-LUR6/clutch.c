@@ -21,19 +21,18 @@
 #include "config.h"
 #include "clutch.h"
 
-
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_LEFT_CLOSED = 360;
+static const float CLUTCH_POS_LEFT_CLOSED  = 360;
 //! Threshold value for open clutch
-static const float CLUTCH_POS_LEFT_OPEN = 485;
+static const float CLUTCH_POS_LEFT_OPEN    = 485;
 //! Threshold value for closed clutch
 static const float CLUTCH_POS_RIGHT_CLOSED = 360;
 //! Threshold value for open clutch
-static const float CLUTCH_POS_RIGHT_OPEN = 485;
+static const float CLUTCH_POS_RIGHT_OPEN   = 485;
 //! PWM value for closed clutch
-static const float CLUTCH_DC_CLOSED = 3000;
+static const float CLUTCH_DC_CLOSED        = 3000;
 //! PWM value for open clutch
-static const float CLUTCH_DC_OPEN = 13000;
+static const float CLUTCH_DC_OPEN          = 13000;
 
 static const float clutch_pos_left_break_closed  = 410;
 static const float clutch_pos_left_break_open    = 460;
@@ -52,7 +51,7 @@ volatile static float duty_left = 0;
 volatile static float duty_right = 0;
 
 //! The filter factor for the new clutch position value.
-static const float clutch_factor = 0.05;
+static const float clutch_factor = 0.1;
 
 volatile static float clutch_left_factor_open    = 0;
 volatile static float clutch_left_factor_mid     = 0;
@@ -77,11 +76,13 @@ void clutch_filter_left(uint16_t pos_left) {
 }
 
 void clutch_filter_right(uint16_t pos_right) {
-	clutch_right_filtered = clutch_factor * pos_right + (1 - clutch_factor) * clutch_right_filtered;
+	float crf = clutch_factor * pos_right + (1 - clutch_factor) * clutch_right_filtered;
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		clutch_right_filtered = crf;
+	} // end ATOMIC_BLOCK
 }
 
 void clutch_dutycycle_left(void) {
-	//triple linear
 	if (clutch_left_filtered > CLUTCH_POS_LEFT_OPEN) {
 		duty_left = CLUTCH_DC_OPEN;
 	} else if (clutch_left_filtered > clutch_pos_left_break_open) {
@@ -91,20 +92,9 @@ void clutch_dutycycle_left(void) {
 	} else if (clutch_left_filtered > CLUTCH_POS_LEFT_CLOSED) {
 		duty_left = ((clutch_left_filtered - CLUTCH_POS_LEFT_CLOSED)       * clutch_left_factor_closed + CLUTCH_DC_CLOSED);
 	}
-/*
-	//single linear
-	if (clutch_left_filtered < CLUTCH_POS_RIGHT_CLOSED) {
-		duty_left = CLUTCH_DC_CLOSED;
-	} else if (clutch_left_new > CLUTCH_POS_RIGHT_OPEN) {
-		duty_left = CLUTCH_DC_OPEN;
-	} else {
-		duty_left = ((clutch_left_new - CLUTCH_POS_RIGHT_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_RIGHT_OPEN - CLUTCH_POS_RIGHT_CLOSED) + CLUTCH_DC_CLOSED);
-	}
-*/
 }
 
 void clutch_dutycycle_right(void) {
-	//triple linear
 	if (clutch_right_filtered > CLUTCH_POS_RIGHT_OPEN) {
 		duty_right = CLUTCH_DC_OPEN;
 	} else if (clutch_right_filtered > clutch_pos_right_break_open) {
@@ -114,16 +104,6 @@ void clutch_dutycycle_right(void) {
 	} else if (clutch_right_filtered > CLUTCH_POS_RIGHT_CLOSED) {
 		duty_right = ((clutch_right_filtered - CLUTCH_POS_RIGHT_CLOSED)       * clutch_right_factor_closed + CLUTCH_DC_CLOSED);
 	}
-/*
-	//single linear
-	if (clutch_right_filtered < CLUTCH_POS_RIGHT_CLOSED) {
-		duty_right = CLUTCH_DC_CLOSED;
-	} else if (clutch_right_filtered > CLUTCH_POS_RIGHT_OPEN) {
-		duty_right = CLUTCH_DC_OPEN;
-	} else {
-		duty_right = ((clutch_right_filtered - CLUTCH_POS_RIGHT_CLOSED) * (CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED) / (CLUTCH_POS_RIGHT_OPEN - CLUTCH_POS_RIGHT_CLOSED) + CLUTCH_DC_CLOSED);
-	}
-	*/
 }
 
 uint32_t clutch_get_filtered(void) {
