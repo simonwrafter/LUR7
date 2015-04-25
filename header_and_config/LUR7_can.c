@@ -95,7 +95,7 @@ const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC = 4; //!< DLC of Gear Change and Clutch
 
 // +  +  Logging
 const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
-const uint8_t CAN_LOG_DLC = 4; //!< DLC of DTA messages
+const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
 const uint32_t CAN_MID_LOG_CLUTCH_ID = 0x00005000;
 const uint32_t CAN_MID_LOG_FILTER_ID = 0x00005001;

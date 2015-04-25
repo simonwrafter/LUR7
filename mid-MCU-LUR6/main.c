@@ -32,7 +32,7 @@ volatile uint32_t clutch_pos_atomic = 0;
 int main(void) {
 	io_init();
 	adc_init();
-	//ancomp_init();
+	ancomp_init();
 	can_init();
 	timer1_init(OFF);
 
@@ -52,9 +52,9 @@ int main(void) {
 	while (1) {
 		uint16_t clutch_pos_right = adc_get(IO_CLUTCH_RIGHT);
 		//clutch_filter_right(clutch_pos_right);
-
+		
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			clutch_pos_atomic = (uint32_t) clutch_pos_right << 16 | 0x00;
+			clutch_pos_atomic = (uint32_t) 0x00 << 16 | clutch_pos_right;
 			//clutch_filtered_atomic = clutch_get_filtered();
 		} // end ATOMIC_BLOCK
 	}
@@ -67,11 +67,6 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
 	can_setup_tx(CAN_SERVO_ID, (uint8_t *) &clutch_pos_atomic, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	//can_setup_tx(CAN_SERVO_ID, (uint8_t *) &duty, CAN_GEAR_CLUTCH_LAUNCH_DLC);
-	//if (interrupt_nbr == 10) {
-
-		//can_setup_tx(CAN_MID_LOG_CLUTCH_ID, (uint8_t *) &clutch_pos_atomic, CAN_MID_LOG_DLC);
-		//can_setup_tx(CAN_MID_LOG_FILTER_ID, (uint8_t *) &clutch_filtered_atomic, CAN_MID_LOG_DLC);
-	//}
 }
 
 void timer0_isr_stop(void) {}
