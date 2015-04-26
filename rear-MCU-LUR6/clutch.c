@@ -30,17 +30,17 @@ static const float CLUTCH_POS_RIGHT_CLOSED = 360;
 //! Threshold value for open clutch
 static const float CLUTCH_POS_RIGHT_OPEN   = 485;
 //! PWM value for closed clutch
-static const float CLUTCH_DC_CLOSED        = 3000;
+static const float CLUTCH_DC_CLOSED        = 13000;
 //! PWM value for open clutch
-static const float CLUTCH_DC_OPEN          = 13000;
+static const float CLUTCH_DC_OPEN          = 3000;
 
 static const float clutch_pos_left_break_closed  = 410;
 static const float clutch_pos_left_break_open    = 460;
 static const float clutch_pos_right_break_closed = 410;
 static const float clutch_pos_right_break_open   = 460;
 
-static const float clutch_dc_break_closed = 7000;
-static const float clutch_dc_break_open   = 9000;
+static const float clutch_dc_break_closed = 9000;
+static const float clutch_dc_break_open   = 7000;
 
 //! Initial value for the filter.
 volatile static float clutch_left_filtered = 0;
@@ -53,12 +53,12 @@ volatile static float duty_right = 0;
 //! The filter factor for the new clutch position value.
 static const float clutch_factor = 0.1;
 
-volatile static float clutch_left_factor_open    = 0;
-volatile static float clutch_left_factor_mid     = 0;
-volatile static float clutch_left_factor_closed  = 0;
-volatile static float clutch_right_factor_open   = 0;
-volatile static float clutch_right_factor_mid    = 0;
-volatile static float clutch_right_factor_closed = 0;
+volatile static float clutch_left_factor_open    = -160;
+volatile static float clutch_left_factor_mid     = -40;
+volatile static float clutch_left_factor_closed  = -80;
+volatile static float clutch_right_factor_open   = -160;
+volatile static float clutch_right_factor_mid    = -40;
+volatile static float clutch_right_factor_closed = -80;
 
 
 void clutch_init(void) {
@@ -106,14 +106,26 @@ void clutch_dutycycle_right(void) {
 	}
 }
 
-uint32_t clutch_get_filtered(void) {
-	uint16_t filter_left_16 = (uint16_t) clutch_left_filtered;
-	uint16_t filter_right_16 = (uint16_t) clutch_right_filtered;
-	return ((uint32_t) filter_left_16 << 16) | filter_right_16;
+clutch_set_dutycycle(void) {
+	if (duty_left < duty_right) {
+		timer1_dutycycle(duty_left);
+	} else {
+		timer1_dutycycle(duty_right);
+	}
 }
 
-uint32_t clutch_get_dutycycle(void) {
-	uint16_t duty_left_16 = (uint16_t) duty_left;
-	uint16_t duty_right_16 = (uint16_t) duty_right;
-	return ((uint32_t) duty_left_16 << 16) | duty_right_16;
+uint16_t clutch_get_filtered_left(void) {
+	return (uint16_t) clutch_left_filtered;
+}
+
+uint16_t clutch_get_filtered_right(void) {
+	return (uint16_t) clutch_right_filtered;
+}
+
+uint16_t clutch_get_dutycycle_left(void) {
+	return (uint16_t) duty_left;
+}
+
+uint16_t clutch_get_dutycycle_right(void) {
+	return (uint16_t) duty_right;
 }

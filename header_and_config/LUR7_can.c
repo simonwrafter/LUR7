@@ -411,7 +411,7 @@ void _can_handle_TXOK() {
 	uint8_t data[dlc]; // create vector for data
 
 	//read data
-	for (int i = dlc; i > 0; i++) {
+	for (int i = dlc; i > 0; i--) {
 		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
 	}
 

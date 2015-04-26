@@ -34,8 +34,6 @@ volatile uint8_t failsafe_dta = FALSE;
 //! Counter to put DTA is in failsafe mode.
 volatile uint8_t failsafe_dta_counter = 0;
 
-volatile uint32_t clutch_data = 0;
-
 //! The MOb configured for RX of gear, clutch and launch control instructions.
 volatile uint8_t gcl_MOb;
 //! The MOb configured for RX of current gear.
@@ -54,6 +52,7 @@ int main(void) {
 	gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 
+	clutch_init();
 	interrupts_on();
 	can_enable();
 
@@ -98,7 +97,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	}
 }
 
-//see gear_clutch.c
+//see gear_launch.c
 //void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
@@ -114,13 +113,14 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_SERVO_ID) {
-			uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
-			uint16_t clutch_right = ((uint16_t) data[3] << 8) | data[2];
-			if (clutch_left > clutch_right) {
-				timer1_dutycycle(clutch_left);
-			} else {
-				timer1_dutycycle(clutch_right);
-			}
+			//uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
+			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
+			//clutch_filter_left(clutch_left);
+			clutch_filter_right(clutch_right);
+			//clutch_dutycycle_left();
+			clutch_dutycycle_right();
+			//clutch_set_dutycycle();
+			timer1_dutycycle(clutch_get_dutycycle_right());
 		}
 	}
 

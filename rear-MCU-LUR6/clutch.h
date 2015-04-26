@@ -40,7 +40,10 @@ void clutch_filter_left(uint16_t pos_left);
 void clutch_filter_right(uint16_t pos_right);
 void clutch_dutycycle_left(void);
 void clutch_dutycycle_right(void);
-uint32_t clutch_get_filtered(void);
-uint32_t clutch_get_dutycycle(void);
+uint16_t clutch_get_filtered_left(void);
+uint16_t clutch_get_filtered_right(void);
+uint16_t clutch_get_dutycycle_left(void);
+uint16_t clutch_get_dutycycle_right(void);
+void clutch_set_dutycycle(void);
 
 #endif // _GEAR_CLUTCH_LAUNCH_H_
