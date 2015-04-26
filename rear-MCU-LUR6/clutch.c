@@ -106,7 +106,7 @@ void clutch_dutycycle_right(void) {
 	}
 }
 
-clutch_set_dutycycle(void) {
+void clutch_set_dutycycle(void) {
 	if (duty_left < duty_right) {
 		timer1_dutycycle(duty_left);
 	} else {

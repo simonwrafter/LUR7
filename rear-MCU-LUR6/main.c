@@ -19,6 +19,7 @@
 #include "../header_and_config/LUR7.h"
 #include "config.h"
 #include "gear_launch.h"
+#include "clutch.h"
 
 //! Flag to set if signal to change up is received.
 volatile uint8_t gear_up_flag = FALSE;
@@ -41,8 +42,8 @@ volatile uint8_t dta_MOb;
 
 int main(void) {
 	io_init();
-	//adc_init();
-	//ancomp_init();
+	adc_init();
+	ancomp_init();
 	can_init();
 	timer0_init();
 	timer1_init(ON);
@@ -112,19 +113,22 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			} else if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_REPEAT, data, dlc)) {
 				gear_neutral_repeat_flag = TRUE;
 			}
-		} else if (id == CAN_SERVO_ID) {
+		} else if (id == CAN_CLUTCH_ID) {
 			//uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
-			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
+			uint16_t clutch_right = ((uint16_t) data[3] << 8) | data[2];
 			//clutch_filter_left(clutch_left);
 			clutch_filter_right(clutch_right);
 			//clutch_dutycycle_left();
 			clutch_dutycycle_right();
 			//clutch_set_dutycycle();
 			timer1_dutycycle(clutch_get_dutycycle_right());
+			
+			uint32_t filter = (uint32_t) clutch_get_filtered_right() << 16;
+			can_setup_tx(CAN_REAR_LOG_FILTER_ID, (uint8_t *) &filter, CAN_REAR_LOG_DLC);
+			uint32_t dutycycle = (uint32_t) clutch_get_dutycycle_right() << 16;
+			can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
 		}
-	}
-
-	if (mob == dta_MOb) {
+	} else if (mob == dta_MOb) {
 		failsafe_dta_counter = 0;
 		if (id == 0x2000) {
 			set_current_revs(((uint16_t) data[0] << 8) | data[1]);

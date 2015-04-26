@@ -40,7 +40,6 @@
 
 #include "../header_and_config/LUR7.h"
 #include "config.h"
-#include "brake.h"
 
 //! Counter for pulses from left wheel speed sensor.
 volatile uint16_t wheel_count_l = 0;
@@ -200,7 +199,7 @@ void pcISR_in9(void) {}
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	// 10Hz interrupt (avoid other data being sent)
 	if ((interrupt_nbr % 10) == 0) { //10 Hz
-		uint32_t holder = ((uint32_t) wheel_count_l << 16) | wheel_count_r; // build data to send
+		uint32_t holder = wheel_count_l | ((uint32_t) wheel_count_r<< 16) ; // build data to send
 		can_setup_tx(CAN_FRONT_LOG_SPEED_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC); // send
 		wheel_count_l = 0; // reset
 		wheel_count_r = 0; // reset
@@ -208,14 +207,13 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
 	// 20 Hz (avoid other data being sent)
 	if (((interrupt_nbr + 2) % 5) == 0) {
-		uint32_t holder = ((uint32_t) susp_l_atomic << 16) | susp_r_atomic; // build data
+		uint32_t holder = susp_l_atomic | ((uint32_t) susp_r_atomic << 16) ; // build data
 		can_setup_tx(CAN_FRONT_LOG_SPEED_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC); // send
 	}
 
 	// 20 Hz (avoid other data being sent)
 	if (((interrupt_nbr + 4) % 5) == 0) {
-		can_setup_tx(CAN_BRAKE_LIGHT_ID, brake_light(brake_atomic), CAN_BRAKE_LIGHT_DLC);
-		uint32_t holder = ((uint32_t) brake_atomic << 16) | steering_atomic; // build data
+		uint32_t holder = brake_atomic | ((uint32_t) steering_atomic << 16); // build data
 		can_setup_tx(CAN_FRONT_LOG_STEER_BRAKE_ID, (uint8_t *) &holder, CAN_FRONT_LOG_DLC); // send
 	}
 }

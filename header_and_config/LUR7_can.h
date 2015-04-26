@@ -119,16 +119,7 @@ extern const uint32_t CAN_DTA_ID; //!< The base ID of CAN messages from the DTA
 extern const uint32_t CAN_DTA_MASK; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 extern const uint8_t  CAN_DTA_DLC; //!< DLC of DTA messages
 
-// +  +  Gear (0x2003)
-extern const uint32_t CAN_DTA_GEAR_ID; //!< The ID of CAN messages containging gear from the DTA
-extern const uint32_t CAN_DTA_GEAR_MASK; //!< Mask for the DTA message containging current gear
-
 // +  Front-MCU
-// +  +  Brake Light
-extern const uint32_t CAN_BRAKE_LIGHT_ID; //! Message ID for messages carrying brake light information
-extern const uint32_t CAN_BRAKE_LIGHT_MASK; //!< Mask for the Brake log messages
-extern const uint8_t  CAN_BRAKE_LIGHT_DLC; //!< DLC of messages with brake light information
-
 // +  +  Logging
 extern const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
@@ -138,25 +129,23 @@ extern const uint8_t  CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging
 // +  Mid-MCU
 // +  +  Gear and Clutch
 extern const uint32_t CAN_GEAR_ID; //!< The ID for messages carrying Gear Change information
-extern const uint32_t CAN_SERVO_ID; //!< The ID for messages carrying Clutch Position information
+extern const uint32_t CAN_CLUTCH_ID; //!< The ID for messages carrying Clutch Position information
 extern const uint32_t CAN_LAUNCH_ID; //!< The ID of CAN messages for lunch control
 extern const uint32_t CAN_GEAR_CLUTCH_LAUNCH_MASK; //!< Mask for Gear Change, Clutch Position and Launch Control IDs
-extern const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC; //!< DLC of Gear Change and Clutch Position messages
+extern const uint8_t  CAN_GEAR_CLUTCH_LAUNCH_DLC; //!< DLC of Gear Change and Clutch Position messages
 
 // +  +  Logging
 extern const uint32_t CAN_LOG_ID; //!< The ID of CAN messages for starting/stoping logging
-extern const uint8_t CAN_LOG_DLC; //!< DLC of DTA messages
-
-extern const uint32_t CAN_MID_LOG_CLUTCH_ID;
-extern const uint32_t CAN_MID_LOG_FILTER_ID;
-extern const uint8_t  CAN_MID_LOG_DLC; //!< DLC of messages from mid logging node
+extern const uint8_t  CAN_LOG_DLC; //!< DLC of DTA messages
 
 // +  Rear MCU
 // +  +  Logging
 extern const uint32_t CAN_REAR_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_REAR_LOG_SUSPENSION_ID; //!< Message ID for front suspension
 extern const uint32_t CAN_REAR_LOG_NEUTRAL_ID; //!< Message ID for logging of successful attempts at finding Neutral Gear
-extern const uint8_t CAN_REAR_LOG_DLC; //!< DLC of messages from rear logging node
+extern const uint32_t CAN_REAR_LOG_FILTER_ID; //!< Messsage ID for filtered clutch paddle positions
+extern const uint32_t CAN_REAR_LOG_DUTYCYCLE_ID; //!< Message for servo dutycycle
+extern const uint8_t  CAN_REAR_LOG_DLC; //!< DLC of messages from rear logging node
 
 // Pre-defined messages
 extern uint8_t CAN_MSG_NONE[8]; //!< No message

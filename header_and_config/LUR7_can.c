@@ -69,16 +69,7 @@ const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from th
 const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t  CAN_DTA_DLC = 8; //!< DLC of DTA messages
 
-// +  +  Gear (0x2003)
-const uint32_t CAN_DTA_GEAR_ID = 0x00002003; //!< The ID of CAN messages containging gear from the DTA
-const uint32_t CAN_DTA_GEAR_MASK = 0xFFFFFFFF; //!< Mask for the DTA message containging current gear
-
 // +  Front-MCU
-// +  +  Brake Light
-const uint32_t CAN_BRAKE_LIGHT_ID = 0x00001700; //! Message ID for messages carrying brake light information
-const uint32_t CAN_BRAKE_LIGHT_MASK = 0xFFFFFFFF; //!< Mask for the Brake log messages
-const uint8_t  CAN_BRAKE_LIGHT_DLC = 4; //!< DLC of messages with brake light information
-
 // +  +  Logging
 const uint32_t CAN_FRONT_LOG_SPEED_ID = 0x00004000; //!< Message ID for front wheel speeds
 const uint32_t CAN_FRONT_LOG_SUSPENSION_ID = 0x00004001; //!< Message ID for front suspension
@@ -88,26 +79,25 @@ const uint8_t  CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging no
 // +  Mid-MCU
 // +  +  Gear and Clutch
 const uint32_t CAN_GEAR_ID = 0x00001500; //!< The ID for messages carrying Gear Change information
-const uint32_t CAN_SERVO_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
+const uint32_t CAN_CLUTCH_ID = 0x00001501; //!< The ID for messages carrying Clutch Position information
 const uint32_t CAN_LAUNCH_ID = 0x00001502; //!< The ID of CAN messages for lunch control
 const uint32_t CAN_GEAR_CLUTCH_LAUNCH_MASK = 0xFFFFFFFC; //!< Mask for Gear Change, Clutch Position and Launch Control IDs
-const uint8_t CAN_GEAR_CLUTCH_LAUNCH_DLC = 4; //!< DLC of Gear Change and Clutch Position messages
+const uint8_t  CAN_GEAR_CLUTCH_LAUNCH_DLC = 4; //!< DLC of Gear Change and Clutch Position messages
 
 // +  +  Logging
 const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
-const uint8_t CAN_LOG_DLC = 1; //!< DLC of DTA messages
-
-const uint32_t CAN_MID_LOG_CLUTCH_ID = 0x00005000;
-const uint32_t CAN_MID_LOG_FILTER_ID = 0x00005001;
-const uint8_t  CAN_MID_LOG_DLC = 4; //!< DLC of messages from mid logging node
+const uint8_t  CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
 // +  Rear MCU
 // +  +  Logging
 const uint32_t CAN_REAR_LOG_SPEED_ID = 0x4500; //!< Message ID for front wheel speeds
 const uint32_t CAN_REAR_LOG_SUSPENSION_ID = 0x4501; //!< Message ID for front suspension
 const uint32_t CAN_REAR_LOG_NEUTRAL_ID = 0x4502; //!< Message ID for logging of successful attempts at finding Neutral Gear
-const uint8_t CAN_REAR_LOG_DLC = 4; //!< DLC of messages from rear logging node
+const uint32_t CAN_REAR_LOG_FILTER_ID = 0x4504; //!< Messsage ID for filtered clutch paddle positions
+const uint32_t CAN_REAR_LOG_DUTYCYCLE_ID = 0x4503; //!< Message for servo dutycycle
+const uint8_t  CAN_REAR_LOG_DLC = 4; //!< DLC of messages from rear logging node
 
+// messages are backwards so they can be easily read with CANview.
 // Pre-defined messages
 uint8_t CAN_MSG_NONE[8] = "00000000"; //!< No message
 
@@ -118,17 +108,17 @@ uint8_t CAN_MSG_BRAKE_OFF[4] = "OFFO"; //!< Message for Brake Light OFF
 
 // +  Mid-MCU
 // +  +  Gear
-uint8_t CAN_MSG_GEAR_UP[4] = "UPUP"; //!< Message for Gear Change UP
-uint8_t CAN_MSG_GEAR_DOWN[4] = "DOWN"; //!< Message for Gear Change DOWN
-uint8_t CAN_MSG_GEAR_NEUTRAL_SINGLE[4] = "SNGL"; //!< Message for Neutral Gear (single attempt)
-uint8_t CAN_MSG_GEAR_NEUTRAL_REPEAT[4] = "RPET"; //!< Message for Neutral Gear (repeat attempt)
+uint8_t CAN_MSG_GEAR_UP[4] = "PUPU"; //!< Message for Gear Change UP
+uint8_t CAN_MSG_GEAR_DOWN[4] = "NWOD"; //!< Message for Gear Change DOWN
+uint8_t CAN_MSG_GEAR_NEUTRAL_SINGLE[4] = "LGNS"; //!< Message for Neutral Gear (single attempt)
+uint8_t CAN_MSG_GEAR_NEUTRAL_REPEAT[4] = "TEPR"; //!< Message for Neutral Gear (repeat attempt)
 
 // +  +  Launch Control
-uint8_t CAN_MSG_LAUNCH[4] = "LNCH"; //!< Enable/(disable) launch control system.
+uint8_t CAN_MSG_LAUNCH[4] = "HCNL"; //!< Enable/(disable) launch control system.
 
 // +  +  Logging
-uint8_t CAN_MSG_LOG_START[4] = "STRT"; //!< Start saving log data.
-uint8_t CAN_MSG_LOG_STOP[4] = "STOP"; //!< Stop saving log data.
+uint8_t CAN_MSG_LOG_START[4] = "TRTS"; //!< Start saving log data.
+uint8_t CAN_MSG_LOG_STOP[4] = "POTS"; //!< Stop saving log data.
 
 
 /*******************************************************************************
@@ -167,7 +157,7 @@ void can_init(void) {
 	for (uint8_t mob_number = 0; mob_number < NBR_OF_MOB; mob_number++) {
 		CANPAGE = (mob_number << MOBNB0); // select each MOb in turn
 
-		//initiate everything to zero
+		//initiate everything to zero. IMPORTANT!!
 		CANCDMOB = 0x00;
 		CANSTMOB = 0x00;
 
@@ -234,7 +224,7 @@ uint8_t can_setup_tx(uint32_t mob_id, uint8_t * mob_data, uint8_t mob_dlc) {
 	_can_set_id(mob_id); // configure ID
 
 	for (uint8_t i = mob_dlc; i > 0; i--) {
-		CANMSG = mob_data[i-1]; // set data, has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
+		CANMSG = mob_data[i-1]; // Set data. Reversed to send uint16_t non inverted. AVR is little endian, this way we can read the information with CANview. Arrays are sent backwards.
 	}
 
 	CANCDMOB = (1<<CONMOB0) | (1 << IDE) | (mob_dlc << DLC0); // enable transmission and set DLC
@@ -389,7 +379,7 @@ void _can_handle_RXOK() {
 
 	//read data
 	for (uint8_t i = dlc; i > 0; i--) {
-		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
+		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. Reversed to send uint16_t non inverted. AVR is little endian, this way we can read the information with CANview. Arrays are sent backwards. inverted.
 	}
 
 	// send information to extern function in application to act on information
@@ -412,7 +402,7 @@ void _can_handle_TXOK() {
 
 	//read data
 	for (uint8_t i = dlc; i > 0; i--) {
-		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. has to be reversed to send data non inverted. No idea why, stupid design of CAN controller
+		data[i-1] = CANMSG; //CANMSG autoincrements, !AINC = 0. Reversed to send uint16_t non inverted. AVR is little endian, this way we can read the information with CANview. Arrays are sent backwards.
 	}
 
 	CAN_ISR_TXOK(mob, id, dlc, data); // extern function if more actions are required after TXOK
