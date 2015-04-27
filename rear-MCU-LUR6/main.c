@@ -71,8 +71,8 @@ int main(void) {
 			gear_neutral_single_flag = FALSE;
 		}
 		if (gear_neutral_repeat_flag) {
-			gear_neutral_repeat_linear();
-			//gear_neutral_repeat_binary();
+			//gear_neutral_repeat_linear();
+			gear_neutral_repeat_bisect();
 			gear_neutral_repeat_flag = FALSE;
 		}
 	}
@@ -96,6 +96,11 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		set_current_gear(11);
 		set_current_revs(13000);
 	}
+	
+	uint32_t filter = (uint32_t) clutch_get_filtered_right();
+	can_setup_tx(CAN_REAR_LOG_FILTER_ID, (uint8_t *) &filter, CAN_REAR_LOG_DLC);
+	uint32_t dutycycle = (uint32_t) clutch_get_dutycycle_right();
+	can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
 }
 
 //see gear_launch.c
@@ -115,18 +120,13 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			}
 		} else if (id == CAN_CLUTCH_ID) {
 			//uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
-			uint16_t clutch_right = ((uint16_t) data[3] << 8) | data[2];
+			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
 			//clutch_filter_left(clutch_left);
 			clutch_filter_right(clutch_right);
 			//clutch_dutycycle_left();
 			clutch_dutycycle_right();
 			//clutch_set_dutycycle();
 			timer1_dutycycle(clutch_get_dutycycle_right());
-			
-			uint32_t filter = (uint32_t) clutch_get_filtered_right() << 16;
-			can_setup_tx(CAN_REAR_LOG_FILTER_ID, (uint8_t *) &filter, CAN_REAR_LOG_DLC);
-			uint32_t dutycycle = (uint32_t) clutch_get_dutycycle_right() << 16;
-			can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
 		}
 	} else if (mob == dta_MOb) {
 		failsafe_dta_counter = 0;

@@ -93,8 +93,8 @@ const uint8_t  CAN_LOG_DLC = 1; //!< DLC of DTA messages
 const uint32_t CAN_REAR_LOG_SPEED_ID = 0x4500; //!< Message ID for front wheel speeds
 const uint32_t CAN_REAR_LOG_SUSPENSION_ID = 0x4501; //!< Message ID for front suspension
 const uint32_t CAN_REAR_LOG_NEUTRAL_ID = 0x4502; //!< Message ID for logging of successful attempts at finding Neutral Gear
-const uint32_t CAN_REAR_LOG_FILTER_ID = 0x4504; //!< Messsage ID for filtered clutch paddle positions
-const uint32_t CAN_REAR_LOG_DUTYCYCLE_ID = 0x4503; //!< Message for servo dutycycle
+const uint32_t CAN_REAR_LOG_FILTER_ID = 0x4503; //!< Messsage ID for filtered clutch paddle positions
+const uint32_t CAN_REAR_LOG_DUTYCYCLE_ID = 0x4504; //!< Message for servo dutycycle
 const uint8_t  CAN_REAR_LOG_DLC = 4; //!< DLC of messages from rear logging node
 
 // messages are backwards so they can be easily read with CANview.

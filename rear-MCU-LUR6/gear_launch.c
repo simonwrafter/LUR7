@@ -102,7 +102,7 @@ static const uint16_t NEUTRAL_DELAY_ADJUST = 50; //5 ms
 
 static void neutral_repeat_worker_linear(void);
 static void neutral_repeat_stabiliser_linear(void);
-/*
+
 // ***** BISECT
 static volatile uint16_t neutral_up_limit_high = 700;
 static volatile uint16_t neutral_up_limit_low = 300;
@@ -111,7 +111,6 @@ static volatile uint16_t neutral_down_limit_low = 300;
 
 static void neutral_repeat_worker_bisect(void);
 static void neutral_repeat_stabiliser_bisect(void);
-*/
 
 //******************************************************************************
 // COMMON
@@ -369,7 +368,7 @@ static void neutral_repeat_stabiliser_linear(void) {
 }
 
 // ***** BISECT
-/*
+
 void gear_neutral_repeat_bisect() {
 	if (!busy) {
 		last_gear = 0;
@@ -438,7 +437,6 @@ static void neutral_repeat_stabiliser_bisect(void) {
 	end_fun_ptr = neutral_repeat_worker_bisect;
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
 }
-*/
 
 //******************************************************************************
 // TIMER

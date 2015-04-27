@@ -49,7 +49,7 @@ int main(void) {
 }
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	uint32_t c_data = (uint16_t) 0 | ((uint32_t) clutch_pos_atomic << 16);
+	uint32_t c_data = ((uint32_t) 0 << 16) | (uint16_t) clutch_pos_atomic;
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 

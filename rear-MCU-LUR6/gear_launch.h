@@ -43,6 +43,6 @@ void gear_down(void);
 
 void gear_neutral_single(void);
 void gear_neutral_repeat_linear(void);
-//void gear_neutral_repeat_bisect(void);
+void gear_neutral_repeat_bisect(void);
 
 #endif // _GEAR_CLUTCH_LAUNCH_H_
