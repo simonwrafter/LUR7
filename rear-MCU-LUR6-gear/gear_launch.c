@@ -16,33 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \file gear_clutch_launch.c
- * \ref gear_clutch_launch contains functions for gear changing, clutch and
- * launch control on the rear MCU used in the LUR7.
- *
- * All code is released under the GPLv3 license.
- *
- * \see \ref gear_clutch_launch
- * \see \ref gear_clutch_launch.h
- * \see \ref main.c
- * \see \ref config.h
- * \see <http://www.gnu.org/copyleft/gpl.html>
- * \author Simon Wrafter
- * \copyright GNU Public License v3.0
- *
- * \defgroup gear_clutch_launch Rear MCU - Gear, Clutch and Launch Control
- * \ref gear_clutch_launch.c controls gear changing procedures, clutch
- * positioning and launch control.
- *
- * \see \ref gear_clutch_launch.c
- * \see \ref gear_clutch_launch.h
- * \see \ref main
- * \see \ref config
- * \see <http://www.gnu.org/copyleft/gpl.html>
- * \author Simon Wrafter
- * \copyright GNU Public License v3.0
- */
-
 #include "../header_and_config/LUR7.h"
 #include "gear_launch.h"
 #include "config.h"

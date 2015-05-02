@@ -131,7 +131,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	} else if (mob == dta_MOb) {
 		failsafe_dta_counter = 0;
 		if (id == 0x2000) {
-			set_current_revs(((uint16_t) data[7] << 8) | data[6]);
+			set_current_revs(((uint16_t) data[0] << 8) | data[1]);
 		}
 		if (id == 0x2003) {
 			set_current_gear(data[7]);

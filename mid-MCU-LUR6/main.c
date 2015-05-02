@@ -34,7 +34,8 @@ int main(void) {
 
 	ext_int_on(IO_GEAR_UP, 1, 1);
 	ext_int_on(IO_GEAR_DOWN, 1, 1);
-	ext_int_on(IO_GEAR_NEUTRAL, 1, 1);
+	//ext_int_on(IO_GEAR_NEUTRAL, 1, 1);
+	pc_int_on(IN6);
 
 	interrupts_on();
 	can_enable();
@@ -63,6 +64,7 @@ ISR (INT_GEAR_DOWN) { //IN8
 	can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
 
+/*
 ISR (INT_GEAR_NEUTRAL) { //IN5
 	if (!get_input(IO_ALT_BTN)) {
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_SINGLE, CAN_GEAR_CLUTCH_LAUNCH_DLC);
@@ -70,13 +72,24 @@ ISR (INT_GEAR_NEUTRAL) { //IN5
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	}
 }
+*/
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
 void pcISR_in3(void) {}
 void pcISR_in4(void) {}
 void pcISR_in5(void) {}
-void pcISR_in6(void) {}
+
+void pcISR_in6(void) {
+	if (get_input(IN6)) {
+		if (!get_input(IO_ALT_BTN)) {
+			can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_SINGLE, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+		} else {
+			can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+		}
+	}
+}
+
 void pcISR_in7(void) {}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}

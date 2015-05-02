@@ -1,0 +1,1 @@
+avrdude -p m32m1 -P usb -c avrisp2 -U lfuse:w:0xcf:m -U hfuse:w:0xd9:m -U efuse:w:0xf9:m
