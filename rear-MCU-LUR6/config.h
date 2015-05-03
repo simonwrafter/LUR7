@@ -23,9 +23,9 @@
 //! Output for Clutch Servo, PWM
 #define CLUTCH				OUT1 //PWM on Timer1
 //! Output for Gear Up signal to solenoid.
-#define GEAR_UP				OUT4
+#define GEAR_UP				OUT5
 //! Output for Gear Down signal to solenoid.
-#define GEAR_DOWN			OUT5
+#define GEAR_DOWN			OUT4
 //! Output for Shift cut (DTA pin 14)
 #define SHIFT_CUT			OUT6
 

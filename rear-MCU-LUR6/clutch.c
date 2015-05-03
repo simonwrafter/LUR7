@@ -40,7 +40,7 @@ static const float clutch_pos_right_break_closed = 410;
 static const float clutch_pos_right_break_open   = 460;
 
 static const float clutch_dc_break_closed = 9000;
-static const float clutch_dc_break_open   = 7000;
+static const float clutch_dc_break_open   = 6000;
 
 //! Initial value for the filter.
 volatile static float clutch_left_filtered = 0;
