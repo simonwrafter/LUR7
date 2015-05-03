@@ -201,7 +201,11 @@ void gear_down() {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
-		timer0_start(GEAR_DOWN_DELAY);
+		if (current_gear == 2) {
+			timer0_start(GEAR_DOWN_DELAY + 150);
+		} else {
+			timer0_start(GEAR_DOWN_DELAY);
+		}
 	}
 }
 
@@ -211,10 +215,14 @@ void gear_down() {
  * time. end_fun_ptr set to \ref end_gear_change.
  */
 static void mid_gear_up(void) {
-	set_output(SHIFT_CUT, TRI); // reset shift cut output
+	//set_output(SHIFT_CUT, TRI); // reset shift cut output
 	set_output(GEAR_UP, GND); // run solenoid
 	end_fun_ptr = end_gear_change;
-	timer0_start(GEAR_UP_DELAY); // new delay for actual gear change
+	if (current_gear == 1) {
+		timer0_start(GEAR_UP_DELAY + 150); // new delay for actual gear change
+	} else {
+		timer0_start(GEAR_UP_DELAY); // new delay for actual gear change
+	}
 }
 
 //! End gear change sequence
@@ -222,6 +230,7 @@ static void mid_gear_up(void) {
  * Turns off the solenoid in both directions. Frees the busy flag.
  */
 static void end_gear_change(void) {
+	set_output(SHIFT_CUT, TRI); // reset shift cut output
 	set_output(GEAR_UP, TRI); // reset output
 	set_output(GEAR_DOWN, TRI); // reset output
 	busy = FALSE; // free unit
