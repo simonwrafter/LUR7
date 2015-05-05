@@ -20,6 +20,9 @@
 #define _CONFIG_H_
 
 //Inputs
+//! Reset rear MCU
+#define IO_RESET			IN2
+//! Alternate
 #define IO_ALT_BTN			IN3
 //! Input for Log Start/Stop button
 #define IO_CLUTCH_RIGHT		ADC_IN4
@@ -29,7 +32,6 @@
 #define IO_GEAR_DOWN		IN8
 //! Input for Gear Up paddle
 #define IO_GEAR_UP			IN9
-
 
 //External interrupts
 //! Interrupt vector for Gear Up paddle

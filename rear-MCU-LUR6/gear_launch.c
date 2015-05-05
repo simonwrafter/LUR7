@@ -172,7 +172,7 @@ void set_current_revs(uint16_t revs) {
  */
 void gear_up() {
 	can_setup_tx(0x7000, &current_gear, 1);
-	if (!busy && current_gear != 5) {
+	if (!busy) {// && current_gear != 5) {
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
 		end_fun_ptr = mid_gear_up;
@@ -200,7 +200,7 @@ void gear_up() {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_down() {
-	if (!busy && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
+	if (!busy) {// && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
@@ -345,26 +345,25 @@ static void neutral_repeat_worker_linear(void) {
 	}
 	
 	can_setup_tx(0x6011, (uint8_t *) "REPT", 4);
-	if (current_gear == 1 && last_gear == 0) { //first attempt, starting in first
+	
+	if (current_gear == 1) {
+		//if (last_gear == 0) first attempt
+		if (last_gear == 1) { // if last attempt was to soft
+			neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+		} else if (last_gear == 2) { // if last attempt was to hard
+			neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
+		}
 		set_output(GEAR_UP, GND);
 		timer0_start(neutral_up_try_time);
-	} else if (current_gear == 1 && last_gear == 1) { // if last attempt was to soft
-		set_output(GEAR_UP, GND);
-		timer0_start(neutral_up_try_time += NEUTRAL_DELAY_ADJUST);
-	} else if (current_gear == 1 && last_gear == 2) { // if last attempt was to hard
-		set_output(GEAR_UP, GND);
-		neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
-		timer0_start(neutral_up_try_time);
-	} else if (current_gear == 2 && last_gear == 0) { //first attempt, starting in second
+	} else if (current_gear == 2) {
+		//if (last_gear == 0) first attempt
+		if (last_gear == 1) {  // if last attempt was to hard
+			neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+		} else if (last_gear == 2) { // if last attempt was to soft
+			neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
+		}
 		set_output(GEAR_DOWN, GND);
 		timer0_start(neutral_down_try_time);
-	} else if (current_gear == 2 && last_gear == 1) {  // if last attempt was to hard
-		set_output(GEAR_DOWN, GND);
-		neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
-		timer0_start(neutral_down_try_time);
-	} else if (current_gear == 2 && last_gear == 2) { // if last attempt was to soft
-		set_output(GEAR_DOWN, GND);
-		timer0_start(neutral_down_try_time += NEUTRAL_DELAY_ADJUST);
 	} else {
 		busy = FALSE;
 		uint32_t time_info = 0x0000;
@@ -385,7 +384,7 @@ static void neutral_repeat_stabiliser_linear(void) {
 	set_output(GEAR_DOWN, TRI); // reset output
 	end_fun_ptr = neutral_repeat_worker_linear;
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
-	can_setup_tx(0x6099, (uint8_t *) "STAB", 4);
+	can_setup_tx(0x6099, (uint8_t *) "LBTS", 4);
 }
 
 // ***** BISECT
