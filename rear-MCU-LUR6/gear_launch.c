@@ -55,7 +55,7 @@ static volatile uint8_t busy = FALSE;
 //! Currently selected gear as read by the DTA
 static volatile uint8_t current_gear = 11;
 //! Current engine revs as read by the DTA
-static volatile uint16_t current_revs = 0;
+static volatile uint16_t current_revs = 1000;
 //! Pointer to function call after time elapses.
 static void (*volatile end_fun_ptr)(void);
 
@@ -165,7 +165,8 @@ void set_current_revs(uint16_t revs) {
  * If the car is in fifth gear, trying to shift up will have no effect. However,
  * this is only a feature as long as the DTA is not in fail mode.
  *
- * \todo special case for neutral -> 1st.
+ * \todo special case for neutral -> 1st?
+ * \todo TODO: Super Gearing holding alt. button
  *
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
@@ -193,6 +194,8 @@ void gear_up() {
  *
  * If the car is in first gear, trying to shift down will have no effect. However,
  * this is only a feature as long as the DTA is not in fail mode.
+ *
+ * \todo TODO: Super Gearing holding alt. button
  *
  * \param current_gear allows the controler to behave in the most appropriate manner
  */

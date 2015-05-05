@@ -30,6 +30,8 @@ volatile uint8_t gear_neutral_single_flag = FALSE;
 //! Flag to set if signal to change to neutral (repeated attempts) is received.
 volatile uint8_t gear_neutral_repeat_flag = FALSE;
 
+//! Set to true when first DTA message is received
+volatile uint8_t dta_first_received = FALSE;
 //! Whether the DTA is in failsafe mode.
 volatile uint8_t failsafe_dta = FALSE;
 //! Counter to put DTA is in failsafe mode.
@@ -90,10 +92,10 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	if (!failsafe_dta && ++failsafe_dta_counter == 100) {
+	if (dta_first_received && !failsafe_dta && ++failsafe_dta_counter == 100) {
 		failsafe_dta = TRUE;
 		can_free_rx(dta_MOb);
-		set_current_gear(13);
+		set_current_gear(11);
 		set_current_revs(13000);
 	}
 	
@@ -129,6 +131,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			timer1_dutycycle(clutch_get_dutycycle_right());
 		}
 	} else if (mob == dta_MOb) {
+		dta_first_received = TRUE;
 		failsafe_dta_counter = 0;
 		if (id == 0x2000) {
 			set_current_revs(((uint16_t) data[7] << 8) | data[6]);

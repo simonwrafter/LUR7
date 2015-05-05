@@ -22,6 +22,8 @@
 //! Atomically written copy of right clutch position sensor value.
 volatile uint16_t clutch_pos_atomic = 0;
 
+volatile uint8_t busy_gear = FALSE;
+
 int main(void) {
 	io_init();
 	adc_init();
@@ -34,8 +36,8 @@ int main(void) {
 
 	ext_int_on(IO_GEAR_UP, 1, 1);
 	ext_int_on(IO_GEAR_DOWN, 1, 1);
-	//ext_int_on(IO_GEAR_NEUTRAL, 1, 1);
-	pc_int_on(IN6);
+	//ext_int_on(IO_GEAR_NEUTRAL, 1, 1); //moved
+	pc_int_on(IO_GEAR_NEUTRAL);
 
 	interrupts_on();
 	can_enable();
@@ -57,15 +59,32 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 void timer0_isr_stop(void) {}
 
 ISR (INT_GEAR_UP) { //IN9
-	can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	if (busy_gear) {
+		return;
+	} else {
+		if (can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC) == 0xFF) {
+			return;
+		} else {
+			busy_gear = TRUE;
+		}
+	}
+	
 }
 
 ISR (INT_GEAR_DOWN) { //IN8
-	can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	if (busy_gear) {
+		return;
+	} else {
+		if (can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC) == 0xFF) {
+			return;
+		} else {
+			busy_gear = TRUE;
+		}
+	}
 }
 
 /*
-ISR (INT_GEAR_NEUTRAL) { //IN5
+ISR (INT_GEAR_NEUTRAL) { //IN5 moved to pc_int on IN6
 	if (!get_input(IO_ALT_BTN)) {
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_SINGLE, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	} else {
@@ -95,7 +114,11 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
+	if (id = CAN_GEAR_ID) {
+		busy_gear = FALSE;
+	}
+}
 void CAN_ISR_OTHER(void) {}
 
 void early_bod_warning_ISR(void) {}

@@ -30,17 +30,17 @@ static const float CLUTCH_POS_RIGHT_CLOSED = 360; //DONE
 //! Threshold value for open clutch
 static const float CLUTCH_POS_RIGHT_OPEN   = 485; //DONE
 //! PWM value for closed clutch
-static const float CLUTCH_DC_CLOSED        = 13000; //FINE TUNE // slapp vajer [13000, 13700]
+static const float CLUTCH_DC_CLOSED        = 13000; //FINE TUNE // slapp vajer. max: 13700
 //! PWM value for open clutch
-static const float CLUTCH_DC_OPEN          = 3000; //FINE TUNE // dragen vajer [2200, 3000]
+static const float CLUTCH_DC_OPEN          = 4500; //FINE TUNE // dragen vajer. min: 2200
 
 static const float clutch_pos_left_break_closed  = 410;
 static const float clutch_pos_left_break_open    = 460;
 static const float clutch_pos_right_break_closed = 410;
 static const float clutch_pos_right_break_open   = 460;
 
-static const float clutch_dc_break_closed = 9000;
-static const float clutch_dc_break_open   = 6000;
+static const float clutch_dc_break_closed = 9000; //trim!!!
+static const float clutch_dc_break_open   = 7000; //trim!!!
 
 //! Initial value for the filter.
 volatile static float clutch_left_filtered = 0;

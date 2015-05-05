@@ -27,6 +27,7 @@ int main(void) {
 	can_enable();
 
 	while (1) {}
+	
 	return 0;
 }
 
