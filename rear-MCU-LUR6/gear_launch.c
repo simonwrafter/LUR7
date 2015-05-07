@@ -62,11 +62,20 @@ static void (*volatile end_fun_ptr)(void);
 //********* GEAR ***************************************************************
 
 //! Delay between engaging shift cut and running the solenoid.
-static const uint16_t SHIFT_CUT_DELAY = 300; //30 ms
+static const uint16_t SHIFT_CUT_DELAY = 200; //20 ms
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY = 1000; //100 ms
+static const uint16_t GEAR_UP_DELAY = 300; //100 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY = 1000; //100 ms
+static const uint16_t GEAR_DOWN_DELAY = 300; //100 ms
+//! Time to run the solenoid for gear up from first.
+static const uint16_t GEAR_UP_DELAY_FIRST = 1500; //115 ms
+//! Time to run the solenoid for gear down from second.
+static const uint16_t GEAR_DOWN_DELAY_SECOND = 1500; //115 ms
+//! Time to run the solenoid for gear up from neutral.
+static const uint16_t GEAR_UP_DELAY_NEUTRAL = 300; //100 ms
+//! Time to run the solenoid for gear down from neutral.
+static const uint16_t GEAR_DOWN_DELAY_NEUTRAL = 300; //100 ms
+
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
 
@@ -171,7 +180,7 @@ void set_current_revs(uint16_t revs) {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_up() {
-	can_setup_tx(0x7000, &current_gear, 1);
+	can_setup_tx(0x7000, (uint8_t *) &current_gear, 1);
 	if (!busy) {// && current_gear != 5) {
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
@@ -204,8 +213,11 @@ void gear_down() {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
-		if (current_gear == 2) {
-			timer0_start(GEAR_DOWN_DELAY + 150);
+		
+		if (current_gear == 0) {
+			timer0_start(GEAR_DOWN_DELAY_NEUTRAL);
+		} else if (current_gear == 2) {
+			timer0_start(GEAR_DOWN_DELAY_SECOND);
 		} else {
 			timer0_start(GEAR_DOWN_DELAY);
 		}
@@ -222,11 +234,11 @@ static void mid_gear_up(void) {
 	set_output(GEAR_UP, GND); // run solenoid
 	end_fun_ptr = end_gear_change;
 	if (current_gear == 0) {
-		timer0_start(GEAR_UP_DELAY);// + 200); // new delay for actual gear change
+		timer0_start(GEAR_UP_DELAY_NEUTRAL);
 	} else if (current_gear == 1) {
-		timer0_start(GEAR_UP_DELAY + 200); // new delay for actual gear change
+		timer0_start(GEAR_UP_DELAY_FIRST);
 	} else {
-		timer0_start(GEAR_UP_DELAY); // new delay for actual gear change
+		timer0_start(GEAR_UP_DELAY);
 	}
 }
 
