@@ -62,15 +62,15 @@ static void (*volatile end_fun_ptr)(void);
 //********* GEAR ***************************************************************
 
 //! Delay between engaging shift cut and running the solenoid.
-static const uint16_t SHIFT_CUT_DELAY = 200; //20 ms
+static const uint16_t SHIFT_CUT_DELAY = 1000; //20 ms
 //! Time to run the solenoid for gear up.
 static const uint16_t GEAR_UP_DELAY = 300; //100 ms
 //! Time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY = 300; //100 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_FIRST = 1500; //115 ms
+static const uint16_t GEAR_UP_DELAY_FIRST = 1100; //115 ms
 //! Time to run the solenoid for gear down from second.
-static const uint16_t GEAR_DOWN_DELAY_SECOND = 1500; //115 ms
+static const uint16_t GEAR_DOWN_DELAY_SECOND = 1000; //115 ms
 //! Time to run the solenoid for gear up from neutral.
 static const uint16_t GEAR_UP_DELAY_NEUTRAL = 300; //100 ms
 //! Time to run the solenoid for gear down from neutral.
