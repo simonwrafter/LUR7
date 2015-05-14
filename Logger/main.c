@@ -1,14 +1,16 @@
 #define F_CPU 8000000UL		//freq 8 MHz
+#define CAN_BAUDRATE 1000
+
 #include <avr/io.h>
-//#include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <stdint.h>
+
 #include "SPI_routines.h"
 #include "SD_routines.h"
-//#include "UART_routines.h"
-//#include "RTC_routines.h"
-//#include "i2c_routines.h"
 #include "FAT32.h"
+
+#include "../header_and_config/LUR7_can.h"
 
 
 int main(void) {
@@ -17,11 +19,11 @@ int main(void) {
 	unsigned int i;
 	unsigned char fileName[13];
 	
+	can_init(); // etc.!!!
+	
 	//**********************
 	// Init
 	//**********************
-	
-	//init_devices();
 	
 	for (i=0; i<10; i++) {
 		error = SD_init();
@@ -31,12 +33,6 @@ int main(void) {
 	}
 
 	if(error) {
-		if (error == 1) {
-			transmitString_F(PSTR("SD card not detected.."));
-		}
-		if (error == 2) {
-			transmitString_F(PSTR("Card Initialization failed.."));
-		}
 		while(1){
 			;  //wait here forever if error in SD init 
 		}

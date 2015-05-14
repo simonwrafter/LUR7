@@ -20,25 +20,15 @@
 
 int main(void) {
 	io_init();
-	set_output(OUT1, OFF);
-	set_output(OUT2, ON);
-
-	pc_int_on(IN1);
-	pc_int_on(IN2);
-
-	interrupts_on();
 
 	while (1) {
+		set_output(LED0, get_input(IN1));
 	}
 	return 0;
 }
 
-void pcISR_in1(void) {
-	toggle_output(OUT1);
-}
-void pcISR_in2(void) {
-	toggle_output(OUT2);
-}
+void pcISR_in1(void) {}
+void pcISR_in2(void) {}
 void pcISR_in3(void) {}
 void pcISR_in4(void) {}
 void pcISR_in5(void) {}
