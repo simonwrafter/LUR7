@@ -20,11 +20,25 @@
 
 int main(void) {
 	io_init();
-	set_output(OUT1, OFF);
-	set_output(OUT2, ON);
 
+	set_output(OUT1, OFF);
+	set_output(OUT2, OFF);
+	set_output(OUT3, OFF);
+	set_output(OUT4, OFF);
+	set_output(OUT5, OFF);
+	set_output(OUT6, OFF);
+	set_output(OUT7, OFF);
+	set_output(OUT8, OFF);
 	pc_int_on(IN1);
 	pc_int_on(IN2);
+	pc_int_on(IN3);
+	pc_int_on(IN4);
+	pc_int_on(IN5);
+	pc_int_on(IN6);
+	pc_int_on(IN7);
+	pc_int_on(IN8);
+	pc_int_on(IN9);
+
 
 	interrupts_on();
 
@@ -34,24 +48,50 @@ int main(void) {
 }
 
 void pcISR_in1(void) {
-	toggle_output(OUT1);
+	toggleAll();
 }
 void pcISR_in2(void) {
-	toggle_output(OUT2);
+	toggleAll();
 }
-void pcISR_in3(void) {}
-void pcISR_in4(void) {}
-void pcISR_in5(void) {}
-void pcISR_in6(void) {}
-void pcISR_in7(void) {}
-void pcISR_in8(void) {}
-void pcISR_in9(void) {}
+void pcISR_in3(void) {
+	toggleAll();
+}
+void pcISR_in4(void) {
+	toggleAll();
+}
+void pcISR_in5(void) {
+	toggleAll();
+}
+void pcISR_in6(void) {
+	toggleAll();
+}
+void pcISR_in7(void) {
+	toggleAll();
+}
+void pcISR_in8(void) {	
+	toggleAll();
+}
+void pcISR_in9(void) {
+	toggleAll();
+}
+
+void toggleAll(void){
+	toggle_output(OUT1);
+	toggle_output(OUT2);
+	toggle_output(OUT3);
+	toggle_output(OUT4);
+	toggle_output(OUT5);
+	toggle_output(OUT6);
+	toggle_output(OUT7);
+	toggle_output(OUT8);
+
+}	
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
 
-void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_OTHER(void) {}
+//void CAN_ISR_RXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+//void CAN_ISR_TXOK(uint32_t id, uint8_t dlc, uint8_t * data) {}
+//void CAN_ISR_OTHER(void) {}
 
 void early_bod_warning_ISR(void) {}
 void early_bod_safe_ISR(void) {}
