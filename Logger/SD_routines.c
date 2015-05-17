@@ -267,5 +267,3 @@ unsigned char SD_writeSingleBlock(unsigned long startBlock) {
 	SD_CS_DEASSERT;
 	return 0;
 }
-
-//******** END ****** www.dharmanitech.com *****

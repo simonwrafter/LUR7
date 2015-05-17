@@ -16,14 +16,18 @@
 //clock rate: 125Khz
 void SPI_init(void) {
 	DDRB |= (1 << DDB1) | (1 << DDB7); // MOSI & SCK to output
+	DDRD |= (1 << DDD3); // SS as output
 	
 	//setup SPI: Interrupts enabled, Master mode, MSB first, SCK phase low, SCK idle low
-	SPCR = (1 << SPIE) | (1 << SPE) | (1 << MSTR) | (1 << SPR1);
+	SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1);
 	SPSR = (1 << SPI2X);
 }
 
 void SPI_send_byte(uint8_t data) {
 	SPDR = data;
+	while (!(SPSR & (1<<SPIF))) {
+		;
+	}
 }
 
 unsigned char SPI_receive(void) {
@@ -42,6 +46,10 @@ void SPI_high_speed(void) {
 	SPCR &= 0xFC; //clear clock bits, set SPI clock to 4 MHz
 }
 
-ISR(SPI_STC_vect) {
-	
+void SPI_select(void) {
+	PORTD |= (1 << PORTD3);
+}
+
+void SPI_deselect(void) {
+	PORTD &= ~(1 << PORTD3);
 }

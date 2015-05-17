@@ -12,11 +12,13 @@
 #ifndef _SPI_ROUTINES_H_
 #define _SPI_ROUTINES_H_
 
-void spi_init(void);
+void SPI_init(void);
 unsigned char SPI_transmit(unsigned char);
 unsigned char SPI_receive(void);
 
+void SPI_select(void);
+void SPI_deselect(void);
+
 void SPI_high_speed(void);
-void SPI_sd(void);
 
 #endif
