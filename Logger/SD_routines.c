@@ -29,7 +29,7 @@ unsigned char SD_init(void) {
 	for (i=0;i<10;i++) {
 		SPI_transmit(0xff);   //80 clock pulses spent before sending the first command
 	}
-	SD_CS_ASSERT;
+	SPI_select();
 	do {
 		response = SD_sendCommand(GO_IDLE_STATE, 0); //send 'reset & go idle' command
 		retry++;
@@ -38,7 +38,7 @@ unsigned char SD_init(void) {
 		}
 	} while (response != 0x01);
 
-	SD_CS_DEASSERT;
+	SPI_deselect();
 	SPI_transmit (0xff);
 	SPI_transmit (0xff);
 
@@ -117,7 +117,7 @@ unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg) {
 		}
 	}
 
-	SD_CS_ASSERT;
+	SPI_select();
 
 	SPI_transmit(cmd | 0x40); //send command, first two bits always '01'
 	SPI_transmit(arg>>24);
@@ -150,7 +150,7 @@ unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg) {
 	}
 
 	SPI_receive(); //extra 8 CLK
-	SD_CS_DEASSERT;
+	SPI_deselect();
 
 	return response; //return state
 }
@@ -194,12 +194,12 @@ unsigned char SD_readSingleBlock(unsigned long startBlock) {
 		return response; //check for SD status: 0x00 - OK (No flags set)
 	}
 
-	SD_CS_ASSERT;
+	SPI_select();
 
 	retry = 0;
 	while (SPI_receive() != 0xfe) { //wait for start block token 0xfe (0x11111110)
 		if (retry++ > 0xfffe) {
-			SD_CS_DEASSERT;
+			SPI_deselect();
 			return 1;
 		} //return if time-out
 	}
@@ -211,7 +211,7 @@ unsigned char SD_readSingleBlock(unsigned long startBlock) {
 	SPI_receive(); //receive incoming CRC (16-bit), CRC is ignored here
 	SPI_receive();
 	SPI_receive(); //extra 8 clock pulses
-	SD_CS_DEASSERT;
+	SPI_deselect();
 	return 0;
 }
 
@@ -231,7 +231,7 @@ unsigned char SD_writeSingleBlock(unsigned long startBlock) {
 		return response; //check for SD status: 0x00 - OK (No flags set)
 	}
 
-	SD_CS_ASSERT;
+	SPI_select();
 	SPI_transmit(0xfe);     //Send start block token 0xfe (0x11111110)
 
 	for (i=0; i<512; i++) {    //send 512 bytes data
@@ -243,27 +243,27 @@ unsigned char SD_writeSingleBlock(unsigned long startBlock) {
 	response = SPI_receive();
 
 	if ((response & 0x1f) != 0x05) { //response= 0xXXX0AAA1 ; AAA='010' - data accepted
-		SD_CS_DEASSERT;              //AAA='101'-data rejected due to CRC error
+		SPI_deselect();              //AAA='101'-data rejected due to CRC error
 		return response;             //AAA='110'-data rejected due to write error
 	}
 
 	while (!SPI_receive()) { //wait for SD card to complete writing and get idle
 		if (retry++ > 0xfffe) {
-			SD_CS_DEASSERT;
+			SPI_deselect();
 			return 1;
 		}
 	}
 
-	SD_CS_DEASSERT;
+	SPI_deselect();
 	SPI_transmit(0xff);   //just spend 8 clock cycle delay before reasserting the CS line
-	SD_CS_ASSERT;         //re-asserting the CS line to verify if card is still busy
+	SPI_select();         //re-asserting the CS line to verify if card is still busy
 
 	while (!SPI_receive()) { //wait for SD card to complete writing and get idle
 		if (retry++ > 0xfffe) {
-			SD_CS_DEASSERT;
+			SPI_deselect();
 			return 1;
 		}
 	}
-	SD_CS_DEASSERT;
+	SPI_deselect();
 	return 0;
 }
