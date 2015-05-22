@@ -5,7 +5,7 @@
 MCU = atmega32m1
 FORMAT = ihex
 TARGET = main
-SRC = fat32.c sd_routines.c spi_routines.c $(TARGET).c ../header_and_config/LUR7_io.c ../header_and_config/LUR7_adc.c ../header_and_config/LUR7_ancomp.c ../header_and_config/LUR7_can.c ../header_and_config/LUR7_interrupt.c ../header_and_config/LUR7_power.c ../header_and_config/LUR7_timer0.c ../header_and_config/LUR7_timer1.c
+SRC = fat32.c $(TARGET).c sd_routines.c spi_routines.c ../header_and_config/LUR7_io.c ../header_and_config/LUR7_adc.c ../header_and_config/LUR7_ancomp.c ../header_and_config/LUR7_can.c ../header_and_config/LUR7_interrupt.c ../header_and_config/LUR7_power.c ../header_and_config/LUR7_timer0.c ../header_and_config/LUR7_timer1.c
 ASRC =
 OPT = s
 

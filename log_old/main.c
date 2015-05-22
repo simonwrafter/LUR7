@@ -17,12 +17,15 @@
  */
 
 #include "../header_and_config/LUR7.h"
+/*
+#define F_CPU 16000000UL
 
-//#include <avr/pgmspace.h>
-
+#include <avr/io.h>
+#include <util/delay.h>
+*/
 #include "spi_routines.h"
 #include "sd_routines.h"
-#include "fat32.h"
+//#include "fat32.h"
 
 int main(void) {
 	unsigned char option, error, data, FAT32_active;
@@ -30,15 +33,15 @@ int main(void) {
 	unsigned char fileName[13];
 	
 	//io_init();
-	adc_init();
-	ancomp_init();
-	can_init();
-	timer1_init(OFF);
-	power_off_default();
-	power_off_timer0();
+	//adc_init();
+	//ancomp_init();
+	//can_init();
+	//timer1_init(OFF);
+	//power_off_default();
+	//power_off_timer0();
 	
-	interrupts_on();
-	can_enable();
+	//interrupts_on();
+	//can_enable();
 	
 	//**********************
 	// Init
@@ -55,7 +58,7 @@ int main(void) {
 		}
 	}
 
-	error = getBootSectorData(); //read boot sector and keep necessary data in global variables
+	//error = getBootSectorData(); //read boot sector and keep necessary data in global variables
 	if(error) {
 		//FAT32 incompatible drive
 		while (1) {

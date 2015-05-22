@@ -52,7 +52,7 @@
  * peripherals are never used and can thus be safely dissabled.
  */
 void power_off_default(void) {
-	PRR = (1 << PRPSC) | (1 << PRSPI) | (1 << PRLIN);
+	PRR = (1 << PRPSC) | (1 << PRLIN);
 }
 
 //! Dissable Timer1

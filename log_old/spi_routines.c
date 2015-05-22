@@ -24,14 +24,14 @@ void SPI_init(void) {
 	SPSR = (1 << SPI2X);
 }
 
-void SPI_send_byte(uint8_t data) {
+void SPI_transmit(uint8_t data) {
 	SPDR = data;
 	while (!(SPSR & (1<<SPIF))) {
 		;
 	}
 }
 
-unsigned char SPI_receive(void) {
+uint8_t SPI_receive(void) {
 	unsigned char data;
 	// Wait for reception complete
 	SPDR = 0xff;
