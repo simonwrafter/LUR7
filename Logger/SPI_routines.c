@@ -1,15 +1,5 @@
-//**************************************************************
-// ****** FUNCTIONS FOR SPI COMMUNICATION *******
-//**************************************************************
-//Controller: ATmega32 (Clock: 8 Mhz-internal)
-//Compiler	: AVR-GCC (winAVR with AVRStudio)
-//Project V.: Version - 2.4.1
-//Author	: CC Dharmani, Chennai (India)
-//			  www.dharmanitech.com
-//Date		: 24 Apr 2011
-//**************************************************************
-
 #include <avr/io.h>
+#include <avr/stdint.h>
 #include "SPI_routines.h"
 
 //SPI initialize for SD card
@@ -24,15 +14,15 @@ void SPI_init(void) {
 	SPSR = (1 << SPI2X);
 }
 
-void SPI_send_byte(uint8_t data) {
+void SPI_send_uint8_t(uint8_t data) {
 	SPDR = data;
 	while (!(SPSR & (1<<SPIF))) {
 		;
 	}
 }
 
-unsigned char SPI_receive(void) {
-	unsigned char data;
+uint8_t SPI_receive(void) {
+	uint8_t data;
 	// Wait for reception complete
 	SPDR = 0xff;
 	while (!(SPSR & (1<<SPIF))) {

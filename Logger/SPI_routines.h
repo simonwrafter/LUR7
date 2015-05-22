@@ -13,8 +13,8 @@
 #define _SPI_ROUTINES_H_
 
 void SPI_init(void);
-unsigned char SPI_transmit(unsigned char);
-unsigned char SPI_receive(void);
+uint8_t SPI_transmit(uint8_t);
+uint8_t SPI_receive(void);
 
 void SPI_select(void);
 void SPI_deselect(void);

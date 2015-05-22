@@ -35,19 +35,13 @@
 #define READ_OCR				 58
 #define CRC_ON_OFF               59
 
-
 #define ON     1
 #define OFF    0
 
-volatile unsigned long startBlock, totalBlocks; 
-volatile unsigned char SDHC_flag, cardType, buffer[512];
-
-unsigned char SD_init(void);
-unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg);
-unsigned char SD_readSingleBlock(unsigned long startBlock);
-unsigned char SD_writeSingleBlock(unsigned long startBlock);
-unsigned char SD_readMultipleBlock (unsigned long startBlock, unsigned long totalBlocks);
-unsigned char SD_writeMultipleBlock(unsigned long startBlock, unsigned long totalBlocks);
-unsigned char SD_erase (unsigned long startBlock, unsigned long totalBlocks);
+uint8_t SD_init(void);
+uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg);
+uint8_t SD_readSingleBlock(uint32_t startBlock);
+uint8_t SD_writeSingleBlock(uint32_t startBlock);
+uint8_t SD_erase (uint32_t startBlock, uint32_t totalBlocks);
 
 #endif

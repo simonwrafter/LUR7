@@ -32,8 +32,8 @@
  * \addtogroup gear_clutch_launch
  */
 
-#ifndef _GEAR_CLUTCH_LAUNCH_H_
-#define GEAR_CLUTCH_LAUNCH_H_
+#ifndef _GEAR_LAUNCH_H_
+#define _GEAR_LAUNCH_H_
 
 void set_current_gear(uint8_t);
 void set_current_revs(uint16_t);
@@ -45,4 +45,4 @@ void gear_neutral_single(void);
 void gear_neutral_repeat_linear(void);
 void gear_neutral_repeat_bisect(void);
 
-#endif // _GEAR_CLUTCH_LAUNCH_H_
+#endif // _GEAR_LAUNCH_H_

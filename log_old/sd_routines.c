@@ -1,7 +1,7 @@
 //**************************************************************
 // ****** FUNCTIONS FOR SD RAW DATA TRANSFER *******
 //**************************************************************
-//Controller: ATmega32 (Clock: 8 Mhz-internal)
+//Controller: ATmega32M1 (Clock: 16 Mhz-external)
 //Compiler	: AVR-GCC (winAVR with AVRStudio)
 //Project V.: Version - 2.4.1
 //Author	: CC Dharmani, Chennai (India)
@@ -11,10 +11,10 @@
 
 //Link to the Post: http://www.dharmanitech.com/2009/01/sd-card-interfacing-with-atmega8-fat32.html
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-#include "SPI_routines.h"
-#include "SD_routines.h"
+#include "../header_and_config/LUR7.h"
+
+#include "spi_routines.h"
+#include "sd_routines.h"
 
 //******************************************************************
 //Function	: to initialize the SD/SDHC card in SPI mode

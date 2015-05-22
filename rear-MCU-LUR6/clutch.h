@@ -32,8 +32,8 @@
  * \addtogroup gear_clutch_launch
  */
 
-#ifndef _GEAR_CLUTCH_LAUNCH_H_
-#define GEAR_CLUTCH_LAUNCH_H_
+#ifndef _CLUTCH_H_
+#define _CLUTCH_H_
 
 void clutch_init(void);
 void clutch_filter_left(uint16_t pos_left);
@@ -46,4 +46,4 @@ uint16_t clutch_get_dutycycle_left(void);
 uint16_t clutch_get_dutycycle_right(void);
 void clutch_set_dutycycle(void);
 
-#endif // _GEAR_CLUTCH_LAUNCH_H_
+#endif // _CLUTCH_H_

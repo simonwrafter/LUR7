@@ -46,7 +46,7 @@
 
 
 static
-void dly_us (UINT n)	/* Delay n microseconds (avr-gcc -Os) */
+void dly_us (uint16_t n)	/* Delay n microseconds (avr-gcc -Os) */
 {
 	do {
 		PINB;
@@ -73,8 +73,6 @@ void dly_us (UINT n)	/* Delay n microseconds (avr-gcc -Os) */
 #endif
 	} while (--n);
 }
-
-
 
 /*--------------------------------------------------------------------------
 
@@ -105,30 +103,26 @@ void dly_us (UINT n)	/* Delay n microseconds (avr-gcc -Os) */
 #define CMD55	(55)		/* APP_CMD */
 #define CMD58	(58)		/* READ_OCR */
 
-
 static
 DSTATUS Stat = STA_NOINIT;	/* Disk status */
 
 static
-BYTE CardType;			/* b0:MMC, b1:SDv1, b2:SDv2, b3:Block addressing */
-
-
+uint8_t CardType;			/* b0:MMC, b1:SDv1, b2:SDv2, b3:Block addressing */
 
 /*-----------------------------------------------------------------------*/
-/* Transmit bytes to the card (bitbanging)                               */
+/* Transmit uint8_ts to the card (bitbanging)                               */
 /*-----------------------------------------------------------------------*/
 
 static
 void xmit_mmc (
-	const BYTE* buff,	/* Data to be sent */
-	UINT bc				/* Number of bytes to send */
+	const uint8_t* buff,	/* Data to be sent */
+	uint16_t bc				/* Number of uint8_ts to send */
 )
 {
-	BYTE d;
-
+	uint8_t d;
 
 	do {
-		d = *buff++;	/* Get a byte to be sent */
+		d = *buff++;	/* Get a uint8_t to be sent */
 		if (d & 0x80) DI_H(); else DI_L();	/* bit7 */
 		CK_H(); CK_L();
 		if (d & 0x40) DI_H(); else DI_L();	/* bit6 */
@@ -148,19 +142,17 @@ void xmit_mmc (
 	} while (--bc);
 }
 
-
-
 /*-----------------------------------------------------------------------*/
-/* Receive bytes from the card (bitbanging)                              */
+/* Receive uint8_ts from the card (bitbanging)                              */
 /*-----------------------------------------------------------------------*/
 
 static
 void rcvr_mmc (
-	BYTE *buff,	/* Pointer to read buffer */
-	UINT bc		/* Number of bytes to receive */
+	uint8_t *buff,	/* Pointer to read buffer */
+	uint16_t bc		/* Number of uint8_ts to receive */
 )
 {
-	BYTE r;
+	uint8_t r;
 
 
 	DI_H();	/* Send 0xFF */
@@ -182,7 +174,7 @@ void rcvr_mmc (
 		CK_H(); CK_L();
 		r <<= 1; if (DO) r++;	/* bit0 */
 		CK_H(); CK_L();
-		*buff++ = r;			/* Store a received byte */
+		*buff++ = r;			/* Store a received uint8_t */
 	} while (--bc);
 }
 
@@ -195,8 +187,8 @@ void rcvr_mmc (
 static
 int wait_ready (void)	/* 1:OK, 0:Timeout */
 {
-	BYTE d;
-	UINT tmr;
+	uint8_t d;
+	uint16_t tmr;
 
 
 	for (tmr = 5000; tmr; tmr--) {	/* Wait for ready in timeout of 500ms */
@@ -217,7 +209,7 @@ int wait_ready (void)	/* 1:OK, 0:Timeout */
 static
 void deselect (void)
 {
-	BYTE d;
+	uint8_t d;
 
 	CS_H();
 	rcvr_mmc(&d, 1);	/* Dummy clock (force DO hi-z for multiple slave SPI) */
@@ -232,7 +224,7 @@ void deselect (void)
 static
 int select (void)	/* 1:OK, 0:Timeout */
 {
-	BYTE d;
+	uint8_t d;
 
 	CS_L();
 	rcvr_mmc(&d, 1);	/* Dummy clock (force DO enabled) */
@@ -250,12 +242,12 @@ int select (void)	/* 1:OK, 0:Timeout */
 
 static
 int rcvr_datablock (	/* 1:OK, 0:Failed */
-	BYTE *buff,			/* Data buffer to store received data */
-	UINT btr			/* Byte count */
+	uint8_t *buff,			/* Data buffer to store received data */
+	uint16_t btr			/* uint8_t count */
 )
 {
-	BYTE d[2];
-	UINT tmr;
+	uint8_t d[2];
+	uint16_t tmr;
 
 
 	for (tmr = 1000; tmr; tmr--) {	/* Wait for data packet in timeout of 100ms */
@@ -279,11 +271,11 @@ int rcvr_datablock (	/* 1:OK, 0:Failed */
 
 static
 int xmit_datablock (	/* 1:OK, 0:Failed */
-	const BYTE *buff,	/* 512 byte data block to be transmitted */
-	BYTE token			/* Data/Stop token */
+	const uint8_t *buff,	/* 512 uint8_t data block to be transmitted */
+	uint8_t token			/* Data/Stop token */
 )
 {
-	BYTE d[2];
+	uint8_t d[2];
 
 
 	if (!wait_ready()) return 0;
@@ -291,7 +283,7 @@ int xmit_datablock (	/* 1:OK, 0:Failed */
 	d[0] = token;
 	xmit_mmc(d, 1);				/* Xmit a token */
 	if (token != 0xFD) {		/* Is it data token? */
-		xmit_mmc(buff, 512);	/* Xmit the 512 byte data block to MMC */
+		xmit_mmc(buff, 512);	/* Xmit the 512 uint8_t data block to MMC */
 		rcvr_mmc(d, 2);			/* Xmit dummy CRC (0xFF,0xFF) */
 		rcvr_mmc(d, 1);			/* Receive data response */
 		if ((d[0] & 0x1F) != 0x05)	/* If not accepted, return with error */
@@ -308,12 +300,12 @@ int xmit_datablock (	/* 1:OK, 0:Failed */
 /*-----------------------------------------------------------------------*/
 
 static
-BYTE send_cmd (		/* Returns command response (bit7==1:Send failed)*/
-	BYTE cmd,		/* Command byte */
-	DWORD arg		/* Argument */
+uint8_t send_cmd (		/* Returns command response (bit7==1:Send failed)*/
+	uint8_t cmd,		/* Command uint8_t */
+	uint32_t arg		/* Argument */
 )
 {
-	BYTE n, d, buf[6];
+	uint8_t n, d, buf[6];
 
 
 	if (cmd & 0x80) {	/* ACMD<n> is the command sequense of CMD55-CMD<n> */
@@ -328,10 +320,10 @@ BYTE send_cmd (		/* Returns command response (bit7==1:Send failed)*/
 
 	/* Send a command packet */
 	buf[0] = 0x40 | cmd;			/* Start + Command index */
-	buf[1] = (BYTE)(arg >> 24);		/* Argument[31..24] */
-	buf[2] = (BYTE)(arg >> 16);		/* Argument[23..16] */
-	buf[3] = (BYTE)(arg >> 8);		/* Argument[15..8] */
-	buf[4] = (BYTE)arg;				/* Argument[7..0] */
+	buf[1] = (uint8_t)(arg >> 24);		/* Argument[31..24] */
+	buf[2] = (uint8_t)(arg >> 16);		/* Argument[23..16] */
+	buf[3] = (uint8_t)(arg >> 8);		/* Argument[15..8] */
+	buf[4] = (uint8_t)arg;				/* Argument[7..0] */
 	n = 0x01;						/* Dummy CRC + Stop */
 	if (cmd == CMD0) n = 0x95;		/* (valid CRC for CMD0(0)) */
 	if (cmd == CMD8) n = 0x87;		/* (valid CRC for CMD8(0x1AA)) */
@@ -339,7 +331,7 @@ BYTE send_cmd (		/* Returns command response (bit7==1:Send failed)*/
 	xmit_mmc(buf, 6);
 
 	/* Receive command response */
-	if (cmd == CMD12) rcvr_mmc(&d, 1);	/* Skip a stuff byte when stop reading */
+	if (cmd == CMD12) rcvr_mmc(&d, 1);	/* Skip a stuff uint8_t when stop reading */
 	n = 10;								/* Wait for a valid response in timeout of 10 attempts */
 	do
 		rcvr_mmc(&d, 1);
@@ -362,7 +354,7 @@ BYTE send_cmd (		/* Returns command response (bit7==1:Send failed)*/
 /*-----------------------------------------------------------------------*/
 
 DSTATUS disk_status (
-	BYTE drv			/* Drive number (always 0) */
+	uint8_t drv			/* Drive number (always 0) */
 )
 {
 	if (drv) return STA_NOINIT;
@@ -377,11 +369,11 @@ DSTATUS disk_status (
 /*-----------------------------------------------------------------------*/
 
 DSTATUS disk_initialize (
-	BYTE drv		/* Physical drive nmuber (0) */
+	uint8_t drv		/* Physical drive nmuber (0) */
 )
 {
-	BYTE n, ty, cmd, buf[4];
-	UINT tmr;
+	uint8_t n, ty, cmd, buf[4];
+	uint16_t tmr;
 	DSTATUS s;
 
 
@@ -439,14 +431,14 @@ DSTATUS disk_initialize (
 /*-----------------------------------------------------------------------*/
 
 DRESULT disk_read (
-	BYTE drv,			/* Physical drive nmuber (0) */
-	BYTE *buff,			/* Pointer to the data buffer to store read data */
-	DWORD sector,		/* Start sector number (LBA) */
-	BYTE count			/* Sector count (1..256(0)) */
+	uint8_t drv,			/* Physical drive nmuber (0) */
+	uint8_t *buff,			/* Pointer to the data buffer to store read data */
+	uint32_t sector,		/* Start sector number (LBA) */
+	uint8_t count			/* Sector count (1..256(0)) */
 )
 {
 	if (disk_status(drv) & STA_NOINIT) return RES_NOTRDY;
-	if (!(CardType & CT_BLOCK)) sector *= 512;	/* Convert LBA to byte address if needed */
+	if (!(CardType & CT_BLOCK)) sector *= 512;	/* Convert LBA to uint8_t address if needed */
 
 	if (count == 1) {	/* Single block read */
 		if ((send_cmd(CMD17, sector) == 0)	/* READ_SINGLE_BLOCK */
@@ -474,14 +466,14 @@ DRESULT disk_read (
 /*-----------------------------------------------------------------------*/
 
 DRESULT disk_write (
-	BYTE drv,			/* Physical drive nmuber (0) */
-	const BYTE *buff,	/* Pointer to the data to be written */
-	DWORD sector,		/* Start sector number (LBA) */
-	BYTE count			/* Sector count (1..256(0)) */
+	uint8_t drv,			/* Physical drive nmuber (0) */
+	const uint8_t *buff,	/* Pointer to the data to be written */
+	uint32_t sector,		/* Start sector number (LBA) */
+	uint8_t count			/* Sector count (1..256(0)) */
 )
 {
 	if (disk_status(drv) & STA_NOINIT) return RES_NOTRDY;
-	if (!(CardType & CT_BLOCK)) sector *= 512;	/* Convert LBA to byte address if needed */
+	if (!(CardType & CT_BLOCK)) sector *= 512;	/* Convert LBA to uint8_t address if needed */
 
 	if (count == 1) {	/* Single block write */
 		if ((send_cmd(CMD24, sector) == 0)	/* WRITE_BLOCK */
@@ -510,14 +502,14 @@ DRESULT disk_write (
 /*-----------------------------------------------------------------------*/
 
 DRESULT disk_ioctl (
-	BYTE drv,		/* Physical drive nmuber (0) */
-	BYTE ctrl,		/* Control code */
+	uint8_t drv,		/* Physical drive nmuber (0) */
+	uint8_t ctrl,		/* Control code */
 	void *buff		/* Buffer to send/receive control data */
 )
 {
 	DRESULT res;
-	BYTE n, csd[16];
-	DWORD cs;
+	uint8_t n, csd[16];
+	uint32_t cs;
 
 
 	if (disk_status(drv) & STA_NOINIT) return RES_NOTRDY;	/* Check if card is in the socket */
@@ -528,22 +520,22 @@ DRESULT disk_ioctl (
 			if (select()) res = RES_OK;
 			break;
 
-		case GET_SECTOR_COUNT :	/* Get number of sectors on the disk (DWORD) */
+		case GET_SECTOR_COUNT :	/* Get number of sectors on the disk (uint32_t) */
 			if ((send_cmd(CMD9, 0) == 0) && rcvr_datablock(csd, 16)) {
 				if ((csd[0] >> 6) == 1) {	/* SDC ver 2.00 */
-					cs = csd[9] + ((WORD)csd[8] << 8) + ((DWORD)(csd[7] & 63) << 16) + 1;
-					*(DWORD*)buff = cs << 10;
+					cs = csd[9] + ((uint16_t)csd[8] << 8) + ((uint32_t)(csd[7] & 63) << 16) + 1;
+					*(uint32_t*)buff = cs << 10;
 				} else {					/* SDC ver 1.XX or MMC */
 					n = (csd[5] & 15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
-					cs = (csd[8] >> 6) + ((WORD)csd[7] << 2) + ((WORD)(csd[6] & 3) << 10) + 1;
-					*(DWORD*)buff = cs << (n - 9);
+					cs = (csd[8] >> 6) + ((uint16_t)csd[7] << 2) + ((uint16_t)(csd[6] & 3) << 10) + 1;
+					*(uint32_t*)buff = cs << (n - 9);
 				}
 				res = RES_OK;
 			}
 			break;
 
-		case GET_BLOCK_SIZE :	/* Get erase block size in unit of sector (DWORD) */
-			*(DWORD*)buff = 128;
+		case GET_BLOCK_SIZE :	/* Get erase block size in unit of sector (uint32_t) */
+			*(uint32_t*)buff = 128;
 			res = RES_OK;
 			break;
 
