@@ -86,6 +86,7 @@ const uint8_t  CAN_GEAR_CLUTCH_LAUNCH_DLC = 4; //!< DLC of Gear Change and Clutc
 
 // +  +  Logging
 const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
+const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the LOG instruction
 const uint8_t  CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
 // +  Rear MCU

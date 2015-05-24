@@ -132,18 +132,19 @@ unsigned long unusedSectors, appendFileSector, appendFileLocation, fileSize, app
 unsigned char freeClusterCountUpdated;
 
 //************* functions *************
+
 unsigned char getBootSectorData (void);
 unsigned long getFirstSector(unsigned long clusterNumber);
+unsigned long getSetNextCluster (unsigned long clusterNumber, unsigned char get_set, unsigned long clusterEntry);
 unsigned long getSetFreeCluster(unsigned char totOrNext, unsigned char get_set, unsigned long FSEntry);
 struct dir_Structure* findFiles (unsigned char flag, unsigned char *fileName);
-unsigned long getSetNextCluster (unsigned long clusterNumber,unsigned char get_set,unsigned long clusterEntry);
 unsigned char readFile (unsigned char flag, unsigned char *fileName);
 unsigned char convertFileName (unsigned char *fileName);
 void writeFile (unsigned char *fileName, unsigned char *in_data, unsigned char in_length);
-void appendFile (void);
 unsigned long searchNextFreeCluster (unsigned long startCluster);
-void memoryStatistics (void);
 void deleteFile (unsigned char *fileName);
 void freeMemoryUpdate (unsigned char flag, unsigned long size);
+
+
 
 #endif

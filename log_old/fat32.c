@@ -97,6 +97,7 @@ unsigned long getSetNextCluster (unsigned long clusterNumber, unsigned char get_
 	while(retry <10) {
 		if(!SD_readSingleBlock(FATEntrySector)) {
 			break;
+		}
 		retry++;
 	}
 	//get the cluster address from the buffer
@@ -120,7 +121,7 @@ unsigned long getSetNextCluster (unsigned long clusterNumber, unsigned char get_
 //********************************************************************************************
 unsigned long getSetFreeCluster(unsigned char totOrNext, unsigned char get_set, unsigned long FSEntry) {
 	struct FSInfo_Structure *FS = (struct FSInfo_Structure *) &buffer;
-	unsigned char error;
+	//unsigned char error;
 
 	SD_readSingleBlock(unusedSectors + 1);
 
@@ -139,7 +140,8 @@ unsigned long getSetFreeCluster(unsigned char totOrNext, unsigned char get_set, 
 		} else { // when totOrNext = NEXT_FREE
 			FS->nextFreeCluster = FSEntry;
 		}
-		error = SD_writeSingleBlock(unusedSectors + 1);	//update FSinfo
+		//error = SD_writeSingleBlock(unusedSectors + 1);	//update FSinfo
+		SD_writeSingleBlock(unusedSectors + 1);	//update FSinfo
 	}
 	return 0xffffffff;
 }
@@ -166,16 +168,16 @@ struct dir_Structure* findFiles (unsigned char flag, unsigned char *fileName) {
 			SD_readSingleBlock (firstSector + sector);
 			for (i=0; i<bytesPerSector; i+=32) {
 				dir = (struct dir_Structure *) &buffer[i];
-
 				if (dir->name[0] == EMPTY) { //indicates end of the file list of the directory
 					return 0;
 				}
 			}
 			if ((dir->name[0] != DELETED) && (dir->attrib != ATTR_LONG_NAME)) {
 				if ((flag == GET_FILE) || (flag == DELETE)) {
-					for(j=0; j<11; j++)
-						if(dir->name[j] != fileName[j])
+					for(j=0; j<11; j++) {
+						if(dir->name[j] != fileName[j]) {
 							break;
+						}
 						if(j == 11) {
 							if(flag == GET_FILE) {
 								appendFileSector = firstSector + sector;
@@ -324,12 +326,11 @@ unsigned char convertFileName (unsigned char *fileName) {
 void writeFile (unsigned char *fileName, unsigned char *in_data, unsigned char in_length) {
 	unsigned char loop = 0;
 	unsigned char j;
-	unsigned char data;
-	unsigned char error;
+	//unsigned char data;
+	//unsigned char error;
 	unsigned char fileCreatedFlag = 0;
 	unsigned char start = 0;
 	unsigned char appendFile = 0;
-	unsigned char sectorEndFlag = 0;
 	unsigned char sector=0;
 	unsigned int i;
 	unsigned int firstClusterHigh=0;
@@ -395,7 +396,8 @@ void writeFile (unsigned char *fileName, unsigned char *in_data, unsigned char i
 			fileSize++;
 			if (i >= 512) { // though 'i' will never become greater than 512, it's kept here to avoid
 				i = 0;		//   infinite loop in case it happens to be greater than 512 due to some data corruption
-				error = SD_writeSingleBlock (startBlock);
+				//error = SD_writeSingleBlock (startBlock);
+				SD_writeSingleBlock (startBlock);
 				j++;
 				if (j == sectorPerCluster) {
 					j = 0;
@@ -408,7 +410,8 @@ void writeFile (unsigned char *fileName, unsigned char *in_data, unsigned char i
 			for (;i<512;i++) { //fill the rest of the buffer with 0x00
 				buffer[i]= 0x00;
 			}
-			error = SD_writeSingleBlock (startBlock);
+			//error = SD_writeSingleBlock (startBlock);
+			SD_writeSingleBlock (startBlock);
 			break;
 		}
 //------------------------------------------------------------------------------
