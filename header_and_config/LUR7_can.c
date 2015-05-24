@@ -74,6 +74,7 @@ const uint8_t  CAN_DTA_DLC = 8; //!< DLC of DTA messages
 const uint32_t CAN_FRONT_LOG_SPEED_ID = 0x00004000; //!< Message ID for front wheel speeds
 const uint32_t CAN_FRONT_LOG_SUSPENSION_ID = 0x00004001; //!< Message ID for front suspension
 const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID = 0x00004002; //!< Message ID for steering and braking
+const uint32_t CAN_FRONT_LOG_STEER_BRAKE_MASK = 0xFFFFFFFF; //!< Mask for steering and braking
 const uint8_t  CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging node
 
 // +  Mid-MCU
