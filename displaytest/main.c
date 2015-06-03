@@ -20,39 +20,62 @@
 #include "config.h"
 #include "display.h"
 
-volatile uint8_t print = FALSE;
-
 int main(void) {
-	io_init();
-	adc_init();
-	ancomp_init();
-	can_init();
-	timer1_init(OFF);
-	power_off_default();
-	power_off_timer0();
+	io_init(); //! <li> initialise LUR_io.
+	adc_init(); //! <li> initialise LUR7_adc.
+	ancomp_init(); //! <li> initialise LUR7_ancomp.
+	can_init(); //! <li> initialise LUR7_CAN.
+	timer1_init(OFF); //! <li> initialise LUR7_timer0.
 
-	interrupts_on();
+	power_off_default(); //! <li> power off unused periferals.
+	power_off_timer0(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 
+	interrupts_on(); //! <li> enable interrupts.
+	can_enable(); //! <li> enable CAN.
+
+	update_RPM(9000);
+	update_watertemp(75);
+	update_speed(88);
+	update_oiltemp(50);
+	update_gear(3);
+	
 	while (1) {
-		for (int i=0; i < 64; i++) {
-			for (int j=0; j<64; j++){
-				if (i==j) {
-					shift_bit(1);
-				} else if (i == j+1) {
-					shift_bit(1);
-				}else {
-					shift_bit(0);
+		
+		//update_display();
+		
+		// blink
+		for (int i = 0; i<2; i++) {
+			for (int j = 0; j<64; j++) {
+				if (i==0) {
+					shift_bit(ON);
+				} else {
+					shift_bit(OFF);
 				}
-				shift_strobe();
-				_delay_ms(500);
 			}
+			shift_strobe();
+			_delay_ms(500);
+			toggle_output(LED0);
 		}
+		
+		/* //vandrare
+		for (int i = 0; i<64; i++) {
+			for (int j = 0; j<64; j++) {
+				if (i==j) {
+					shift_bit(ON);
+				} else {
+					shift_bit(OFF);
+				}
+			}
+			shift_strobe();
+			toggle_output(LED0);
+		}
+		*/
 	}
-
-	return 0;
+	return 0; //! </ul>
 }
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {}
+
 void timer0_isr_stop(void) {}
 
 void pcISR_in1(void) {}
@@ -66,6 +89,7 @@ void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+
 void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 void early_bod_warning_ISR(void) {}

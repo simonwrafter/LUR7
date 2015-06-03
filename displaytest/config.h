@@ -19,19 +19,11 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-//Constants
-#define CLUTCH_ATOMIC_LENGTH	10
 
-//Inputs
+//Outputs
+#define IO_SHIFT_STROBE		OUT2
+#define IO_SHIFT_DATA		OUT3
+#define IO_SHIFT_CLK		OUT4
 
-// Outputs
-// Outout for Shift Register Strobe
-#define IO_SHIFT_STROBE		OUT5
-// Outout for Shift Register Data
-#define IO_SHIFT_DATA		OUT6
-// Outout for Shift Register Clock
-#define IO_SHIFT_CLK		OUT7
-
-//External interrupts
 
 #endif // _CONFIG_H_
