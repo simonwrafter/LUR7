@@ -214,7 +214,7 @@ void pcISR_in2(void) {
 //! Pin Change Interrupt handler for IN3.
 /*! Gear Up backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in3(void) {
-	if (get_input(BAK_IN_GEAR_UP)) {
+	if (!get_input(BAK_IN_GEAR_UP)) {
 		gear_up_flag = TRUE;
 	}
 }
@@ -226,7 +226,7 @@ void pcISR_in4(void) {}
 //! Pin Change Interrupt handler for IN5.
 /*! Gear Down backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in5(void) {
-	if (get_input(BAK_IN_GEAR_DOWN)) {
+	if (!get_input(BAK_IN_GEAR_DOWN)) {
 		gear_down_flag = TRUE;
 	}
 }
@@ -238,7 +238,7 @@ void pcISR_in6(void) {}
 //! Pin Change Interrupt handler for IN7.
 /*! Neutral Gear backup, enabled if mid-MCU is in failsafe mode. */
 void pcISR_in7(void) {
-	if (get_input(BAK_IN_NEUTRAL)) {
+	if (!get_input(BAK_IN_NEUTRAL)) {
 		gear_neutral_single_flag = TRUE;
 	}
 }
@@ -322,9 +322,9 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_setup_tx(CAN_REAR_LOG_SUSPENSION_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
 	}
 
-	uint32_t filter = (uint32_t) clutch_get_filtered_right();
+	uint32_t filter = ((uint32_t) clutch_get_filtered_right() << 16) | clutch_get_filtered_left();
 	can_setup_tx(CAN_REAR_LOG_FILTER_ID, (uint8_t *) &filter, CAN_REAR_LOG_DLC);
-	uint32_t dutycycle = (uint32_t) clutch_get_dutycycle_right();
+	uint32_t dutycycle = ((uint32_t) clutch_get_dutycycle_right() << 16) | clutch_get_dutycycle_left();
 	can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
 }
 
@@ -354,15 +354,15 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			//uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
+			uint16_t clutch_left = ((uint16_t) data[3] << 8) | data[2];
 			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
-			//clutch_filter_left(clutch_left);
+			clutch_filter_left(clutch_left);
 			clutch_filter_right(clutch_right);
-			//clutch_dutycycle_left();
+			clutch_dutycycle_left();
 			clutch_dutycycle_right();
 			clutch_set_dutycycle();
 		} else if (id == CAN_LAUNCH_ID) { //! <li> if message ID is CAN_LAUNCH_ID <ul>
-			launch_control(); //! engage launch control.
+			//launch_control(); //! engage launch control.
 		} //! </ul>
 	} //! </ul>
 	else if (mob == brk_MOb) { //! <li> \ref brk_MOb receives a message <ul>
@@ -373,15 +373,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	else if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
 		dta_first_received = TRUE;
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
-		
-		/*/ OSÄKER detta från LUR7. launch_stop_clutch???
-		uint8_t gear = data[0];
-		if (gear == 3) {
-			launch_stop_clutch();
-		}
-		set_current_gear(gear); //! <li> relay to gear system.*/
 
-		//detta från LUR6
 		if (id == 0x2000) {
 			set_current_revs(((uint16_t) data[7] << 8) | data[6]);
 		}

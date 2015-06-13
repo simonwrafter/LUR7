@@ -22,20 +22,20 @@
 #include "clutch.h"
 
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_LEFT_CLOSED  = 550; // slapp vajer (430)
+static const float CLUTCH_POS_LEFT_CLOSED  = 553; // slapp vajer
 //! Threshold value for open clutch
-static const float CLUTCH_POS_LEFT_OPEN    = 644; // dragen vajer (370)
+static const float CLUTCH_POS_LEFT_OPEN    = 639; // dragen vajer
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_RIGHT_CLOSED = 425; // slapp (544)
+static const float CLUTCH_POS_RIGHT_CLOSED = 427; // Johansson och freddie pillar
 //! Threshold value for open clutch
-static const float CLUTCH_POS_RIGHT_OPEN   = 375; // dragen (649)
+static const float CLUTCH_POS_RIGHT_OPEN   = 378; // Johansson och freddie pillar
 //! PWM value for closed clutch
-static const float CLUTCH_DC_CLOSED        = 4500; //FINE TUNE // slapp vajer. max: 13700
+static const float CLUTCH_DC_CLOSED        = 6200; //FINE TUNE // slapp vajer. min: 2200
 //! PWM value for open clutch
-static const float CLUTCH_DC_OPEN          = 13000; //FINE TUNE // dragen vajer. min: 2200 (?)
+static const float CLUTCH_DC_OPEN          = 13500; //FINE TUNE // dragen vajer. max: 13700 (?)
 
-static const float clutch_pos_left_break   = 400;
-static const float clutch_pos_right_break  = 600;
+static const float clutch_pos_left_break   = 580;
+static const float clutch_pos_right_break  = 410; //johansson och freddie pillar
 
 static const float clutch_dc_break   = 8000; //trim!!!
 
@@ -57,6 +57,7 @@ volatile static float clutch_right_factor_closed = 0;
 
 
 void clutch_init(void) {
+	timer1_dutycycle(CLUTCH_DC_CLOSED);
 	clutch_left_factor_closed  = ((clutch_dc_break - CLUTCH_DC_CLOSED))  / (clutch_pos_left_break - CLUTCH_POS_LEFT_CLOSED);
 	clutch_left_factor_open    = ((CLUTCH_DC_OPEN  - clutch_dc_break))   / (CLUTCH_POS_LEFT_OPEN  - clutch_pos_left_break);
 
@@ -91,19 +92,19 @@ void clutch_dutycycle_left(void) {
 }
 
 void clutch_dutycycle_right(void) {
-	if (clutch_right_filtered > CLUTCH_POS_RIGHT_OPEN) {
+	if (clutch_right_filtered < CLUTCH_POS_RIGHT_OPEN) {
 		duty_right = CLUTCH_DC_OPEN;
-	} else if (clutch_right_filtered > clutch_pos_right_break) {
+	} else if (clutch_right_filtered < clutch_pos_right_break) {
 		duty_right = ((clutch_right_filtered - clutch_pos_right_break)  * clutch_right_factor_open   + clutch_dc_break);
-	} else if (clutch_right_filtered > CLUTCH_POS_RIGHT_CLOSED) {
+	} else if (clutch_right_filtered < CLUTCH_POS_RIGHT_CLOSED) {
 		duty_right = ((clutch_right_filtered - CLUTCH_POS_RIGHT_CLOSED) * clutch_right_factor_closed + CLUTCH_DC_CLOSED);
 	} else {
-		duty_left = CLUTCH_DC_CLOSED;
+		duty_right = CLUTCH_DC_CLOSED;
 	}
 }
 
 void clutch_set_dutycycle(void) {
-	if (duty_left < duty_right) {
+	if (duty_left > duty_right) {
 		timer1_dutycycle(duty_left);
 	} else {
 		timer1_dutycycle(duty_right);

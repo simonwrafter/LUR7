@@ -68,9 +68,9 @@ static const uint16_t GEAR_UP_DELAY = 300; //30 ms
 //! Time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY = 300; //30 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_FIRST = 1100; //110 ms
+static const uint16_t GEAR_UP_DELAY_FIRST = 500; //50 ms
 //! Time to run the solenoid for gear down from second.
-static const uint16_t GEAR_DOWN_DELAY_SECOND = 1000; //100 ms
+static const uint16_t GEAR_DOWN_DELAY_SECOND = 500; //50 ms
 //! Time to run the solenoid for gear up from neutral.
 static const uint16_t GEAR_UP_DELAY_NEUTRAL = 300; //30 ms
 //! Time to run the solenoid for gear down from neutral.
@@ -94,7 +94,7 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_up_try_time = 500;
+static volatile uint16_t neutral_up_try_time = 500; // 50ms
 //! Last delay time used for finding neutral from second.
 static volatile uint16_t neutral_down_try_time = 500;
 //! Number of tries for neutral
@@ -124,13 +124,13 @@ static void neutral_repeat_stabiliser_bisect(void);
 
 
 //********** LAUNCH ************************************************************
-
+/*
 //! Time to run the signal for launch control
 static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
 volatile const uint8_t launch_mode = FALSE;
 //! Launch Control, end signal
 static void end_launch_signal(void);
-
+*/
 //******************************************************************************
 // COMMON
 //******************************************************************************
@@ -491,10 +491,10 @@ static void neutral_repeat_stabiliser_bisect(void) {
 /*!
  * Sets a signal to the DTA that initiates its launch control system.
  */
- 
+/*
  //OSÄKER. ÄNDRA OM HÄR!
 void launch_control(void) {}
-/*	if (!busy) {
+	if (!busy) {
 		busy = TRUE;
 		set_output(LAUNCH, GND);
 		end_fun_ptr = end_launch_signal;
@@ -510,10 +510,10 @@ void launch_control(void) {}
 }
 */
 
-
+/*
 //OSÄKER. ÄNDRA OM HÄR!
 void launch_stop_clutch(void) {}
-/*	clutch_factor = clutch_filter_main;
+	clutch_factor = clutch_filter_main;
 	launch_mode = FALSE;
 }
 */
@@ -522,11 +522,11 @@ void launch_stop_clutch(void) {}
 /*!
  * stops the signal to the DTA when Launch Control is active.
  */
-static void end_launch_signal(void) {
+/*static void end_launch_signal(void) {
 	set_output(LAUNCH, TRI);
 	busy = FALSE;
 }
-
+*/
 //******************************************************************************
 // TIMER
 //******************************************************************************

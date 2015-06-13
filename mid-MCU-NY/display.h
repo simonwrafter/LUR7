@@ -65,9 +65,9 @@ void update_oiltemp(uint16_t);
 uint8_t get_current_gear(void);
 
 uint8_t revs_to_bar(void);
-uint8_t temp_to_bar(void);
+uint8_t temp_to_bar(uint16_t);
 void bcd_convert(uint16_t);
 uint8_t bin_to_7seg(uint8_t, uint8_t);
-void update_display(void);
+void update_display(uint8_t);
 
 #endif // _MIDMCU_H_

@@ -77,9 +77,9 @@ static volatile uint16_t speed = 0;
 //! Logging number
 static volatile uint16_t log_id = 0;
 //! Water temperature
-static volatile uint16_t water_temp = 93;
+static volatile uint16_t water_temp = 110;
 //! Oil temperature
-static volatile uint16_t oil_temp = 100;
+static volatile uint16_t oil_temp = 110;
 //! BCD representation of number to display.
 static volatile uint8_t  bcd_vect[3] = {0,0,0};
 
@@ -143,26 +143,26 @@ uint8_t revs_to_bar() {
  * to give good resolution in the interesting regions, while maintaining a wide
  * span. \ref TEMP_LVL_1 to \ref TEMP_LVL_10 determine the steps.
  */
-uint8_t temp_to_bar() {
-	if (water_temp < TEMP_LVL_1) { // 20
+uint8_t temp_to_bar(uint16_t temperature) {
+	if (temperature < TEMP_LVL_1) { // 20
 		return 0;
-	} else if (water_temp < TEMP_LVL_2) { // 40
+	} else if (temperature < TEMP_LVL_2) { // 40
 		return 1;
-	} else if (water_temp < TEMP_LVL_3) { // 50
+	} else if (temperature < TEMP_LVL_3) { // 50
 		return 2;
-	} else if (water_temp < TEMP_LVL_4) { // 60
+	} else if (temperature < TEMP_LVL_4) { // 60
 		return 3;
-	} else if (water_temp < TEMP_LVL_5) { // 70
+	} else if (temperature < TEMP_LVL_5) { // 70
 		return 4;
-	} else if (water_temp < TEMP_LVL_6) { // 80
+	} else if (temperature < TEMP_LVL_6) { // 80
 		return 5;
-	} else if (water_temp < TEMP_LVL_7) { // 85
+	} else if (temperature < TEMP_LVL_7) { // 85
 		return 6;
-	} else if (water_temp < TEMP_LVL_8) { // 90
+	} else if (temperature < TEMP_LVL_8) { // 90
 		return 7;
-	} else if (water_temp < TEMP_LVL_9) { // 95
+	} else if (temperature < TEMP_LVL_9) { // 95
 		return 8;
-	} else if (water_temp < TEMP_LVL_10) { // 100
+	} else if (temperature < TEMP_LVL_10) { // 100
 		return 9;
 	}
 	return 10;
@@ -229,16 +229,24 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 /*!
  * Re-populates the shift registers with the latest information available.
  */
-void update_display(void) {
+void update_display(uint8_t mode) {
 	shift_byte(bin_to_7seg(gear, OFF));
 
-	bcd_convert(speed);
+	if (mode) {
+		bcd_convert(speed);
+	} else {
+		bcd_convert(speed);
+	}
 	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 
 	shift_bar(revs_to_bar(), REV_BAR_MAX);
-	shift_bar(temp_to_bar(), 10);
+	if (mode) {
+		shift_bar(temp_to_bar(water_temp), 10);
+	} else {
+		shift_bar(temp_to_bar(oil_temp), 10);
+	}
 	
 	// STROBE
 	shift_strobe();

@@ -29,7 +29,7 @@ int main(void) {
 	uint16_t delay = 150;
 	uint16_t step = 1;
 
-	timer1_dutycycle(3000);
+	timer1_dutycycle(4500);
 	while (1) {/*
 		for (int i=low; i<high; i += step) {
 			timer1_dutycycle(i);

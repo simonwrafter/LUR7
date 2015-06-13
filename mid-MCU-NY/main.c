@@ -96,9 +96,9 @@ int main(void) {
 	//! </ol>
 
 	//! <li> Input interrupts <ol>
-	ext_int_on(IO_GEAR_UP, 1, 1); //! <li> Gear up, rising flank trigger external interrupt
-	ext_int_on(IO_GEAR_DOWN, 1, 1); //! <li> Gear down, rising flank trigger external interrupt
-	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); //! <li> Neutral gear, rising flank trigger external interrupt
+	ext_int_on(IO_GEAR_UP, 1, 0); //! <li> Gear up, falling flank trigger external interrupt
+	ext_int_on(IO_GEAR_DOWN, 1, 0); //! <li> Gear down, falling flank trigger external interrupt
+	ext_int_on(IO_GEAR_NEUTRAL, 1, 0); //! <li> Neutral gear, falling flank trigger external interrupt
 
 	//pc_int_on(IO_GP_BTN);
 	pc_int_on(IO_LOG_BTN);
@@ -129,7 +129,7 @@ int main(void) {
 		//! <li> If new information for panel <ol>
 		if (new_info) {
 			new_info = FALSE; //! <li> clear flag
-			update_display(); //! <li> update panel
+			update_display(get_input(IO_ALT_BTN)); //! <li> update panel
 		} //! </ol>
 	} //! </ul>
 	return 0; //! </ul>
@@ -175,8 +175,6 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	if (interrupt_nbr == 0)
-		update_display();
 	uint32_t c_data = ((uint32_t) clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
@@ -210,7 +208,7 @@ ISR (INT_GEAR_DOWN) { //IN8
  * accordingly.
  */
 ISR (INT_GEAR_NEUTRAL) { //IN5
-	if (!get_input(IO_ALT_BTN)) {
+	if (get_input(IO_ALT_BTN)) {
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_SINGLE, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	} else {
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
@@ -280,18 +278,18 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	if (mob == CAN_DTA_MOb) { //! <li> if received from DTA: <ul>
 		switch (id_lsb) {
 			case 0 : //! <li> ID = 0x2000. <ul>
-				update_RPM((data[1] << 8) | data[0]); //! <li> extract RPM.
-				update_watertemp((data[5] << 8) | data[4]); //! <li> extract water temperature [C].
+				update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
+				update_watertemp((data[3] << 8) | data[2]); //! <li> extract water temperature [C].
 				new_info = TRUE; //! <li> set flag to update panel
 				break; //! </ul>
 			case 1 : //! <li> ID = 0x2001. <ul>
-				update_speed((data[5] << 8) | data[4]);  //! <li> extract speed [km/h * 10]
+				update_speed((data[3] << 8) | data[2]);  //! <li> extract speed [km/h * 10]
 				break; //! </ul>
 			case 2 : //! <li> ID = 0x2002. <ul>
-				update_oiltemp((data[3] << 8) | data[2]);  //! <li> extract oil temperature [C].
+				update_oiltemp((data[5] << 8) | data[6]);  //! <li> extract oil temperature [C].
 				break; //! </ul>
 			case 3 : //! <li> ID = 0x2003. <ul>
-				update_gear(data[0]);  //! <li> extract current gear.
+				update_gear(data[7]);  //! <li> extract current gear.
 				break; //! </ul>
 			default :
 				break;
