@@ -33,15 +33,6 @@
 #ifndef _MIDMCU_H_
 #define _MIDMCU_H_
 
-//! Minimum engine revs
-#define REV_MIN 6000
-//! Maximum engine revs
-#define REV_MAX 10500
-//! Minimum number of LEDs for rev bar
-#define REV_BAR_MIN 1
-//! Maximum number of LEDs for rev bar
-#define REV_BAR_MAX 22
-
 //! Water Temperature for one lit LED
 #define TEMP_LVL_1 20
 //! Water Temperature for two lit LED

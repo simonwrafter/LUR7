@@ -61,7 +61,7 @@ volatile uint16_t clutch_pos_right_atomic = 0;
 //! Used for stopping clutch CAN messages.
 volatile uint8_t clutch_CAN_disable = FALSE;
 
-void ugly_reset(void);
+//void ugly_reset(void);
 
 //! Main function.
 /*!
@@ -135,7 +135,7 @@ int main(void) {
 	return 0; //! </ul>
 }
 
-void ugly_reset(void) {
+/*void ugly_reset(void) {
 	set_output(OUT8, GND);
 	ext_int_off(IO_GEAR_UP);
 	ext_int_off(IO_GEAR_DOWN);
@@ -143,7 +143,7 @@ void ugly_reset(void) {
 	set_output(OUT8, TRI);
 	ext_int_on(IO_GEAR_UP, 1, 1);
 	ext_int_on(IO_GEAR_DOWN, 1, 1);
-}
+}*/
 
 // Interrupts
 //! Timer Interrupt, 100 Hz
@@ -175,6 +175,8 @@ void ugly_reset(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
+	if (interrupt_nbr == 0)
+		update_display();
 	uint32_t c_data = ((uint32_t) clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
@@ -218,18 +220,18 @@ ISR (INT_GEAR_NEUTRAL) { //IN5
 //! Pin Change Interrupt handler for IN1.
 /*! \todo manual gear changes on/off, FAILSAFE */
 void pcISR_in1(void) {
-	ext_int_off(IO_GEAR_UP);
-	ext_int_off(IO_GEAR_DOWN);
-	ext_int_off(IO_GEAR_NEUTRAL);
-	clutch_CAN_disable = TRUE;
-	set_output(IO_GEAR_STOP_LED, ON);
+	//ext_int_off(IO_GEAR_UP);
+	//ext_int_off(IO_GEAR_DOWN);
+	//ext_int_off(IO_GEAR_NEUTRAL);
+	//clutch_CAN_disable = TRUE;
+	//set_output(IO_GEAR_STOP_LED, ON);
 }
 
 //! Pin Change Interrupt handler for IN2.
 /*! Logging start/stop button.broadcasts a messabe to start or stop logging. */
-void pcISR_in2(void) {
+void pcISR_in2(void) { /*
 	if (get_input(IO_LOG_BTN)) {
-		if (!get_input(IO_ALT_BTN)) {
+		if (get_input(IO_ALT_BTN)) {
 			if (logging) {
 				can_setup_tx(CAN_LOG_ID, (uint8_t *) &CAN_MSG_LOG_STOP, CAN_LOG_DLC);
 				logging = TRUE;
@@ -240,7 +242,7 @@ void pcISR_in2(void) {
 		} else {
 			can_setup_tx(CAN_LAUNCH_ID, (uint8_t *) &CAN_MSG_LAUNCH, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 		}
-	}
+	} */
 }
 
 //! Pin Change Interrupt handler for IN3.

@@ -33,41 +33,69 @@ int main(void) {
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
 
-	update_RPM(9000);
-	update_watertemp(75);
-	update_speed(88);
-	update_oiltemp(50);
+	update_RPM(7000);
+	update_watertemp(90);
+	update_speed(456);
+	update_oiltemp(78);
 	update_gear(3);
+	
+	shift_strobe();
 	
 	while (1) {
 		
-		//update_display();
-		
+		update_display();
+		_delay_ms(200);
+		/*
 		// blink
-		for (int i = 0; i<2; i++) {
-			for (int j = 0; j<64; j++) {
-				if (i==0) {
+		for (uint8_t i = 0; i<7; i++) {
+			for (uint8_t j = 0; j<64; j++) {
+				if (i%2) {
 					shift_bit(ON);
 				} else {
 					shift_bit(OFF);
 				}
 			}
 			shift_strobe();
-			_delay_ms(500);
-			toggle_output(LED0);
+			_delay_ms(300);
 		}
 		
-		/* //vandrare
-		for (int i = 0; i<64; i++) {
-			for (int j = 0; j<64; j++) {
-				if (i==j) {
+		// varannan
+		for (uint8_t i = 0; i<6; i++) {
+			for (uint8_t j = 0; j<70; j++) {
+				if ((i+j) & 1) {
 					shift_bit(ON);
 				} else {
 					shift_bit(OFF);
 				}
 			}
 			shift_strobe();
-			toggle_output(LED0);
+			_delay_ms(700);
+		}
+		
+		//vandraren
+		for (uint8_t n=0; n<2; n++) {
+			for (uint8_t i = 0; i<64; i++) {
+				for (uint8_t j = 0; j<64; j++) {
+					if (i==j) {
+						shift_bit(ON);
+					} else {
+						shift_bit(OFF);
+					}
+				}
+				shift_strobe();
+				//_delay_ms(2);
+			}
+			for (uint8_t i = 0; i<64; i++) {
+				for (uint8_t j = 0; j<64; j++) {
+					if (64-i==j) {
+						shift_bit(ON);
+					} else {
+						shift_bit(OFF);
+					}
+				}
+				shift_strobe();
+				//_delay_ms(2);
+			}
 		}
 		*/
 	}

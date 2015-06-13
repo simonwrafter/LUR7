@@ -26,10 +26,11 @@ int main(void) {
 
 	uint16_t high = 13700;
 	uint16_t low = 2000;
-	uint16_t delay = 100;
+	uint16_t delay = 150;
 	uint16_t step = 1;
 
-	while (1) {
+	timer1_dutycycle(3000);
+	while (1) {/*
 		for (int i=low; i<high; i += step) {
 			timer1_dutycycle(i);
 			_delay_us(delay);
@@ -38,6 +39,7 @@ int main(void) {
 			timer1_dutycycle(i);
 			_delay_us(delay);
 		}
+		*/
 	}
 	return 0;
 }

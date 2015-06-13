@@ -44,6 +44,8 @@
 #include "config.h"
 #include "shiftregister.h"
 
+static const float PULSE_TIME = 2000; //2000
+
 //! Shifts out a byte.
 /*!
  * Utilising the function \ref shift_bit a full byte is shifted out to the 
@@ -52,9 +54,14 @@
  * \param value the byte to shift out.
  */
 void shift_byte(uint8_t value) {
-	for (uint8_t i= 0; i<8; i++) {
-		shift_bit(value & (1<<i));
-	}
+	shift_bit(value & 1);
+	shift_bit(value & 2);
+	shift_bit(value & 4);
+	shift_bit(value & 8);
+	shift_bit(value & 16);
+	shift_bit(value & 32);
+	shift_bit(value & 64);
+	shift_bit(value & 128);
 }
 
 //! Shift out a bar.
@@ -67,12 +74,12 @@ void shift_byte(uint8_t value) {
  * \param length the total length of the bar
  */
 void shift_bar(uint8_t nbr_high, uint8_t length) {
-	uint8_t i=0;
-	for (; i<nbr_high; i++) {
-		shift_bit(ON);
-	}
-	for (; i<length; i++) {
+	uint8_t nbr_low = length - nbr_high;
+	for (uint8_t i=0; i< nbr_low; i++) {
 		shift_bit(OFF);
+	}
+	for (uint8_t i=0; i< nbr_high; i++) {
+		shift_bit(ON);
 	}
 }
 
@@ -85,10 +92,12 @@ void shift_bar(uint8_t nbr_high, uint8_t length) {
  */
 void shift_bit(uint8_t value) {
 	set_output(IO_SHIFT_DATA, value);
-	_delay_ms(PULSE_TIME);
+	_delay_us(PULSE_TIME);
 	set_output(IO_SHIFT_CLK, HIGH);
-	_delay_ms(PULSE_TIME);
+	_delay_us(PULSE_TIME);
 	set_output(IO_SHIFT_CLK, LOW);
+	set_output(IO_SHIFT_DATA, LOW);
+	_delay_us(PULSE_TIME);
 }
 
 //! Strobe the data through.
@@ -98,6 +107,6 @@ void shift_bit(uint8_t value) {
  */
 void shift_strobe(void) {
 	set_output(IO_SHIFT_STROBE, HIGH);
-	_delay_ms(PULSE_TIME);
+	_delay_us(PULSE_TIME);
 	set_output(IO_SHIFT_STROBE, LOW);
 }

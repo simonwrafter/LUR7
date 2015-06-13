@@ -43,8 +43,17 @@
 #include "shiftregister.h"
 #include "config.h"
 
+//! Minimum engine revs
+static const float REV_MIN = 2000;
+//! Maximum engine revs
+static const float REV_MAX = 11000;
+//! Minimum number of LEDs for rev bar
+static const float REV_BAR_MIN = 1;
+//! Maximum number of LEDs for rev bar
+static const float REV_BAR_MAX = 21;
+
 //! Array of bit patterns for numbers on seven segment display.
-static const uint8_t sev_seg[11] = {
+static const uint8_t sev_seg[12] = {
 	// a b c d e f g dp
 	0b11111100, //0
 	0b01100000, //1
@@ -60,17 +69,17 @@ static const uint8_t sev_seg[11] = {
 };
 
 //! Engine revs
-static volatile uint16_t revs = 8000;
+static volatile uint16_t revs = 10999;
 //! Current gear
 static volatile uint8_t  gear = 0;
 //! Current speed
-static volatile uint16_t speed = 88;
+static volatile uint16_t speed = 0;
 //! Logging number
 static volatile uint16_t log_id = 0;
 //! Water temperature
-static volatile uint16_t water_temp = 20;
+static volatile uint16_t water_temp = 93;
 //! Oil temperature
-static volatile uint16_t oil_temp = 30;
+static volatile uint16_t oil_temp = 100;
 //! BCD representation of number to display.
 static volatile uint8_t  bcd_vect[3] = {0,0,0};
 
@@ -78,9 +87,9 @@ static volatile uint8_t  bcd_vect[3] = {0,0,0};
 void update_RPM(uint16_t new_RPM) {
 	revs = new_RPM;
 	if (revs > 2000) {
-		set_output(IO_START_BTN_LED, ON);
+//		set_output(IO_START_BTN_LED, ON);
 	} else {
-		set_output(IO_START_BTN_LED, OFF);
+//		set_output(IO_START_BTN_LED, OFF);
 	}
 }
 
@@ -119,7 +128,7 @@ uint8_t get_current_gear() {
  * The Rev-Bar is lit up in a linear manner proportional to the engine revs.
  */
 uint8_t revs_to_bar() {
-	uint8_t return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * REV_BAR_MAX + REV_BAR_MIN;
+	float return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * REV_BAR_MAX + REV_BAR_MIN;
 	if (return_val < REV_BAR_MIN) {
 		return 0;
 	} else if (return_val > REV_BAR_MAX) {
@@ -224,12 +233,13 @@ void update_display(void) {
 	shift_byte(bin_to_7seg(gear, OFF));
 
 	bcd_convert(speed);
-	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 
-	shift_bar(revs_to_bar(), 22);
+	shift_bar(revs_to_bar(), REV_BAR_MAX);
 	shift_bar(temp_to_bar(), 10);
-
+	
+	// STROBE
 	shift_strobe();
 }

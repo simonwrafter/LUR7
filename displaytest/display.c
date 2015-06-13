@@ -43,8 +43,17 @@
 #include "shiftregister.h"
 #include "config.h"
 
+//! Minimum engine revs
+static const float REV_MIN = 2000;
+//! Maximum engine revs
+static const float REV_MAX = 11000;
+//! Minimum number of LEDs for rev bar
+static const float REV_BAR_MIN = 1;
+//! Maximum number of LEDs for rev bar
+static const float REV_BAR_MAX = 22;
+
 //! Array of bit patterns for numbers on seven segment display.
-static const uint8_t sev_seg[11] = {
+static const uint8_t sev_seg[12] = {
 	// a b c d e f g dp
 	0b11111100, //0
 	0b01100000, //1
@@ -58,6 +67,22 @@ static const uint8_t sev_seg[11] = {
 	0b11110110, //9
 	0b00000000  //blank
 };
+/*
+//! Array of bit patterns for numbers on seven segment display.
+static const uint8_t sev_seg[11] = {
+	// a b c d e f g dp
+	0b00111111, //0
+	0b00000110, //1
+	0b01011011, //2
+	0b01001111, //3
+	0b01100110, //4
+	0b01101101, //5
+	0b01111101, //6
+	0b00000111, //7
+	0b01111111, //8
+	0b01101111, //9
+	0b00000000  //blank
+};*/
 
 //! Engine revs
 static volatile uint16_t revs = 8000;
@@ -119,7 +144,7 @@ uint8_t get_current_gear() {
  * The Rev-Bar is lit up in a linear manner proportional to the engine revs.
  */
 uint8_t revs_to_bar() {
-	uint8_t return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * REV_BAR_MAX + REV_BAR_MIN;
+	float return_val = (revs - REV_MIN) / (REV_MAX - REV_MIN) * REV_BAR_MAX + REV_BAR_MIN;
 	if (return_val < REV_BAR_MIN) {
 		return 0;
 	} else if (return_val > REV_BAR_MAX) {
@@ -206,6 +231,9 @@ void bcd_convert(uint16_t value) {
  * \param dp decimal point.
  */
 uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
+	return sev_seg[binary];
+	
+	/*
 	if (binary >= 0 && binary <= 10) {
 		if (!dp) {
 			return sev_seg[binary];
@@ -213,7 +241,7 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 			return sev_seg[binary] + 1;
 		}
 	}
-	return sev_seg[10];
+	return sev_seg[10];*/
 }
 
 //! Updates the display
@@ -221,27 +249,16 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
  * Re-populates the shift registers with the latest information available.
  */
 void update_display(void) {
-	
 	shift_byte(bin_to_7seg(gear, OFF));
-
+	
 	bcd_convert(speed);
-	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 
-	shift_bar(revs_to_bar(), 22);
+	shift_bar(revs_to_bar(), 21);
 	shift_bar(temp_to_bar(), 10);
 	
-	/*
-	shift_bar(3, 8); //1
-	shift_bar(3, 8); //2
-	shift_bar(3, 8); //3
-	shift_bar(3, 8); //4
-	shift_bar(3, 8); //5
-	shift_bar(3, 8); //6
-	shift_bar(3, 8); //7
-	shift_bar(3, 8); //8
-	*/
 	// STROBE
 	shift_strobe();
 }
