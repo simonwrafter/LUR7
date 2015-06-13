@@ -22,20 +22,20 @@
 #include "clutch.h"
 
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_LEFT_CLOSED  = 425; // slapp vajer (430)
+static const float CLUTCH_POS_LEFT_CLOSED  = 550; // slapp vajer (430)
 //! Threshold value for open clutch
-static const float CLUTCH_POS_LEFT_OPEN    = 375; // dragen vajer (370)
+static const float CLUTCH_POS_LEFT_OPEN    = 644; // dragen vajer (370)
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_RIGHT_CLOSED = 550; // slapp (544)
+static const float CLUTCH_POS_RIGHT_CLOSED = 425; // slapp (544)
 //! Threshold value for open clutch
-static const float CLUTCH_POS_RIGHT_OPEN   = 644; // dragen (649)
+static const float CLUTCH_POS_RIGHT_OPEN   = 375; // dragen (649)
 //! PWM value for closed clutch
 static const float CLUTCH_DC_CLOSED        = 4500; //FINE TUNE // slapp vajer. max: 13700
 //! PWM value for open clutch
 static const float CLUTCH_DC_OPEN          = 13000; //FINE TUNE // dragen vajer. min: 2200 (?)
 
-static const float clutch_pos_left_break   = 460;
-static const float clutch_pos_right_break  = 460;
+static const float clutch_pos_left_break   = 400;
+static const float clutch_pos_right_break  = 600;
 
 static const float clutch_dc_break   = 8000; //trim!!!
 

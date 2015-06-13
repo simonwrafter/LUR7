@@ -152,14 +152,13 @@ int main(void) {
 		} //! </ol>
 		if (gear_neutral_repeat_flag) { //! <li> if neutral flag is set. <ol>
 			gear_neutral_repeat_linear(); //! <li> change to neutral gear. (repeat attempt)
-			//gear_neutral_repeat_binary(); //! <li> change to neutral gear. (repeat attempt)
 			//gear_neutral_repeat_bisect(); //! <li> change to neutral gear. (repeat attempt)
 			gear_neutral_repeat_flag = FALSE; //! <li> clear neutral flag.
 		} //! </ol>
 		//! </ol>
 
 
-		/* Comment out get sensor values
+		/* Uncomment get sensor values
 
 		susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -295,11 +294,11 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	}
 
 	if (failsafe_mid) {
-		//clutch_filter_left(atomic_clutch_pos);
+		clutch_filter_left(atomic_clutch_pos);
 		clutch_filter_right(atomic_clutch_pos);
-		//clutch_dutycycle_left();
+		clutch_dutycycle_left();
 		clutch_dutycycle_right();
-		clutch_set_dutycycle();	
+		clutch_set_dutycycle();
 	}
 
 	if (dta_first_received && !failsafe_dta && ++failsafe_dta_counter == 100) {
@@ -375,12 +374,12 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		dta_first_received = TRUE;
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
 		
-		// OSÄKER detta från LUR7. launch_stop_clutch???
+		/*/ OSÄKER detta från LUR7. launch_stop_clutch???
 		uint8_t gear = data[0];
 		if (gear == 3) {
 			launch_stop_clutch();
 		}
-		set_current_gear(gear); //! <li> relay to gear system.
+		set_current_gear(gear); //! <li> relay to gear system.*/
 
 		//detta från LUR6
 		if (id == 0x2000) {
