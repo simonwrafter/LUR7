@@ -22,20 +22,25 @@
 #include "clutch.h"
 
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_LEFT_CLOSED  = 425; // slapp vajer (430)
+static const float CLUTCH_POS_LEFT_CLOSED  = 553; // slapp vajer (430)
 //! Threshold value for open clutch
-static const float CLUTCH_POS_LEFT_OPEN    = 375; // dragen vajer (370)
+static const float CLUTCH_POS_LEFT_OPEN    = 639; // dragen vajer (370)
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_RIGHT_CLOSED = 550; // slapp (544)
+//static const float CLUTCH_POS_RIGHT_CLOSED = 550; // slapp (544)
+static const float CLUTCH_POS_RIGHT_CLOSED = 427; // Johansson och freddie pillar
+
 //! Threshold value for open clutch
-static const float CLUTCH_POS_RIGHT_OPEN   = 644; // dragen (649)
+//static const float CLUTCH_POS_RIGHT_OPEN   = 644; // dragen (649)
+static const float CLUTCH_POS_RIGHT_OPEN   = 378; // // Johansson och freddie pillar
 //! PWM value for closed clutch
 static const float CLUTCH_DC_CLOSED        = 4500; //FINE TUNE // slapp vajer. max: 13700
 //! PWM value for open clutch
 static const float CLUTCH_DC_OPEN          = 13000; //FINE TUNE // dragen vajer. min: 2200 (?)
 
-static const float clutch_pos_left_break   = 460;
-static const float clutch_pos_right_break  = 460;
+static const float clutch_pos_left_break   = 600;
+//static const float clutch_pos_right_break  = 460;
+static const float clutch_pos_right_break  = 400; //johansosn och freddie pillar
+
 
 static const float clutch_dc_break   = 8000; //trim!!!
 
@@ -91,19 +96,21 @@ void clutch_dutycycle_left(void) {
 }
 
 void clutch_dutycycle_right(void) {
-	if (clutch_right_filtered > CLUTCH_POS_RIGHT_OPEN) {
+	if (clutch_right_filtered < CLUTCH_POS_RIGHT_OPEN) {
 		duty_right = CLUTCH_DC_OPEN;
-	} else if (clutch_right_filtered > clutch_pos_right_break) {
+	} else if (clutch_right_filtered < clutch_pos_right_break) {
 		duty_right = ((clutch_right_filtered - clutch_pos_right_break)  * clutch_right_factor_open   + clutch_dc_break);
-	} else if (clutch_right_filtered > CLUTCH_POS_RIGHT_CLOSED) {
+	} else if (clutch_right_filtered < CLUTCH_POS_RIGHT_CLOSED) {
 		duty_right = ((clutch_right_filtered - CLUTCH_POS_RIGHT_CLOSED) * clutch_right_factor_closed + CLUTCH_DC_CLOSED);
 	} else {
-		duty_left = CLUTCH_DC_CLOSED;
+		duty_right = CLUTCH_DC_CLOSED;
 	}
 }
 
 void clutch_set_dutycycle(void) {
-	if (duty_left < duty_right) {
+	//timer1_dutycycle(duty_right);§
+	
+	if (duty_left > duty_right) {
 		timer1_dutycycle(duty_left);
 	} else {
 		timer1_dutycycle(duty_right);

@@ -355,11 +355,11 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			//uint16_t clutch_left = ((uint16_t) data[1] << 8) | data[0];
+			uint16_t clutch_left = ((uint16_t) data[3] << 8) | data[2];
 			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
-			//clutch_filter_left(clutch_left);
+			clutch_filter_left(clutch_left);
 			clutch_filter_right(clutch_right);
-			//clutch_dutycycle_left();
+			clutch_dutycycle_left();
 			clutch_dutycycle_right();
 			clutch_set_dutycycle();
 		} else if (id == CAN_LAUNCH_ID) { //! <li> if message ID is CAN_LAUNCH_ID <ul>

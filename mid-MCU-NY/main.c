@@ -96,9 +96,9 @@ int main(void) {
 	//! </ol>
 
 	//! <li> Input interrupts <ol>
-	ext_int_on(IO_GEAR_UP, 1, 1); //! <li> Gear up, rising flank trigger external interrupt
-	ext_int_on(IO_GEAR_DOWN, 1, 1); //! <li> Gear down, rising flank trigger external interrupt
-	ext_int_on(IO_GEAR_NEUTRAL, 1, 1); //! <li> Neutral gear, rising flank trigger external interrupt
+	ext_int_on(IO_GEAR_UP, 1, 0); //! <li> Gear up, rising flank trigger external interrupt
+	ext_int_on(IO_GEAR_DOWN, 1, 0); //! <li> Gear down, rising flank trigger external interrupt
+	ext_int_on(IO_GEAR_NEUTRAL, 1, 0); //! <li> Neutral gear, rising flank trigger external interrupt
 
 	//pc_int_on(IO_GP_BTN);
 	pc_int_on(IO_LOG_BTN);
