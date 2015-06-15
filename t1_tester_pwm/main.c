@@ -24,12 +24,14 @@ int main(void) {
 
 	interrupts_on();
 
+	/*
 	uint16_t high = 13700;
 	uint16_t low = 2000;
 	uint16_t delay = 150;
 	uint16_t step = 1;
+	*/
 
-	timer1_dutycycle(4500);
+	timer1_dutycycle(13500);
 	while (1) {/*
 		for (int i=low; i<high; i += step) {
 			timer1_dutycycle(i);

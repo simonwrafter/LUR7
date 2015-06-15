@@ -62,19 +62,19 @@ static void (*volatile end_fun_ptr)(void);
 //********* GEAR ***************************************************************
 
 //! Delay between engaging shift cut and running the solenoid.
-static const uint16_t SHIFT_CUT_DELAY = 1000; //100 ms
+static const uint16_t SHIFT_CUT_DELAY = 500; //100 ms
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY = 300; //30 ms
+static const uint16_t GEAR_UP_DELAY = 800; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY = 300; //30 ms
+static const uint16_t GEAR_DOWN_DELAY = 800; //30 ms
 //! Time to run the solenoid for gear up from first.
 static const uint16_t GEAR_UP_DELAY_FIRST = 500; //50 ms
 //! Time to run the solenoid for gear down from second.
 static const uint16_t GEAR_DOWN_DELAY_SECOND = 500; //50 ms
 //! Time to run the solenoid for gear up from neutral.
-static const uint16_t GEAR_UP_DELAY_NEUTRAL = 300; //30 ms
+static const uint16_t GEAR_UP_DELAY_NEUTRAL = 500; //30 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_NEUTRAL = 300; //30 ms
+static const uint16_t GEAR_DOWN_DELAY_NEUTRAL = 500; //30 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -94,7 +94,7 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_up_try_time = 500; // 50ms
+static volatile uint16_t neutral_up_try_time = 400; // 30ms
 //! Last delay time used for finding neutral from second.
 static volatile uint16_t neutral_down_try_time = 500;
 //! Number of tries for neutral
@@ -190,7 +190,7 @@ void set_current_revs(uint16_t revs) {
  */
 void gear_up() {
 	can_setup_tx(0x7000, (uint8_t *) &current_gear, 1);
-	if (!busy && current_gear != 5) {
+	if (!busy ) { //&& current_gear != 5) {
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
 		end_fun_ptr = mid_gear_up;
@@ -222,13 +222,13 @@ void gear_down() {
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
 		
-		if (current_gear == 0) {
-			timer0_start(GEAR_DOWN_DELAY_NEUTRAL);
-		} else if (current_gear == 2) {
-			timer0_start(GEAR_DOWN_DELAY_SECOND);
-		} else {
+		//if (current_gear == 0) {
+		//	timer0_start(GEAR_DOWN_DELAY_NEUTRAL);
+		//} else if (current_gear == 2) {
+		//	timer0_start(GEAR_DOWN_DELAY_SECOND);
+		//} else {
 			timer0_start(GEAR_DOWN_DELAY);
-		}
+		//}
 	}
 }
 //! Change gear up, part 2
@@ -241,13 +241,13 @@ static void mid_gear_up(void) {
 	//set_output(SHIFT_CUT, TRI); // reset shift cut output
 	set_output(GEAR_UP, GND); // run solenoid
 	end_fun_ptr = end_gear_change;
-	if (current_gear == 0) {
-		timer0_start(GEAR_UP_DELAY_NEUTRAL);
-	} else if (current_gear == 1) {
-		timer0_start(GEAR_UP_DELAY_FIRST);
-	} else {
+	//if (current_gear == 0) {
+	//	timer0_start(GEAR_UP_DELAY_NEUTRAL);
+	//} else if (current_gear == 1) {
+	//	timer0_start(GEAR_UP_DELAY_FIRST);
+	//} else {
 		timer0_start(GEAR_UP_DELAY);
-	}
+	//}
 }
 
 //! End gear change sequence
@@ -292,17 +292,17 @@ static void end_gear_change(void) {
  */
 void gear_neutral_single() {
 	if (!busy) {
-		if (current_gear == 1 || current_gear == 11) {
+		//if (current_gear == 1 || current_gear == 11) {
 			busy = TRUE;
 			set_output(GEAR_UP, GND);
 			end_fun_ptr = neutral_single_stabiliser_up;
 			timer0_start(neutral_up_try_time);
-		} else if (current_gear == 2) {
-			busy = TRUE;
-			set_output(GEAR_DOWN, GND);
-			end_fun_ptr = neutral_single_stabiliser_down;
-			timer0_start(neutral_down_try_time);
-		}
+		//} else if (current_gear == 2) {
+		//	busy = TRUE;
+		//	set_output(GEAR_DOWN, GND);
+		//	end_fun_ptr = neutral_single_stabiliser_down;
+		//	timer0_start(neutral_down_try_time);
+		//}
 	}
 }
 
@@ -313,11 +313,11 @@ static void neutral_single_stabiliser_up(void) {
 }
 
 static void neutral_single_end_up(void) {
-	if (current_gear == 1) {
-		neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
-	} else if (current_gear == 2) {
-		neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
-	}
+	//if (current_gear == 1) {
+	//	neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+	//} else if (current_gear == 2) {
+	//	neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+	//}
 	busy = FALSE;
 }
 
