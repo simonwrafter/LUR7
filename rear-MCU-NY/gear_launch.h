@@ -38,6 +38,7 @@
 #define POT_FAIL 11
 
 void set_current_gear(uint8_t gear);
+uint8_t get_current_gear(void);
 void set_current_revs(uint16_t);
 
 void gear_up(void);

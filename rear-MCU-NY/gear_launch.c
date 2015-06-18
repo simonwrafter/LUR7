@@ -148,6 +148,10 @@ void set_current_gear(uint8_t gear) {
 	current_gear = gear;
 }
 
+uint8_t get_current_gear(){
+	return current_gear;
+}
+
 void set_current_revs(uint16_t revs) {
 	current_revs = revs;
 }
@@ -246,7 +250,7 @@ void gear_down() {
 		} else if (current_gear == 2) {
 			timer0_start(GEAR_DOWN_DELAY_2_TO_1);
 		} else {
-			timer0_start(GEAR_DOWN_DELAY_5_to_2);
+			timer0_start(GEAR_DOWN_DELAY_5_TO_2);
 		}
 	}
 }

@@ -92,7 +92,6 @@ volatile uint8_t brk_MOb;
 //! The MOb configured for RX of current gear.
 volatile uint8_t dta_MOb;
 
-
 const uint32_t failsafe_front_can_id = 0x9001;
 const uint32_t front_can_count_id = 0x9004;
 uint8_t failsafe_front_can_error = 1;
@@ -354,7 +353,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_setup_tx(failsafe_dta_can_id, (uint8_t *) &failsafe_dta_can_error, 1);
 	}
 
-	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 20){
+	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 20) {
 		can_free_rx(dta_MOb);
 		dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 		
@@ -444,7 +443,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		if (id == 0x2003) {
 			set_current_gear(data[7]);
 		}
-		if (id == 0x2004){
+		if (id == 0x2004) {
 			ana3 = ((uint16_t) data[2] << 8) | data[3];
 
 			if (ana3 > 4900 || ana3 < 100){

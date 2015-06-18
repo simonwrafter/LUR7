@@ -92,6 +92,8 @@ volatile uint8_t brk_MOb;
 //! The MOb configured for RX of current gear.
 volatile uint8_t dta_MOb;
 
+volatile uint16_t ana3 = 0;
+
 //! Main function.
 /*!
  * The entry point of the execution of code for the rear MCU. All hardware that
@@ -279,12 +281,22 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_free_rx(brk_MOb);
 	}
 
+	if (!failsafe_front && failsafe_front_counter == 20){
+		can_free_rx(brk_MOb);
+		brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_STEER_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
+	}
+
 	if (!failsafe_mid && ++failsafe_mid_counter == 100) {
 		failsafe_mid = TRUE;
 		can_free_rx(gcl_MOb);
 		pc_int_on(BAK_IN_GEAR_UP); // gear up backup
 		pc_int_on(BAK_IN_GEAR_DOWN); // gear down backup
 		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
+	}
+
+	if (!failsafe_mid && failsafe_mid_counter == 20) {
+		can_free_rx(gcl_MOb);
+		gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	}
 
 	if (failsafe_mid) {
@@ -298,8 +310,13 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (dta_first_received && !failsafe_dta && ++failsafe_dta_counter == 100) {
 		failsafe_dta = TRUE;
 		can_free_rx(dta_MOb);
-		set_current_gear(11);
+		set_current_gear(POT_FAIL);
 		set_current_revs(13000);
+	}
+
+	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 20) {
+		can_free_rx(dta_MOb);
+		dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 	}
 
 	// 10 Hz (avoid other data being sent)
@@ -369,10 +386,28 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
 
 		if (id == 0x2000) {
-			set_current_revs(((uint16_t) data[7] << 8) | data[6]);
+			set_current_revs(((uint16_t) data[6] << 8) | data[7]);
 		}
-		if (id == 0x2003) {
-			set_current_gear(data[7]);
+		
+		if (id == 0x2004) {
+			ana3 = ((uint16_t) data[2] << 8) | data[3];
+
+			if (ana3 > 4900 || ana3 < 100){
+				set_current_gear(1);
+			} else if (ana3 > 200 && ana3 < 600){
+				set_current_gear(0);
+			} else if (ana3 > 720 && ana3 < 920){
+				set_current_gear(2);
+			} else if (ana3 > 1613 && ana3 < 1813){
+				set_current_gear(3);
+			} else if (ana3 > 2585 && ana3 < 2785){
+				set_current_gear(4);
+			} else if (ana3 > 3552 && ana3 < 3752){
+				set_current_gear(5);
+			} 
+			else {
+				set_current_gear(11);
+			}
 		}
 	} //! </ul>
 
