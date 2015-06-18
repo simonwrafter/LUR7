@@ -36,6 +36,7 @@
 #define GEAR_CLUTCH_LAUNCH_H_
 
 void set_current_gear(uint8_t gear);
+uint8_t get_current_gear(void);
 void set_current_revs(uint16_t);
 
 void gear_up(void);

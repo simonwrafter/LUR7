@@ -66,7 +66,7 @@
 // +  DTA
 // +  +  General (0x2000 - 0x2003)
 const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from the DTA
-const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint32_t CAN_DTA_MASK = 0xFFFFFFF8; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t  CAN_DTA_DLC = 8; //!< DLC of DTA messages
 
 // +  Front-MCU

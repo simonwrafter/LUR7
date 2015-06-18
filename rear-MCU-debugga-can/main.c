@@ -58,8 +58,7 @@ volatile uint8_t dta_first_received = FALSE;
 //! Whether the DTA is in failsafe mode.
 volatile uint8_t failsafe_dta = FALSE;
 //! Counter to put DTA is in failsafe mode.
-volatile uint16_t failsafe_dta_counter = 0;
-//ÄNDRAT!
+volatile uint8_t failsafe_dta_counter = 0;
 
 //! Whether the front MCU is in failsafe mode.
 volatile uint8_t failsafe_front = FALSE;
@@ -68,8 +67,7 @@ volatile uint8_t failsafe_front_counter = 0;
 //! Whether the front MCU is in failsafe mode.
 volatile uint8_t failsafe_mid = FALSE;
 //! Counter to put front MCU is in failsafe mode.
-volatile uint16_t failsafe_mid_counter = 0;
-//ÄNDRAT
+volatile uint8_t failsafe_mid_counter = 0;
 
 //! Counter for pulses from left wheel speed sensor.
 volatile uint16_t wheel_count_l = 0;
@@ -96,13 +94,22 @@ volatile uint8_t dta_MOb;
 
 
 const uint32_t failsafe_front_can_id = 0x9001;
+const uint32_t front_can_count_id = 0x9004;
 uint8_t failsafe_front_can_error = 1;
+
 const uint32_t failsafe_mid_can_id = 0x9002;
-const uint32_t mid_can_count_id = 0x9004;
-uint16_t failsafe_mid_can_error = 1;
+const uint32_t mid_can_count_id = 0x9005;
+uint8_t failsafe_mid_can_error = 1;
+
 const uint32_t failsafe_dta_can_id = 0x9003;
-const uint32_t dta_can_count_id = 0x9005;
-uint16_t failsafe_dta_can_error = 1;
+const uint32_t dta_can_count_id = 0x9006;
+uint8_t failsafe_dta_can_error = 1;
+
+const uint32_t gear_id = 0x9010;
+uint8_t print_gear = 11;
+
+//const uint32_t ana3_id = 0x9011;
+volatile uint16_t ana3 = 0;
 
 //! Main function.
 /*!
@@ -299,7 +306,17 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_setup_tx(failsafe_front_can_id, (uint8_t *) &failsafe_front_can_error, 1);
 	}
 
-	if (!failsafe_mid && ++failsafe_mid_counter == 1000) {
+	if (!failsafe_front && failsafe_front_counter == 20){
+		can_free_rx(brk_MOb);
+		brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_STEER_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
+
+		// Skickar ut på CANen att can från front har startats om. Värdet bode vara = 20.
+		failsafe_front_can_error= failsafe_front_counter;
+		can_setup_tx(front_can_count_id, (uint8_t *) &failsafe_front_can_error, 1);
+
+	}
+
+	if (!failsafe_mid && ++failsafe_mid_counter == 100) {
 		failsafe_mid = TRUE;
 		can_free_rx(gcl_MOb);
 		pc_int_on(BAK_IN_GEAR_UP); // gear up backup
@@ -310,8 +327,15 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_setup_tx(failsafe_mid_can_id, (uint8_t *) &failsafe_mid_can_error, 1);
 	}
 
-	failsafe_mid_can_error = failsafe_mid_counter;
-	can_setup_tx(mid_can_count_id, (uint8_t *) &failsafe_mid_can_error, 2);
+	if (!failsafe_mid && failsafe_mid_counter == 20) {
+		can_free_rx(gcl_MOb);
+		gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+
+		// Skickar ut på CANen att can från mid har startats om. Värdet bode vara = 20.
+		failsafe_mid_can_error = failsafe_mid_counter;
+		can_setup_tx(mid_can_count_id, (uint8_t *) &failsafe_mid_can_error, 1);
+	}
+
 
 	if (failsafe_mid) {
 		clutch_filter_left(atomic_clutch_pos);
@@ -327,12 +351,25 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		set_current_gear(11);
 		set_current_revs(13000);
 
-
 		can_setup_tx(failsafe_dta_can_id, (uint8_t *) &failsafe_dta_can_error, 1);
 	}
 
-	failsafe_dta_can_error = failsafe_dta_counter;
-	can_setup_tx(dta_can_count_id, (uint8_t *) &failsafe_dta_can_error, 2);
+	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 20){
+		can_free_rx(dta_MOb);
+		dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
+		
+		// Skickar ut på CANen att can från dta har startats om. Värdet bode vara = 20.
+		failsafe_dta_can_error = failsafe_dta_counter;
+		can_setup_tx(dta_can_count_id, (uint8_t *) &failsafe_dta_can_error, 1);
+	}
+
+
+
+	print_gear = get_current_gear();
+	can_setup_tx(gear_id, (uint8_t *) &print_gear, 1);
+
+	//can_setup_tx(ana3_id, (uint8_t *) &ana3, 2);
+
 
 	// 10 Hz (avoid other data being sent)
 	if ((interrupt_nbr % 10) == 0) {
@@ -367,9 +404,9 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
-	failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 
 	if (mob == gcl_MOb) { //! <li> \ref gc_MOb receives a message <ul>
+		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
 			if (can_data_equals(CAN_MSG_GEAR_UP, data, dlc)) { //! <li> if message is CAN_MSG_GEAR_UP, set \ref gear_up_flag to TRUE.
 				gear_up_flag = TRUE;
@@ -406,6 +443,26 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		}
 		if (id == 0x2003) {
 			set_current_gear(data[7]);
+		}
+		if (id == 0x2004){
+			ana3 = ((uint16_t) data[2] << 8) | data[3];
+
+			if (ana3 > 4900 || ana3 < 100){
+				set_current_gear(1);
+			} else if (ana3 > 200 && ana3 < 600){
+				set_current_gear(0);
+			} else if (ana3 > 720 && ana3 < 920){
+				set_current_gear(2);
+			} else if (ana3 > 1613 && ana3 < 1813){
+				set_current_gear(3);
+			} else if (ana3 > 2585 && ana3 < 2785){
+				set_current_gear(4);
+			} else if (ana3 > 3552 && ana3 < 3752){
+				set_current_gear(5);
+			} 
+			else {
+				set_current_gear(11);
+			}
 		}
 	} //! </ul>
 

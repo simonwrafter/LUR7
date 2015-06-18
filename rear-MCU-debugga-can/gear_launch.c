@@ -139,6 +139,10 @@ void set_current_gear(uint8_t gear) {
 	current_gear = gear;
 }
 
+uint8_t get_current_gear(){
+	return current_gear;
+}
+
 void set_current_revs(uint16_t revs) {
 	current_revs = revs;
 }
