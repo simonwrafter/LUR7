@@ -73,17 +73,17 @@ static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 500; //50 ms
 static const uint16_t SHIFT_CUT_DELAY_FAIL = 500; //50 ms
 
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY = 300; //30 ms
+static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY = 300; //30 ms
+static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 300; //30 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 500; //50 ms
+static const uint16_t GEAR_UP_DELAY_1_TO_2 = 800; //50 ms
 //! Time to run the solenoid for gear down from second.
-static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 500; //50 ms
+static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 800; //50 ms
 //! Time to run the solenoid for gear up from neutral.
 static const uint16_t GEAR_UP_DELAY_N_TO_2 = 500; //30 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 300; //30 ms
+static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 500; //30 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -105,7 +105,7 @@ static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
 static volatile uint16_t neutral_up_try_time = 400; // 40ms
 //! Last delay time used for finding neutral from second.
-static volatile uint16_t neutral_down_try_time = 500;
+static volatile uint16_t neutral_down_try_time = 500; // 50 ms
 //! Number of tries for neutral
 static volatile uint8_t neutral_counter = 0;
 
@@ -246,7 +246,7 @@ void gear_down() {
 		} else if (current_gear == 2) {
 			timer0_start(GEAR_DOWN_DELAY_2_TO_1);
 		} else {
-			timer0_start(GEAR_DOWN_DELAY);
+			timer0_start(GEAR_DOWN_DELAY_5_to_2);
 		}
 	}
 }
@@ -264,7 +264,7 @@ static void mid_gear_up(void) {
 	} else if (current_gear == 1) {
 		timer0_start(GEAR_UP_DELAY_1_TO_2);
 	} else {
-		timer0_start(GEAR_UP_DELAY);
+		timer0_start(GEAR_UP_DELAY_2_TO_5);
 	}
 }
 

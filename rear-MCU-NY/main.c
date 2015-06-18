@@ -136,7 +136,6 @@ int main(void) {
 
 	//! <li> LOOP <ul>
 	while (1) {
-
 		//! <li> Always do: <ol>
 		if (gear_up_flag) { //! <li> if gear_up_flag is set. <ol>
 			gear_up(); //! <li> change up a gear.
@@ -157,9 +156,6 @@ int main(void) {
 		} //! </ol>
 		//! </ol>
 
-
-		/* Uncomment get sensor values
-
 		susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			susp_l_atomic = susp_l; //! <li> atomic copy of left suspension value.
@@ -169,8 +165,6 @@ int main(void) {
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			susp_r_atomic = susp_r; //! <li> atomic copy of right suspension value.
 		} // end ATOMIC_BLOCK
-
-		*/
 		
 		//! <li> If front in failsafe, do: <ul>
 		if (failsafe_front) {

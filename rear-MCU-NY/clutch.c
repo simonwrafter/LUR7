@@ -26,16 +26,16 @@ static const float CLUTCH_POS_LEFT_LOOSE  = 553; // slapp vajer
 //! Threshold value for open clutch
 static const float CLUTCH_POS_LEFT_TIGHT  = 639; // dragen vajer
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_RIGHT_LOOSE = 427; // Johansson och freddie pillar
+static const float CLUTCH_POS_RIGHT_LOOSE = 427;
 //! Threshold value for open clutch
-static const float CLUTCH_POS_RIGHT_TIGHT = 378; // Johansson och freddie pillar
+static const float CLUTCH_POS_RIGHT_TIGHT = 378;
 //! PWM value for closed clutch
-static const float CLUTCH_DC_LOOSE        = 6000; //FINE TUNE // slapp vajer. min: 2200
+static const float CLUTCH_DC_LOOSE        = 6000; // slapp vajer. min: 2200
 //! PWM value for open clutch
-static const float CLUTCH_DC_TIGHT        = 13500; //FINE TUNE // dragen vajer. max: 13700 (?)
+static const float CLUTCH_DC_TIGHT        = 13500; // dragen vajer. max: 13500 (?)
 
-static const float clutch_pos_left_break  = 610;
-static const float clutch_pos_right_break = 390;
+static const float clutch_pos_left_break  = CLUTCH_POS_LEFT_LOOSE + (CLUTCH_POS_LEFT_TIGHT - CLUTCH_POS_LEFT_LOOSE) * 0.8;
+static const float clutch_pos_right_break = CLUTCH_POS_RIGHT_TIGHT + (CLUTCH_POS_RIGHT_LOOSE - CLUTCH_POS_RIGHT_TIGHT) * (1-0.8);
 
 static const float clutch_dc_break        = 8000; //trim!!!
 
