@@ -103,7 +103,7 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_1_to_N = 400; // 40ms
+static volatile uint16_t neutral_1_to_N = 400; // 40 ms
 //! Last delay time used for finding neutral from second.
 static volatile uint16_t neutral_2_to_N = 500; // 50 ms
 //! Number of tries for neutral

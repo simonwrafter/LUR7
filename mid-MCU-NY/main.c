@@ -60,6 +60,8 @@ volatile uint16_t clutch_pos_left_atomic = 0;
 volatile uint16_t clutch_pos_right_atomic = 0;
 //! Used for stopping clutch CAN messages.
 volatile uint8_t clutch_CAN_disable = FALSE;
+//! Debounce for gear shifting
+volatile uint8_t gear_debounce = FALSE;
 
 //void ugly_reset(void);
 
@@ -83,12 +85,12 @@ int main(void) {
 	adc_init(); //! <li> initialise LUR7_adc.
 	ancomp_init(); //! <li> initialise LUR7_ancomp.
 	can_init(); //! <li> initialise LUR7_CAN.
-	timer1_init(OFF); //! <li> initialise LUR7_timer0.
+	timer0_init(); //! <li> initialise LUR7_timer0.
+	timer1_init(OFF); //! <li> initialise LUR7_timer1.
 	//! </ol>
 
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	power_off_timer0(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
 
 	//! <li> Setup CAN RX <ol>
@@ -96,8 +98,8 @@ int main(void) {
 	//! </ol>
 
 	//! <li> Input interrupts <ol>
-	ext_int_on(IO_GEAR_UP, 1, 0); //! <li> Gear up, falling flank trigger external interrupt
-	ext_int_on(IO_GEAR_DOWN, 1, 0); //! <li> Gear down, falling flank trigger external interrupt
+	ext_int_on(IO_GEAR_UP, 0, 1); //! <li> Gear up, any (!) flank trigger external interrupt
+	ext_int_on(IO_GEAR_DOWN, 0, 1); //! <li> Gear down, any (!) flank trigger external interrupt
 	ext_int_on(IO_GEAR_NEUTRAL, 1, 0); //! <li> Neutral gear, falling flank trigger external interrupt
 
 	//pc_int_on(IO_GP_BTN);
@@ -180,9 +182,11 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 }
 
 /*!
- * not used.
+ * lzlrsgkoslr
  */
-void timer0_isr_stop(void) {}
+void timer0_isr_stop(void) {
+	gear_debounce = FALSE;
+}
 
 //! Gear Up interrupt handler
 /*!
@@ -190,7 +194,12 @@ void timer0_isr_stop(void) {}
  * sending a message to the rear MCU to do the shifting.
  */
 ISR (INT_GEAR_UP) { //IN9
-	can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	if (!get_input(IO_GEAR_UP) && !gear_debounce) {
+		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	} else {
+		gear_debounce = TRUE;
+		timer0_start(5000);
+	}
 }
 //! Gear Down interrupt handler
 /*!
@@ -198,7 +207,12 @@ ISR (INT_GEAR_UP) { //IN9
  * sending a message to the rear MCU to do the shifting.
  */
 ISR (INT_GEAR_DOWN) { //IN8
-	can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	if (!get_input(IO_GEAR_DOWN) && !gear_debounce) {
+		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	} else {
+		gear_debounce = TRUE;
+		timer0_start(5000);
+	}
 }
 //! Neutral Gear interrupt handler
 /*!
@@ -276,10 +290,11 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
 	uint8_t id_lsb = ((uint8_t *) &id)[3]; //! <li> extract message specifier.
 	if (mob == CAN_DTA_MOb) { //! <li> if received from DTA: <ul>
+		uint16_t ana3 = 0;
 		switch (id_lsb) {
 			case 0 : //! <li> ID = 0x2000. <ul>
 				update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
-				update_watertemp((data[2] << 8) | data[2]); //! <li> extract water temperature [C].
+				update_watertemp((data[2] << 8) | data[3]); //! <li> extract water temperature [C].
 				new_info = TRUE; //! <li> set flag to update panel
 				break; //! </ul>
 			case 1 : //! <li> ID = 0x2001. <ul>
@@ -289,19 +304,19 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				update_oiltemp((data[5] << 8) | data[6]);  //! <li> extract oil temperature [C].
 				break; //! </ul>
 			case 4 : //! <li> ID = 0x2004. <ul>
-				uint16_t ana3 = ((uint16_t) data[2] << 8) | data[3];//! <li> extract current gear.
-				if (ana3 > 4900 || ana3 < 100){
-					update_gear(1);
-				} else if (ana3 > 200 && ana3 < 600){
-					update_gear(0);
-				} else if (ana3 > 720 && ana3 < 920){
-					update_gear(2);
-				} else if (ana3 > 1613 && ana3 < 1813){
-					update_gear(3);
-				} else if (ana3 > 2585 && ana3 < 2785){
-					update_gear(4);
-				} else if (ana3 > 3552 && ana3 < 3752){
-					update_gear(5);
+				ana3 = ((uint16_t) data[2] << 8) | data[3];//! <li> extract current gear.
+				if (ana3 > 700 || ana3 < 900){
+					update_gear(1); // 791
+				} else if (ana3 > 1100 && ana3 < 1500){
+					update_gear(0); // 1296
+				} else if (ana3 > 1600 && ana3 < 1850){
+					update_gear(2); // 1730
+				} else if (ana3 > 2450 && ana3 < 2700){
+					update_gear(3); // 2587
+				} else if (ana3 > 3400 && ana3 < 3600){
+					update_gear(4); // 3500
+				} else if (ana3 > 4350 && ana3 < 4600){
+					update_gear(5); // 4453
 				}
 				else {
 					update_gear(10); //blank display
