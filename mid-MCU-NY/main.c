@@ -86,11 +86,11 @@ int main(void) {
 	ancomp_init(); //! <li> initialise LUR7_ancomp.
 	can_init(); //! <li> initialise LUR7_CAN.
 	timer1_init(OFF); //! <li> initialise LUR7_timer1.
+	timer0_init(); //! <li> initialise LUR7_timer0.
 	//! </ol>
 
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
-	power_off_timer0(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
 
 	//! <li> Setup CAN RX <ol>
@@ -198,7 +198,7 @@ ISR (INT_GEAR_UP) { //IN9
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	} else {
 		gear_debounce = TRUE;
-		timer0_start(5000);
+		timer0_start(2000);
 	}
 }
 //! Gear Down interrupt handler
@@ -211,7 +211,7 @@ ISR (INT_GEAR_DOWN) { //IN8
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	} else {
 		gear_debounce = TRUE;
-		timer0_start(5000);
+		timer0_start(2000);
 	}
 }
 //! Neutral Gear interrupt handler

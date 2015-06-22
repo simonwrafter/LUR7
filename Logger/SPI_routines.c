@@ -39,6 +39,7 @@ void SPI_high_speed(void) {
 
 void SPI_select(void) {
 	PORTC |= (1 << PORTC1);
+	set_output(OU1);
 }
 
 void SPI_deselect(void) {
