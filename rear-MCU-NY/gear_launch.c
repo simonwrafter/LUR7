@@ -62,28 +62,28 @@ static void (*volatile end_fun_ptr)(void);
 //********* GEAR ***************************************************************
 
 //! Delay between engaging shift cut and running the solenoid. 1 to 2
-static const uint16_t SHIFT_CUT_DELAY_1_TO_2 = 500; //50 ms
+static const uint16_t SHIFT_CUT_DELAY_1_TO_2 = 300; //50 ms
 //! Delay between engaging shift cut and running the solenoid. 2 to 3
-static const uint16_t SHIFT_CUT_DELAY_2_TO_3 = 500; //50 ms
+static const uint16_t SHIFT_CUT_DELAY_2_TO_3 = 300; //50 ms
 //! Delay between engaging shift cut and running the solenoid. 3 to 4
-static const uint16_t SHIFT_CUT_DELAY_3_TO_4 = 500; //50 ms
+static const uint16_t SHIFT_CUT_DELAY_3_TO_4 = 300; //50 ms
 //! Delay between engaging shift cut and running the solenoid. 4 to 5
-static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 500; //50 ms
+static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 300; //50 ms
 //! Delay between engaging shift cut and running the solenoid. if unknown gear
-static const uint16_t SHIFT_CUT_DELAY_FAIL = 500; //50 ms
+static const uint16_t SHIFT_CUT_DELAY_FAIL = 300; //50 ms
 
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
+static const uint16_t GEAR_UP_DELAY_2_TO_5 = 400; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 300; //30 ms
+static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 400; //30 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 800; //50 ms
+static const uint16_t GEAR_UP_DELAY_1_TO_2 = 800; //80 ms
 //! Time to run the solenoid for gear down from second.
-static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 800; //50 ms
+static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 800; //80 ms
 //! Time to run the solenoid for gear up from neutral.
-static const uint16_t GEAR_UP_DELAY_N_TO_2 = 500; //30 ms
+static const uint16_t GEAR_UP_DELAY_N_TO_2 = 800; //50 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 500; //30 ms
+static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 800; //50 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -103,9 +103,9 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_up_try_time = 400; // 40ms
+static volatile uint16_t neutral_1_to_N = 400; // 40ms
 //! Last delay time used for finding neutral from second.
-static volatile uint16_t neutral_down_try_time = 500; // 50 ms
+static volatile uint16_t neutral_2_to_N = 500; // 50 ms
 //! Number of tries for neutral
 static volatile uint8_t neutral_counter = 0;
 
@@ -133,13 +133,13 @@ static void neutral_repeat_stabiliser_bisect(void);
 
 
 //********** LAUNCH ************************************************************
-/*
-//! Time to run the signal for launch control
-static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
-volatile const uint8_t launch_mode = FALSE;
-//! Launch Control, end signal
-static void end_launch_signal(void);
-*/
+
+// ! Time to run the signal for launch control
+//static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
+//volatile const uint8_t launch_mode = FALSE;
+// ! Launch Control, end signal
+//static void end_launch_signal(void);
+
 //******************************************************************************
 // COMMON
 //******************************************************************************
@@ -202,11 +202,10 @@ void set_current_revs(uint16_t revs) {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_up() {
-	if (!busy && current_gear != 5) {
+	if (!busy){// && current_gear != 5) {
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
 		end_fun_ptr = mid_gear_up;
-		
 		switch (current_gear) {
 			case 1:
 				timer0_start(SHIFT_CUT_DELAY_1_TO_2);
@@ -240,7 +239,7 @@ void gear_up() {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_down() {
-	if (!busy && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
+	if (!busy){// && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;

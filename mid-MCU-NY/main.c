@@ -279,17 +279,33 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		switch (id_lsb) {
 			case 0 : //! <li> ID = 0x2000. <ul>
 				update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
-				update_watertemp((data[3] << 8) | data[2]); //! <li> extract water temperature [C].
+				update_watertemp((data[2] << 8) | data[2]); //! <li> extract water temperature [C].
 				new_info = TRUE; //! <li> set flag to update panel
 				break; //! </ul>
 			case 1 : //! <li> ID = 0x2001. <ul>
-				update_speed((data[3] << 8) | data[2]);  //! <li> extract speed [km/h * 10]
+				update_speed((data[2] << 8) | data[3]);  //! <li> extract speed [km/h * 10]
 				break; //! </ul>
 			case 2 : //! <li> ID = 0x2002. <ul>
 				update_oiltemp((data[5] << 8) | data[6]);  //! <li> extract oil temperature [C].
 				break; //! </ul>
-			case 3 : //! <li> ID = 0x2003. <ul>
-				update_gear(data[7]);  //! <li> extract current gear.
+			case 4 : //! <li> ID = 0x2004. <ul>
+				uint16_t ana3 = ((uint16_t) data[2] << 8) | data[3];//! <li> extract current gear.
+				if (ana3 > 4900 || ana3 < 100){
+					update_gear(1);
+				} else if (ana3 > 200 && ana3 < 600){
+					update_gear(0);
+				} else if (ana3 > 720 && ana3 < 920){
+					update_gear(2);
+				} else if (ana3 > 1613 && ana3 < 1813){
+					update_gear(3);
+				} else if (ana3 > 2585 && ana3 < 2785){
+					update_gear(4);
+				} else if (ana3 > 3552 && ana3 < 3752){
+					update_gear(5);
+				}
+				else {
+					update_gear(10); //blank display
+				}
 				break; //! </ul>
 			default :
 				break;

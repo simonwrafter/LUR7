@@ -17,10 +17,8 @@
 #include "SPI_routines.h"
 #include "SD_routines.h"
 
-
 volatile unsigned long startBlock, totalBlocks; 
 volatile unsigned char SDHC_flag, cardType, buffer[512];
-
 
 //******************************************************************
 //Function	: to initialize the SD/SDHC card in SPI mode

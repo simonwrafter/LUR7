@@ -82,8 +82,14 @@ volatile uint16_t susp_l_atomic = 0;
 //! An atomically written and safe copy of suspension sensor for use in interrupt.
 volatile uint16_t susp_r_atomic = 0;
 
-//! backup atomic clutch readings
-volatile uint16_t atomic_clutch_pos = 0;
+//! flag for updating clutch
+volatile uint16_t clutch_flag = FALSE;
+//! atomic clutch readings
+volatile uint16_t clutch_left_atomic = 0;
+//! atomic clutch readings
+volatile uint16_t clutch_right_atomic = 0;
+//! voltage reading of gear pot, received from DTA
+volatile uint16_t ana3 = 0;
 
 //! The MOb configured for RX of gear, clutch and launch control instructions.
 volatile uint8_t gcl_MOb;
@@ -92,7 +98,6 @@ volatile uint8_t brk_MOb;
 //! The MOb configured for RX of current gear.
 volatile uint8_t dta_MOb;
 
-volatile uint16_t ana3 = 0;
 
 //! Main function.
 /*!
@@ -157,6 +162,16 @@ int main(void) {
 			gear_neutral_repeat_flag = FALSE; //! <li> clear neutral flag.
 		} //! </ol>
 		//! </ol>
+		if (clutch_flag) { //! <li> if neutral flag is set. <ol>
+			clutch_filter_left(clutch_left_atomic);
+			clutch_filter_right(clutch_right_atomic);
+			clutch_dutycycle_left();
+			clutch_dutycycle_right();
+			ATOMIC_BLOCK(ATOMIC_FORCEON) {
+				clutch_set_dutycycle();
+			}
+			clutch_flag = FALSE;
+		} //! </ol>
 
 		susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -181,7 +196,8 @@ int main(void) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.
 			ATOMIC_BLOCK(ATOMIC_FORCEON) {
-				atomic_clutch_pos = clutch;
+				clutch_left_atomic = 1000;
+				clutch_right_atomic = clutch;
 			}
 			//! </ol>
 		} //! </ul>
@@ -300,11 +316,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	}
 
 	if (failsafe_mid) {
-		clutch_filter_left(atomic_clutch_pos);
-		clutch_filter_right(atomic_clutch_pos);
-		clutch_dutycycle_left();
-		clutch_dutycycle_right();
-		clutch_set_dutycycle();
+		clutch_flag = TRUE;
 	}
 
 	if (dta_first_received && !failsafe_dta && ++failsafe_dta_counter == 100) {
@@ -332,11 +344,12 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		uint32_t holder = ((uint32_t) susp_l_atomic << 16) | susp_r_atomic; // build data
 		can_setup_tx(CAN_REAR_LOG_SUSPENSION_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
 	}
-
+	/*
 	uint32_t filter = ((uint32_t) clutch_get_filtered_right() << 16) | clutch_get_filtered_left();
 	can_setup_tx(CAN_REAR_LOG_FILTER_ID, (uint8_t *) &filter, CAN_REAR_LOG_DLC);
 	uint32_t dutycycle = ((uint32_t) clutch_get_dutycycle_right() << 16) | clutch_get_dutycycle_left();
 	can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
+	*/
 }
 
 //see gear_clutch.c
@@ -365,13 +378,9 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			uint16_t clutch_left = ((uint16_t) data[3] << 8) | data[2];
-			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
-			clutch_filter_left(clutch_left);
-			clutch_filter_right(clutch_right);
-			clutch_dutycycle_left();
-			clutch_dutycycle_right();
-			clutch_set_dutycycle();
+			clutch_left_atomic = ((uint16_t) data[3] << 8) | data[2];
+			clutch_right_atomic = ((uint16_t) data[1] << 8) | data[0];
+			clutch_flag = TRUE;
 		} else if (id == CAN_LAUNCH_ID) { //! <li> if message ID is CAN_LAUNCH_ID <ul>
 			//launch_control(); //! engage launch control.
 		} //! </ul>
@@ -384,33 +393,29 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	else if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
 		dta_first_received = TRUE;
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
-
 		if (id == 0x2000) {
 			set_current_revs(((uint16_t) data[6] << 8) | data[7]);
 		}
-		
 		if (id == 0x2004) {
 			ana3 = ((uint16_t) data[2] << 8) | data[3];
-
-			if (ana3 > 4900 || ana3 < 100){
-				set_current_gear(1);
-			} else if (ana3 > 200 && ana3 < 600){
-				set_current_gear(0);
-			} else if (ana3 > 720 && ana3 < 920){
-				set_current_gear(2);
-			} else if (ana3 > 1613 && ana3 < 1813){
-				set_current_gear(3);
-			} else if (ana3 > 2585 && ana3 < 2785){
-				set_current_gear(4);
-			} else if (ana3 > 3552 && ana3 < 3752){
-				set_current_gear(5);
-			} 
+			if (ana3 > 700 || ana3 < 900){
+				set_current_gear(1); // 791
+			} else if (ana3 > 1100 && ana3 < 1500){
+				set_current_gear(0); // 1296
+			} else if (ana3 > 1600 && ana3 < 1850){
+				set_current_gear(2); // 1730
+			} else if (ana3 > 2450 && ana3 < 2700){
+				set_current_gear(3); // 2587
+			} else if (ana3 > 3400 && ana3 < 3600){
+				set_current_gear(4); // 3500
+			} else if (ana3 > 4350 && ana3 < 4600){
+				set_current_gear(5); // 4453
+			}
 			else {
-				set_current_gear(11);
+				set_current_gear(POT_FAIL);
 			}
 		}
 	} //! </ul>
-
 //! </ul>
 }
 
