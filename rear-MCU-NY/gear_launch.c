@@ -317,12 +317,12 @@ void gear_neutral_single() {
 			busy = TRUE;
 			set_output(GEAR_UP, GND);
 			end_fun_ptr = neutral_single_stabiliser_up;
-			timer0_start(neutral_up_try_time);
+			timer0_start(neutral_1_to_N);
 		} else if (current_gear == 2) {
 			busy = TRUE;
 			set_output(GEAR_DOWN, GND);
 			end_fun_ptr = neutral_single_stabiliser_down;
-			timer0_start(neutral_down_try_time);
+			timer0_start(neutral_2_to_N);
 		}
 	}
 }
@@ -335,9 +335,9 @@ static void neutral_single_stabiliser_up(void) {
 
 static void neutral_single_end_up(void) {
 	if (current_gear == 1) {
-		neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+		neutral_1_to_N += NEUTRAL_DELAY_ADJUST;
 	} else if (current_gear == 2) {
-		neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+		neutral_1_to_N -= NEUTRAL_DELAY_ADJUST;
 	}
 	busy = FALSE;
 }
@@ -350,9 +350,9 @@ static void neutral_single_stabiliser_down(void) {
 
 static void neutral_single_end_down(void) {
 	if (current_gear == 1) {
-		neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
+		neutral_2_to_N -= NEUTRAL_DELAY_ADJUST;
 	} else if (current_gear == 2) {
-		neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
+		neutral_2_to_N += NEUTRAL_DELAY_ADJUST;
 	}
 	busy = FALSE;
 }
@@ -392,28 +392,28 @@ static void neutral_repeat_worker_linear(void) {
 	if (current_gear == 1) {
 		//if (last_gear == 0) first attempt
 		if (last_gear == 1) { // if last attempt was to soft
-			neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+			neutral_1_to_N += NEUTRAL_DELAY_ADJUST;
 		} else if (last_gear == 2) { // if last attempt was to hard
-			neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
+			neutral_2_to_N -= NEUTRAL_DELAY_ADJUST;
 		}
 		set_output(GEAR_UP, GND);
-		timer0_start(neutral_up_try_time);
+		timer0_start(neutral_1_to_N);
 	} else if (current_gear == 2) {
 		//if (last_gear == 0) first attempt
 		if (last_gear == 1) {  // if last attempt was to hard
-			neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+			neutral_1_to_N -= NEUTRAL_DELAY_ADJUST;
 		} else if (last_gear == 2) { // if last attempt was to soft
-			neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
+			neutral_2_to_N += NEUTRAL_DELAY_ADJUST;
 		}
 		set_output(GEAR_DOWN, GND);
-		timer0_start(neutral_down_try_time);
+		timer0_start(neutral_2_to_N);
 	} else {
 		busy = FALSE;
 		uint32_t time_info = 0x0000;
 		if (last_gear == 1) {
-			time_info = (uint32_t) neutral_up_try_time << 16;
+			time_info = (uint32_t) neutral_1_to_N << 16;
 		} else if (last_gear == 2) {
-			time_info = neutral_down_try_time;
+			time_info = neutral_2_to_N;
 		}
 		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
@@ -464,31 +464,31 @@ static void neutral_repeat_worker_bisect(void) {
 
 	if (current_gear == 1) {
 		if (last_gear == 1) { // if last attempt was to soft
-			neutral_up_limit_low = neutral_up_try_time;
+			neutral_up_limit_low = neutral_1_to_N;
 		} else if (last_gear == 2) { // if last attempt was too hard
-			neutral_down_limit_high = neutral_down_try_time;
+			neutral_down_limit_high = neutral_2_to_N;
 		}
-		neutral_up_try_time = (neutral_up_limit_high + neutral_up_limit_low) >> 1; // div by 2
+		neutral_1_to_N = (neutral_up_limit_high + neutral_up_limit_low) >> 1; // div by 2
 		set_output(GEAR_UP, GND);
-		timer0_start(neutral_up_try_time);
+		timer0_start(neutral_1_to_N);
 		
 	} else if (current_gear == 2) {
 		if (last_gear == 1) {  // if last attempt was too hard
-			neutral_up_limit_high = neutral_up_try_time;
+			neutral_up_limit_high = neutral_1_to_N;
 		} else if (last_gear == 2) { // if last attempt was too soft
-			neutral_down_limit_low = neutral_down_try_time;
+			neutral_down_limit_low = neutral_2_to_N;
 		}
-		neutral_down_try_time = (neutral_down_limit_high + neutral_down_limit_low) >> 1; // div by 2
+		neutral_2_to_N = (neutral_down_limit_high + neutral_down_limit_low) >> 1; // div by 2
 		set_output(GEAR_DOWN, GND);
-		timer0_start(neutral_down_try_time);
+		timer0_start(neutral_2_to_N);
 		
 	} else {
 		busy = FALSE; //assume in neutral. (or in third, but that really shouldn't happen.)
 		uint32_t time_info = 0x0000;
 		if (last_gear == 1) {
-			time_info = (uint32_t) neutral_up_try_time << 16;
+			time_info = (uint32_t) neutral_1_to_N << 16;
 		} else if (last_gear == 2) {
-			time_info = neutral_down_try_time;
+			time_info = neutral_2_to_N;
 		}
 		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
