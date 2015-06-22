@@ -85,12 +85,12 @@ int main(void) {
 	adc_init(); //! <li> initialise LUR7_adc.
 	ancomp_init(); //! <li> initialise LUR7_ancomp.
 	can_init(); //! <li> initialise LUR7_CAN.
-	timer0_init(); //! <li> initialise LUR7_timer0.
 	timer1_init(OFF); //! <li> initialise LUR7_timer1.
 	//! </ol>
 
 	//! <li> LUR7_power. <ol>
 	power_off_default(); //! <li> power off unused periferals.
+	power_off_timer0(); //! <li> no PWM output is required, so LUR7_timer1 is powered off.
 	//! </ol>
 
 	//! <li> Setup CAN RX <ol>
@@ -313,7 +313,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 					update_gear(2); // 1730
 				} else if (ana3 > 2450 && ana3 < 2700){
 					update_gear(3); // 2587
-				} else if (ana3 > 3400 && ana3 < 3600){
+				} else if (ana3 > 3350 && ana3 < 3600){
 					update_gear(4); // 3500
 				} else if (ana3 > 4350 && ana3 < 4600){
 					update_gear(5); // 4453
