@@ -50,7 +50,7 @@ static const float REV_MAX = 11000;
 //! Minimum number of LEDs for rev bar
 static const float REV_BAR_MIN = 1;
 //! Maximum number of LEDs for rev bar
-static const float REV_BAR_MAX = 21;
+static const float REV_BAR_MAX = 22;
 
 //! Array of bit patterns for numbers on seven segment display.
 static const uint8_t sev_seg[12] = {

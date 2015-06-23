@@ -44,9 +44,9 @@
 //Constants
 
 //! The value above which the brakes are considered to have been applied.
-#define BRAKES_ON	100 // MUST above BRAKES_OFF
+#define BRAKES_ON	215 // MUST above BRAKES_OFF
 //! The value below which the brakes are considered to have been released.
-#define BRAKES_OFF	80 // MUST below BRAKES_ON
+#define BRAKES_OFF	210 // MUST below BRAKES_ON
 
 //Inputs
 //! Input for speed measurment of rear right wheel.

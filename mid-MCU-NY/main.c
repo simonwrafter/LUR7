@@ -62,6 +62,8 @@ volatile uint16_t clutch_pos_right_atomic = 0;
 volatile uint8_t clutch_CAN_disable = FALSE;
 //! Debounce for gear shifting
 volatile uint8_t gear_debounce = FALSE;
+//! CAN unhang
+volatile uint8_t dta_can_counter = 0;
 
 //void ugly_reset(void);
 
@@ -177,6 +179,16 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
+	if (dta_can_counter++ == 20) {
+		dta_can_counter = 0;
+		can_free(CAN_DTA_MOb);
+		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); //! <li> Reception of DTA packages, ID 0x2000-6.
+		update_RPM(0);
+		update_watertemp(0);
+		update_speed(0);
+		update_oiltemp(0);
+		update_gear(10);
+	}
 	uint32_t c_data = ((uint32_t) clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 }
@@ -198,7 +210,7 @@ ISR (INT_GEAR_UP) { //IN9
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_UP, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	} else {
 		gear_debounce = TRUE;
-		timer0_start(2000);
+		timer0_start(1500);
 	}
 }
 //! Gear Down interrupt handler
@@ -211,7 +223,7 @@ ISR (INT_GEAR_DOWN) { //IN8
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_DOWN, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	} else {
 		gear_debounce = TRUE;
-		timer0_start(2000);
+		timer0_start(1500);
 	}
 }
 //! Neutral Gear interrupt handler
@@ -289,6 +301,7 @@ void pcISR_in9(void) {}
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
 	if (mob == CAN_DTA_MOb) { //! <li> if received from DTA: <ul>
+		dta_can_counter = 0;
 		if (id == 0x2000) { //! <li> ID = 0x2000. <ul>
 			update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
 			update_watertemp((data[2] << 8) | data[3]); //! <li> extract water temperature [C].
@@ -313,7 +326,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				update_gear(5); // 4453
 			}
 			else {
-				//update_gear(10); //blank display
+				update_gear(10); //blank display
 			}
 		}
 	} //! </ul>
