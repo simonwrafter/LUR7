@@ -350,6 +350,8 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	uint32_t dutycycle = ((uint32_t) clutch_get_dutycycle_right() << 16) | clutch_get_dutycycle_left();
 	can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
 	*/
+	uint8_t hold = get_current_gear();
+	can_setup_tx(0x9876, (uint8_t *) &hold, 1);
 }
 
 //see gear_clutch.c
@@ -398,7 +400,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		}
 		if (id == 0x2004) {
 			ana3 = ((uint16_t) data[2] << 8) | data[3];
-			if (ana3 > 700 || ana3 < 900){
+			if (ana3 > 700 && ana3 < 900){
 				set_current_gear(1); // 791
 			} else if (ana3 > 1100 && ana3 < 1500){
 				set_current_gear(0); // 1296

@@ -83,7 +83,7 @@ static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 800; //80 ms
 //! Time to run the solenoid for gear up from neutral.
 static const uint16_t GEAR_UP_DELAY_N_TO_2 = 800; //50 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 800; //50 ms
+static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 770; //50 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -103,9 +103,9 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_1_to_N = 400; // 40 ms
+static volatile uint16_t neutral_1_to_N = 200; // 30 ms
 //! Last delay time used for finding neutral from second.
-static volatile uint16_t neutral_2_to_N = 500; // 50 ms
+static volatile uint16_t neutral_2_to_N = 250; // 30 ms
 //! Number of tries for neutral
 static volatile uint8_t neutral_counter = 0;
 
@@ -116,7 +116,7 @@ static void neutral_single_stabiliser_down(void);
 static void neutral_single_end_down(void);
 
 //***** LINEAR
-static const uint16_t NEUTRAL_DELAY_ADJUST = 50; //5 ms
+static const uint16_t NEUTRAL_DELAY_ADJUST = 20; //2 ms
 
 static void neutral_repeat_worker_linear(void);
 static void neutral_repeat_stabiliser_linear(void);
@@ -335,9 +335,9 @@ static void neutral_single_stabiliser_up(void) {
 
 static void neutral_single_end_up(void) {
 	if (current_gear == 1) {
-		neutral_1_to_N += NEUTRAL_DELAY_ADJUST;
+		//neutral_1_to_N += NEUTRAL_DELAY_ADJUST;
 	} else if (current_gear == 2) {
-		neutral_1_to_N -= NEUTRAL_DELAY_ADJUST;
+		//neutral_1_to_N -= NEUTRAL_DELAY_ADJUST;
 	}
 	busy = FALSE;
 }
