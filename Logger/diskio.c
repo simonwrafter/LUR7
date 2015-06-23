@@ -14,13 +14,13 @@
 /* Definitions of physical drive number for each drive */
 #define SD		0
 
-static uint8_t disc_status = STA_NOINIT
+static volatile uint8_t disc_status = STA_NOINIT
 
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
 /*-----------------------------------------------------------------------*/
 
-uint8_t disk_status (uint8_t pdrv) {
+uint8_t disk_status (uint8_t drv) {
 	if (drv) {
 		return STA_NOINIT;
 	}
@@ -34,13 +34,10 @@ uint8_t disk_status (uint8_t pdrv) {
 /*-----------------------------------------------------------------------*/
 
 uint8_t disk_initialize (uint8_t pdrv) {
-	if (drv) {
-		return STA_NOINIT;
+	if (pdrv == SD) {
+		disc_status = SD_init();
+		return disc_status;
 	}
-	
-	uint8_t s = SD_init();
-	
-	
 	return STA_NOINIT;
 }
 
@@ -55,22 +52,15 @@ DRESULT disk_read (
 	uint8_t *buff,		/* Data buffer to store read data */
 	uint32_t sector,	/* Sector address in LBA */
 	uint16_t count		/* Number of sectors to read */
-)
-{
+) {
 	DRESULT res;
 	int result;
 
-	switch (pdrv) {
-	case ATA :
-		// translate the arguments here
-
-		result = ATA_disk_read(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case MMC :
+	if (pdrv == SD) {
+		
+	}
+	
+	case SD :
 		// translate the arguments here
 
 		result = MMC_disk_read(buff, sector, count);
@@ -79,15 +69,6 @@ DRESULT disk_read (
 
 		return res;
 
-	case USB :
-		// translate the arguments here
-
-		result = USB_disk_read(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-	}
 
 	return RES_PARERR;
 }

@@ -196,7 +196,7 @@ int main(void) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.
 			ATOMIC_BLOCK(ATOMIC_FORCEON) {
-				clutch_left_atomic = 1000;
+				clutch_left_atomic = 0;
 				clutch_right_atomic = clutch;
 			}
 			//! </ol>

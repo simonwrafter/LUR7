@@ -41,9 +41,9 @@ volatile static float clutch_pos_right_break = 387;
 static const float clutch_dc_break = 9500; // AJUST IF NEEDED!
 
 //! Initial value for the filter.
-volatile static float clutch_left_filtered  = 1000;
+volatile static float clutch_left_filtered  = 0;
 //! Initial value for the filter.
-volatile static float clutch_right_filtered = 0;
+volatile static float clutch_right_filtered = 1000;
 
 volatile static float duty_left  = 0;
 volatile static float duty_right = 0;
