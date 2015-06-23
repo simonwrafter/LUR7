@@ -44,7 +44,7 @@
 #include "config.h"
 #include "shiftregister.h"
 
-static const float PULSE_TIME = 200; //2000
+static const float PULSE_TIME = 300; //2000
 
 //! Shifts out a byte.
 /*!

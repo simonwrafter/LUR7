@@ -50,7 +50,7 @@ static const float REV_MAX = 11000;
 //! Minimum number of LEDs for rev bar
 static const float REV_BAR_MIN = 1;
 //! Maximum number of LEDs for rev bar
-static const float REV_BAR_MAX = 21;
+static const float REV_BAR_MAX = 22;
 
 //! Array of bit patterns for numbers on seven segment display.
 static const uint8_t sev_seg[12] = {
@@ -71,7 +71,7 @@ static const uint8_t sev_seg[12] = {
 //! Engine revs
 static volatile uint16_t revs = 10999;
 //! Current gear
-static volatile uint8_t  gear = 0;
+static volatile uint8_t  gear = 10;
 //! Current speed
 static volatile uint16_t speed = 0;
 //! Logging number
@@ -229,24 +229,39 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 /*!
  * Re-populates the shift registers with the latest information available.
  */
+
+/*
 void update_display(uint8_t mode) {
 	shift_byte(bin_to_7seg(gear, OFF));
-
-	if (mode) {
-		bcd_convert(speed);
-	} else {
-		bcd_convert(speed);
-	}
-	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
-
+	//shift_bar(0, 56);
+	shift_bar(0, 24);
+	
+	//if (mode) {
+	//	bcd_convert(speed);
+	//} else {
+	//	bcd_convert(speed);
+	//}
+	//shift_byte(bin_to_7seg(bcd_vect[0], OFF));
+	//shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+	//shift_byte(bin_to_7seg(bcd_vect[2], OFF));
+	
 	shift_bar(revs_to_bar(), REV_BAR_MAX);
-	if (mode) {
-		shift_bar(temp_to_bar(water_temp), 10);
-	} else {
-		shift_bar(temp_to_bar(oil_temp), 10);
-	}
+	
+	shift_bar(0, 10);
+	
+	//if (mode) {
+	//	shift_bar(temp_to_bar(water_temp), 10);
+	//} else {
+	//	shift_bar(temp_to_bar(oil_temp), 10);
+	//}
+	
+	// STROBE
+	shift_strobe();
+} */
+
+void update_display(uint8_t mode) {
+	shift_byte(bin_to_7seg(gear, OFF));
+	shift_bar(0, 56);
 	
 	// STROBE
 	shift_strobe();

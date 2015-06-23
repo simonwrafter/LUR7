@@ -288,42 +288,33 @@ void pcISR_in9(void) {}
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
-	uint8_t id_lsb = ((uint8_t *) &id)[3]; //! <li> extract message specifier.
 	if (mob == CAN_DTA_MOb) { //! <li> if received from DTA: <ul>
-		uint16_t ana3 = 0;
-		switch (id_lsb) {
-			case 0 : //! <li> ID = 0x2000. <ul>
-				update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
-				update_watertemp((data[2] << 8) | data[3]); //! <li> extract water temperature [C].
-				new_info = TRUE; //! <li> set flag to update panel
-				break; //! </ul>
-			case 1 : //! <li> ID = 0x2001. <ul>
-				update_speed((data[2] << 8) | data[3]);  //! <li> extract speed [km/h * 10]
-				break; //! </ul>
-			case 2 : //! <li> ID = 0x2002. <ul>
-				update_oiltemp((data[5] << 8) | data[6]);  //! <li> extract oil temperature [C].
-				break; //! </ul>
-			case 4 : //! <li> ID = 0x2004. <ul>
-				ana3 = ((uint16_t) data[2] << 8) | data[3];//! <li> extract current gear.
-				if (ana3 > 700 || ana3 < 900){
-					update_gear(1); // 791
-				} else if (ana3 > 1100 && ana3 < 1500){
-					update_gear(0); // 1296
-				} else if (ana3 > 1600 && ana3 < 1850){
-					update_gear(2); // 1730
-				} else if (ana3 > 2450 && ana3 < 2700){
-					update_gear(3); // 2587
-				} else if (ana3 > 3350 && ana3 < 3600){
-					update_gear(4); // 3500
-				} else if (ana3 > 4350 && ana3 < 4600){
-					update_gear(5); // 4453
-				}
-				else {
-					update_gear(10); //blank display
-				}
-				break; //! </ul>
-			default :
-				break;
+		if (id == 0x2000) { //! <li> ID = 0x2000. <ul>
+			update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
+			update_watertemp((data[2] << 8) | data[3]); //! <li> extract water temperature [C].
+			new_info = TRUE; //! <li> set flag to update panel
+		} else if (id == 0x2001) { //! <li> ID = 0x2001. <ul>
+			update_speed((data[2] << 8) | data[3]);  //! <li> extract speed [km/h * 10]
+		} else if (id == 0x2002) { //! <li> ID = 0x2002. <ul>
+			update_oiltemp((data[5] << 8) | data[6]);  //! <li> extract oil temperature [C].
+		} else if (id == 0x2004) { //! <li> ID = 0x2004. <ul>
+			uint16_t ana3 = ((uint16_t) data[2] << 8) | data[3];//! <li> extract current gear.
+			if (ana3 > 700 && ana3 < 900){
+				update_gear(1); // 791
+			} else if (ana3 > 1100 && ana3 < 1500){
+				update_gear(0); // 1296
+			} else if (ana3 > 1600 && ana3 < 1850){
+				update_gear(2); // 1730
+			} else if (ana3 > 2450 && ana3 < 2700){
+				update_gear(3); // 2587
+			} else if (ana3 > 3350 && ana3 < 3600){
+				update_gear(4); // 3500
+			} else if (ana3 > 4350 && ana3 < 4600){
+				update_gear(5); // 4453
+			}
+			else {
+				//update_gear(10); //blank display
+			}
 		}
 	} //! </ul>
 	//! </ul>
