@@ -181,7 +181,7 @@ int main(void) {
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (dta_can_counter++ == 20) {
 		dta_can_counter = 0;
-		can_free(CAN_DTA_MOb);
+		can_free_rx(CAN_DTA_MOb);
 		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); //! <li> Reception of DTA packages, ID 0x2000-6.
 		update_RPM(0);
 		update_watertemp(0);
