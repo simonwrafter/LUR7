@@ -399,6 +399,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			set_current_revs(((uint16_t) data[6] << 8) | data[7]);
 		}
 		if (id == 0x2004) {
+			/*
 			ana3 = ((uint16_t) data[2] << 8) | data[3];
 			if (ana3 > 700 && ana3 < 900){
 				set_current_gear(1); // 791
@@ -415,7 +416,9 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			}
 			else {
 				set_current_gear(POT_FAIL);
-			}
+			}*/
+			set_current_gear(POT_FAIL);
+
 		}
 	} //! </ul>
 //! </ul>

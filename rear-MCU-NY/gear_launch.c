@@ -73,15 +73,15 @@ static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 150;//300; //50 ms
 static const uint16_t SHIFT_CUT_DELAY_FAIL = 150;//300; //50 ms
 
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY_2_TO_5 = 400; //40 ms
+static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
 //! Time to run the solenoid for gear down.
 static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 500; //50 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 1000; //100 ms
+static const uint16_t GEAR_UP_DELAY_1_TO_2 = 950; //95 ms
 //! Time to run the solenoid for gear down from second.
 static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 800; //80 ms
 //! Time to run the solenoid for gear up from neutral.
-static const uint16_t GEAR_UP_DELAY_N_TO_2 = 800; //80 ms
+static const uint16_t GEAR_UP_DELAY_N_TO_2 = 700; //70 ms
 //! Time to run the solenoid for gear down from neutral.
 static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 770; //77 ms
 
@@ -103,7 +103,7 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_1_to_N = 200; // 30 ms
+static volatile uint16_t neutral_1_to_N = 300; // 25 ms
 //! Last delay time used for finding neutral from second.
 static volatile uint16_t neutral_2_to_N = 250; // 30 ms
 //! Number of tries for neutral
@@ -246,7 +246,7 @@ void gear_down() {
 		
 		if (current_gear == 0) {
 			timer0_start(GEAR_DOWN_DELAY_N_TO_1);
-		} else if (current_gear == 2) {
+		} else if (current_gear == 2 || current_gear == POT_FAIL) {
 			timer0_start(GEAR_DOWN_DELAY_2_TO_1);
 		} else {
 			timer0_start(GEAR_DOWN_DELAY_5_TO_2);
@@ -264,7 +264,7 @@ static void mid_gear_up(void) {
 	
 	if (current_gear == 0) {
 		timer0_start(GEAR_UP_DELAY_N_TO_2);
-	} else if (current_gear == 1) {
+	} else if (current_gear == 1 || current_gear == POT_FAIL) {
 		timer0_start(GEAR_UP_DELAY_1_TO_2);
 	} else {
 		timer0_start(GEAR_UP_DELAY_2_TO_5);
