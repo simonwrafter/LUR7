@@ -1,7 +1,7 @@
 //**************************************************************
 // ****** FUNCTIONS FOR SD RAW DATA TRANSFER *******
 //**************************************************************
-//Controller: ATmega32 (Clock: 8 Mhz-internal)
+//Controller: ATmega32M1 (Clock: 16 Mhz-external)
 //Compiler	: AVR-GCC (winAVR with AVRStudio)
 //Project V.: Version - 2.4.1
 //Author	: CC Dharmani, Chennai (India)
@@ -35,13 +35,18 @@
 #define READ_OCR				 58
 #define CRC_ON_OFF               59
 
+
 #define ON     1
 #define OFF    0
 
-uint8_t SD_init(void);
-uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg);
-uint8_t SD_readSingleBlock(uint32_t startBlock);
-uint8_t SD_writeSingleBlock(uint32_t startBlock);
-uint8_t SD_erase (uint32_t startBlock, uint32_t totalBlocks);
+volatile unsigned long startBlock, totalBlocks; 
+volatile unsigned char SDHC_flag, cardType, buffer[512];
+
+
+unsigned char SD_init(void);
+unsigned char SD_sendCommand(unsigned char, unsigned long);
+unsigned char SD_erase (unsigned long, unsigned long);
+unsigned char SD_readSingleBlock(unsigned long);
+unsigned char SD_writeSingleBlock(unsigned long);
 
 #endif

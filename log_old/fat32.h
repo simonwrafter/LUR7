@@ -1,7 +1,7 @@
 //********************************************************
 // **** ROUTINES FOR FAT32 IMPLEMATATION OF SD CARD *****
 //********************************************************
-//Controller: ATmega32 (Clock: 8 Mhz-internal)
+//Controller: ATmega32M1 (Clock: 16 Mhz-external)
 //Compiler	: AVR-GCC (winAVR with AVRStudio)
 //Project V.: Version - 2.4.1
 //Author	: CC Dharmani, Chennai (India)
@@ -132,19 +132,19 @@ unsigned long unusedSectors, appendFileSector, appendFileLocation, fileSize, app
 unsigned char freeClusterCountUpdated;
 
 //************* functions *************
+
 unsigned char getBootSectorData (void);
 unsigned long getFirstSector(unsigned long clusterNumber);
+unsigned long getSetNextCluster (unsigned long clusterNumber, unsigned char get_set, unsigned long clusterEntry);
 unsigned long getSetFreeCluster(unsigned char totOrNext, unsigned char get_set, unsigned long FSEntry);
 struct dir_Structure* findFiles (unsigned char flag, unsigned char *fileName);
-unsigned long getSetNextCluster (unsigned long clusterNumber,unsigned char get_set,unsigned long clusterEntry);
 unsigned char readFile (unsigned char flag, unsigned char *fileName);
 unsigned char convertFileName (unsigned char *fileName);
-void writeFile (unsigned char *fileName);
-void appendFile (void);
+void writeFile (unsigned char *fileName, unsigned char *in_data, unsigned char in_length);
 unsigned long searchNextFreeCluster (unsigned long startCluster);
-void memoryStatistics (void);
-void displayMemory (unsigned char flag, unsigned long memory);
 void deleteFile (unsigned char *fileName);
 void freeMemoryUpdate (unsigned char flag, unsigned long size);
+
+
 
 #endif

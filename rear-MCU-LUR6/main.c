@@ -105,7 +105,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
 }
 
-//see gear_launch.c
+//see gear_launch.c for:
 //void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {

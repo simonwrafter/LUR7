@@ -66,7 +66,7 @@
 // +  DTA
 // +  +  General (0x2000 - 0x2003)
 const uint32_t CAN_DTA_ID = 0x00002000; //!< The base ID of CAN messages from the DTA
-const uint32_t CAN_DTA_MASK = 0xFFFFFFFC; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
+const uint32_t CAN_DTA_MASK = 0xFFFFFFF8; //!< Mask for the four lowest number DTA IDs (0x2000 - 0x2003)
 const uint8_t  CAN_DTA_DLC = 8; //!< DLC of DTA messages
 
 // +  Front-MCU
@@ -74,6 +74,7 @@ const uint8_t  CAN_DTA_DLC = 8; //!< DLC of DTA messages
 const uint32_t CAN_FRONT_LOG_SPEED_ID = 0x00004000; //!< Message ID for front wheel speeds
 const uint32_t CAN_FRONT_LOG_SUSPENSION_ID = 0x00004001; //!< Message ID for front suspension
 const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID = 0x00004002; //!< Message ID for steering and braking
+const uint32_t CAN_FRONT_LOG_STEER_BRAKE_MASK = 0xFFFFFFFF; //!< Mask for steering and braking
 const uint8_t  CAN_FRONT_LOG_DLC = 4; //!< DLC of messages from front logging node
 
 // +  Mid-MCU
@@ -86,6 +87,7 @@ const uint8_t  CAN_GEAR_CLUTCH_LAUNCH_DLC = 4; //!< DLC of Gear Change and Clutc
 
 // +  +  Logging
 const uint32_t CAN_LOG_ID = 0x00003000; //!< The ID of CAN messages for starting/stoping logging
+const uint32_t CAN_LOG_MASK = 0xFFFFFFFF; //!< Mask for the LOG instruction
 const uint8_t  CAN_LOG_DLC = 1; //!< DLC of DTA messages
 
 // +  Rear MCU

@@ -1,7 +1,7 @@
 //**************************************************************
 // ****** FUNCTIONS FOR SD RAW DATA TRANSFER *******
 //**************************************************************
-//Controller: ATmega32 (Clock: 8 Mhz-internal)
+//Controller: ATmega32M1 (Clock: 16 Mhz-external)
 //Compiler	: AVR-GCC (winAVR with AVRStudio)
 //Project V.: Version - 2.4.1
 //Author	: CC Dharmani, Chennai (India)
@@ -11,24 +11,20 @@
 
 //Link to the Post: http://www.dharmanitech.com/2009/01/sd-card-interfacing-with-atmega8-fat32.html
 
-#include <avr/io.h>
-#include <avr/stdint.h>
-#include <avr/pgmspace.h>
-#include "SPI_routines.h"
-#include "SD_routines.h"
+#include "../header_and_config/LUR7.h"
 
-volatile unsigned long startBlock, totalBlocks; 
-volatile unsigned char SDHC_flag, cardType, buffer[512];
+#include "spi_routines.h"
+#include "sd_routines.h"
 
 //******************************************************************
 //Function	: to initialize the SD/SDHC card in SPI mode
 //Arguments	: none
 //return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
+// 			  otherwise the response byte will be sent
 //******************************************************************
-uint8_t SD_init(void) {
-	uint8_t i, response, SD_version;
-	uint16_t retry=0 ;
+unsigned char SD_init(void) {
+	unsigned char i, response, SD_version;
+	unsigned int retry=0 ;
 
 	for (i=0;i<10;i++) {
 		SPI_transmit(0xff);   //80 clock pulses spent before sending the first command
@@ -100,13 +96,13 @@ uint8_t SD_init(void) {
 //Function	: to send a command to SD card
 //Arguments	: unsigned char (8-bit command value)
 // 			  & unsigned long (32-bit command argument)
-//return	: unsigned char; response uint8_t
+//return	: unsigned char; response byte
 //******************************************************************
-uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg) {
-	uint8_t response, retry=0, status;
+unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg) {
+	unsigned char response, retry=0, status;
 
-//SD card accepts uint8_t address while SDHC accepts block address in multiples of 512
-//so, if it's SD card we need to convert block address into corresponding uint8_t address by 
+//SD card accepts byte address while SDHC accepts block address in multiples of 512
+//so, if it's SD card we need to convert block address into corresponding byte address by 
 //multipying it with 512. which is equivalent to shifting it left 9 times
 //following 'if' loop does that
 
@@ -142,14 +138,14 @@ uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg) {
 	}
 
 	if (response == 0x00 && cmd == 58) { //checking response of CMD58
-		status = SPI_receive() & 0x40;     //first uint8_t of the OCR register (bit 31:24)
+		status = SPI_receive() & 0x40;     //first byte of the OCR register (bit 31:24)
 		if (status == 0x40) {
 			SDHC_flag = 1;  //we need it to verify SDHC card
 		} else {
 			SDHC_flag = 0;
 		}
-		SPI_receive(); //remaining 3 uint8_ts of the OCR register are ignored here
-		SPI_receive(); //one can use these uint8_ts to check power supply limits of SD
+		SPI_receive(); //remaining 3 bytes of the OCR register are ignored here
+		SPI_receive(); //one can use these bytes to check power supply limits of SD
 		SPI_receive(); 
 	}
 
@@ -163,10 +159,10 @@ uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg) {
 //Function	: to erase specified no. of blocks of SD card
 //Arguments	: none
 //return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
+// 			  otherwise the response byte will be sent
 //*****************************************************************
-uint8_t SD_erase (uint32_t startBlock, uint32_t totalBlocks) {
-	uint8_t response;
+unsigned char SD_erase (unsigned long startBlock, unsigned long totalBlocks) {
+	unsigned char response;
 
 	response = SD_sendCommand(ERASE_BLOCK_START_ADDR, startBlock); //send starting block address
 	if (response != 0x00) { //check for SD status: 0x00 - OK (No flags set)
@@ -187,11 +183,11 @@ uint8_t SD_erase (uint32_t startBlock, uint32_t totalBlocks) {
 //Function	: to read a single block from SD card
 //Arguments	: none
 //return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
+// 			  otherwise the response byte will be sent
 //******************************************************************
-uint8_t SD_readSingleBlock(uint32_t startBlock) {
-	uint8_t response;
-	uint16_t i, retry=0;
+unsigned char SD_readSingleBlock(unsigned long startBlock) {
+	unsigned char response;
+	unsigned int i, retry=0;
 
 	response = SD_sendCommand(READ_SINGLE_BLOCK, startBlock); //read a Block command
 	if (response != 0x00) {
@@ -208,7 +204,7 @@ uint8_t SD_readSingleBlock(uint32_t startBlock) {
 		} //return if time-out
 	}
 
-	for (i=0; i<512; i++) { //read 512 uint8_ts
+	for (i=0; i<512; i++) { //read 512 bytes
 		buffer[i] = SPI_receive();
 	}
 
@@ -223,11 +219,11 @@ uint8_t SD_readSingleBlock(uint32_t startBlock) {
 //Function	: to write to a single block of SD card
 //Arguments	: none
 //return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
+// 			  otherwise the response byte will be sent
 //******************************************************************
-uint8_t SD_writeSingleBlock(uint32_t startBlock) {
-	uint8_t response;
-	uint16_t i, retry=0;
+unsigned char SD_writeSingleBlock(unsigned long startBlock) {
+	unsigned char response;
+	unsigned int i, retry=0;
 
 	response = SD_sendCommand(WRITE_SINGLE_BLOCK, startBlock); //write a Block command
   
@@ -238,7 +234,7 @@ uint8_t SD_writeSingleBlock(uint32_t startBlock) {
 	SPI_select();
 	SPI_transmit(0xfe);     //Send start block token 0xfe (0x11111110)
 
-	for (i=0; i<512; i++) {    //send 512 uint8_ts data
+	for (i=0; i<512; i++) {    //send 512 bytes data
 		SPI_transmit(buffer[i]);
 	}
 
@@ -269,137 +265,5 @@ uint8_t SD_writeSingleBlock(uint32_t startBlock) {
 		}
 	}
 	SPI_deselect();
-	return 0;
-}
-
-//***************************************************************************
-//Function	: to read multiple blocks from SD card & send every block to UART
-//Arguments	: none
-//return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response byte will be sent
-//****************************************************************************
-uint8_t SD_readMultipleBlock (uint8_t startBlock, uint32_t totalBlocks) {
-	uint8_t response;
-	uint16_t retry = 0;
-	
-	response = SD_sendCommand(READ_MULTIPLE_BLOCKS, startBlock); //write a Block command
-	
-	if (response != 0x00) {
-		return response; //check for SD status: 0x00 - OK (No flags set)
-	}
-	
-	SPI_select();
-	
-	while ( totalBlocks ) {
-		retry = 0;
-		while (SPI_receive() != 0xfe) { //wait for start block token 0xfe (0x11111110)
-			if (retry++ > 0xfffe) {
-				SPI_deselect();
-				return 1;
-			} //return if time-out
-		}
-		for (uint16_t i = 0; i<512; i++) { //read 512 bytes
-			buffer[i] = SPI_receive();
-		}
-		
-		SPI_receive(); //receive incoming CRC (16-bit), CRC is ignored here
-		SPI_receive();
-		SPI_receive(); //extra 8 cycles
-	}
-	SD_sendCommand(STOP_TRANSMISSION, 0); //command to stop transmission
-	SPI_deselect();
-	SPI_receive(); //extra 8 clock pulses
-	return 0;
-}
-
-//***************************************************************************
-//Function: to receive data from UART and write to multiple blocks of SD card
-//Arguments: none
-//return: unsigned char; will be 0 if no error,
-// otherwise the response byte will be sent
-//****************************************************************************
-uint8_t SD_writeMultipleBlock(uint32_t startBlock, uint32_t totalBlocks) {
-	uint8_t response;
-	uint8_t data;
-	uint16_t i;
-	uint16_t retry = 0;
-	uint32_t blockCounter = 0;
-	uint32_t size;
-	
-	response = SD_sendCommand(WRITE_MULTIPLE_BLOCKS, startBlock); //write a Block command
-	
-	if (response != 0x00) {
-		return response; //check for SD status: 0x00 - OK (No flags set)
-	}
-	
-	SPI_select();
-	
-	while( blockCounter < totalBlocks ) {
-		i=0;
-		do {
-			data = receiveByte();
-			if(data == 0x08)	//'Back Space' key pressed
-			{
-				if(i != 0)
-				{
-					transmitByte(data);
-					transmitByte(' '); 
-					transmitByte(data); 
-					i--; 
-					size--;
-				}
-				continue;
-			}
-			transmitByte(data);
-			buffer[i++] = data;
-			if(data == 0x0d)
-			{
-				transmitByte(0x0a);
-				buffer[i++] = 0x0a;
-			}
-			if(i == 512) break;
-		}while (data != '~');
-		
-		TX_NEWLINE;
-		transmitString_F(PSTR(" ---- "));
-		TX_NEWLINE;
-		
-		SPI_transmit(0xfc); //Send start block token 0xfc (0x11111100)
-		
-		for(i=0; i<512; i++) //send 512 bytes data
-			SPI_transmit( buffer[i] );
-		
-		SPI_transmit(0xff); //transmit dummy CRC (16-bit), CRC is ignored here
-		SPI_transmit(0xff);
-		
-		response = SPI_receive();
-		if( (response & 0x1f) != 0x05) //response= 0xXXX0AAA1 ; AAA='010' - data accepted
-		{                              //AAA='101'-data rejected due to CRC error
-			SD_CS_DEASSERT;             //AAA='110'-data rejected due to write error
-			return response;
-		}
-		
-		while(!SPI_receive()) //wait for SD card to complete writing and get idle
-			if(retry++ > 0xfffe){SD_CS_DEASSERT; return 1;}
-			
-			SPI_receive(); //extra 8 bits
-			blockCounter++;
-	}
-	
-	SPI_transmit(0xfd); //send 'stop transmission token'
-	
-	retry = 0;
-	
-	while(!SPI_receive()) //wait for SD card to complete writing and get idle
-		if(retry++ > 0xfffe){SD_CS_DEASSERT; return 1;}
-		
-		SD_CS_DEASSERT;
-	SPI_transmit(0xff); //just spend 8 clock cycle delay before reasserting the CS signal
-	SD_CS_ASSERT; //re assertion of the CS signal is required to verify if card is still busy
-	
-	while(!SPI_receive()) //wait for SD card to complete writing and get idle
-		if(retry++ > 0xfffe){SD_CS_DEASSERT; return 1;}
-		SD_CS_DEASSERT;
-	
 	return 0;
 }

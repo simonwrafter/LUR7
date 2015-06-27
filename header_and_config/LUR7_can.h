@@ -124,6 +124,7 @@ extern const uint8_t  CAN_DTA_DLC; //!< DLC of DTA messages
 extern const uint32_t CAN_FRONT_LOG_SPEED_ID; //!< Message ID for front wheel speeds
 extern const uint32_t CAN_FRONT_LOG_SUSPENSION_ID; //!< Message ID for front suspension
 extern const uint32_t CAN_FRONT_LOG_STEER_BRAKE_ID; //!< Message ID for steering and braking
+extern const uint32_t CAN_FRONT_LOG_STEER_BRAKE_MASK; //!< Mask for steering and braking
 extern const uint8_t  CAN_FRONT_LOG_DLC; //!< DLC of messages from front logging node
 
 // +  Mid-MCU

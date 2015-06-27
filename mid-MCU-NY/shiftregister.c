@@ -17,7 +17,7 @@
  */
 
 /*! \file shiftregister.c
- * \ref shiftregister populates the the siftregisters for the LED display used
+ * \ref shiftregister populates the the siftregisters for the LED display used 
  * in the LUR7.
  *
  * All code is released under the GPLv3 license.
@@ -44,43 +44,56 @@
 #include "config.h"
 #include "shiftregister.h"
 
+static const float PULSE_TIME = 300; //2000
+
 //! Shifts out a byte.
 /*!
- * Utilising the function \ref shift_bit a full byte is shifted out to the
+ * Utilising the function \ref shift_bit a full byte is shifted out to the 
  * shift registers.
- *
+ * 
  * \param value the byte to shift out.
  */
 void shift_byte(uint8_t value) {
-	for (uint8_t i= 0; i<8; i++) {
-		shift_bit(value & (1<<i));
-	}
+	shift_bit(value & 1);
+	shift_bit(value & 2);
+	shift_bit(value & 4);
+	shift_bit(value & 8);
+	shift_bit(value & 16);
+	shift_bit(value & 32);
+	shift_bit(value & 64);
+	shift_bit(value & 128);
 }
 
 //! Shift out a bar.
 /*!
- * Utilising the function \ref shift_bit a bar is shifted out to the shift
+ * Utilising the function \ref shift_bit a bar is shifted out to the shift 
  * registers. \p nbr_high number of high bits are shifted out, followed by
  * \p length - \p nbr_high low bits.
- *
+ * 
  * \param nbr_high the number of high bits to shift out.
  * \param length the total length of the bar
  */
 void shift_bar(uint8_t nbr_high, uint8_t length) {
-	uint8_t i=0;
-	for (; i<nbr_high; i++) {
-		shift_bit(ON);
+	if (nbr_high > length) {
+		nbr_high = length;
 	}
-	for (; i<length; i++) {
+	if (nbr_high < 0) {
+		nbr_high = 0;
+	}
+	uint8_t nbr_low = length - nbr_high;
+	for (uint8_t i=0; i< nbr_low; i++) {
 		shift_bit(OFF);
+	}
+	for (uint8_t i=0; i< nbr_high; i++) {
+		shift_bit(ON);
 	}
 }
 
 //! Shift out a single bit.
 /*!
- * Shifts out a bit by setting the data output to \p value, waiting and then
+ * Shifts out a bit by setting the data output to \p value, waiting and then 
  * triggering generating a clock pulse.
- *
+ * 
  * \param value the bit value to shift out.
  */
 void shift_bit(uint8_t value) {
@@ -91,15 +104,15 @@ void shift_bit(uint8_t value) {
 	set_output(IO_SHIFT_CLK, LOW);
 	_delay_us(PULSE_TIME);
 	set_output(IO_SHIFT_DATA, LOW);
+	_delay_us(PULSE_TIME);
 }
 
 //! Strobe the data through.
 /*!
- * Data stored in the shift registers is latched through to the outputs of the
+ * Data stored in the shift registers is latched through to the outputs of the 
  * shift registers when strobe is set high and locked when it returnes to low.
  */
 void shift_strobe(void) {
-	_delay_us(PULSE_TIME);
 	set_output(IO_SHIFT_STROBE, HIGH);
 	_delay_us(PULSE_TIME);
 	set_output(IO_SHIFT_STROBE, LOW);

@@ -1,6 +1,6 @@
 /*
- * config.h - A collection of functions to setup and ease the use of the LUR7 PCB
- * Copyright (C) 2014  Simon Wrafter <simon.wrafter@gmail.com>
+ * brake.h - A collection of functions to setup and ease the use of the LUR7 PCB
+ * Copyright (C) 2015  Simon Wrafter <simon.wrafter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,22 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+/*! \file brake.h
+ * \ref brake controls braking of the LUR7.
+ *
+ * All code is released under the GPLv3 license.
+ *
+ * \see \ref brake
+ * \see \ref brake.c
+ * \see <http://www.gnu.org/copyleft/gpl.html>
+ * \author Simon Wrafter
+ * \copyright GNU Public License v3.0
+ *
+ * \addtogroup brake
+ */
 
-//Constants
-#define CLUTCH_ATOMIC_LENGTH	10
+#ifndef _BRAKE_H_
+#define _BRAKE_H_
 
-//Inputs
+void brake_light(uint16_t);
 
-// Outputs
-// Outout for Shift Register Strobe
-#define IO_SHIFT_STROBE		OUT5
-// Outout for Shift Register Data
-#define IO_SHIFT_DATA		OUT6
-// Outout for Shift Register Clock
-#define IO_SHIFT_CLK		OUT7
-
-//External interrupts
-
-#endif // _CONFIG_H_
+#endif // _BRAKE_H_
