@@ -14,20 +14,16 @@
 
 //SPI initialize for SD card
 //clock rate: 125Khz
-void spi_init(void) {
-	SPCR = 0x52; //setup SPI: Master mode, MSB first, SCK phase low, SCK idle low
-	SPSR = 0x00;
+void SPI_init(void) {
+	DDRB |= (1 << DDB1) | (1 << DDB7); // MOSI & SCK to output
+	
+	//setup SPI: Interrupts enabled, Master mode, MSB first, SCK phase low, SCK idle low
+	SPCR = (1 << SPIE) | (1 << SPE) | (1 << MSTR) | (1 << SPR1);
+	SPSR = (1 << SPI2X);
 }
 
-unsigned char SPI_transmit(unsigned char data) {
-	// Start transmission
+void SPI_send_byte(uint8_t data) {
 	SPDR = data;
-	// Wait for transmission complete
-	while (!(SPSR & (1<<SPIF))) {
-		;
-	}
-	data = SPDR;
-	return(data);
 }
 
 unsigned char SPI_receive(void) {
@@ -43,10 +39,9 @@ unsigned char SPI_receive(void) {
 }
 
 void SPI_high_speed(void) {
-	SPCR = 0x50;
-	SPSR |= (1<<SPI2X);
+	SPCR &= 0xFC; //clear clock bits, set SPI clock to 4 MHz
 }
 
-void SPI_sd(void) {
-	SPCR = 0x52;
+ISR(SPI_STC_vect) {
+	
 }

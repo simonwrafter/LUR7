@@ -57,7 +57,7 @@
 
 // vectors of ports as used on PCB, used localy only!
 //! Data Direction Register for the respective in- and outputs
-static volatile uint8_t * DDX[19] = {
+static volatile uint8_t * DDX[NBR_OF_IO+1] = {
 	&DDRD, //IN1
 	&DDRD, //IN2
 	&DDRD, //IN3
@@ -75,11 +75,12 @@ static volatile uint8_t * DDX[19] = {
 	&DDRC, //OUT5
 	&DDRC, //OUT6
 	&DDRB, //OUT7
-	&DDRB  //OUT8
+	&DDRB, //OUT8
+	&DDRB  //LED0 MCU v1.1
 };
 
 //! Data Direction Register bits for the respective in- and outputs
-static uint8_t DDXn[19] = {
+static uint8_t DDXn[NBR_OF_IO+1] = {
 	DDD3, //IN1
 	DDD2, //IN2
 	DDD1, //IN3
@@ -97,12 +98,12 @@ static uint8_t DDXn[19] = {
 	DDC5, //OUT5
 	DDC6, //OUT6
 	DDB3, //OUT7
-	DDB4  //OUT8
+	DDB4, //OUT8
+	DDB0  //LED0 MCU v1.1
 };
 
 //! Port Data register for the respective in- and outputs
-static volatile uint8_t * PORTX[19] = {
-	
+static volatile uint8_t * PORTX[NBR_OF_IO+1] = {
 	&PORTD, //IN1
 	&PORTD, //IN2
 	&PORTD, //IN3
@@ -120,11 +121,12 @@ static volatile uint8_t * PORTX[19] = {
 	&PORTC, //OUT5
 	&PORTC, //OUT6
 	&PORTB, //OUT7
-	&PORTB  //OUT8
+	&PORTB, //OUT8
+	&PORTB  //LED0 MCU v1.1
 };
 
 //! Port Data register bits for the respective in- and outputs
-static uint8_t PORTXn[19] = {
+static uint8_t PORTXn[NBR_OF_IO+1] = {
 	PORTD3, //IN1
 	PORTD2, //IN2
 	PORTD1, //IN3
@@ -142,11 +144,12 @@ static uint8_t PORTXn[19] = {
 	PORTC5, //OUT5
 	PORTC6, //OUT6
 	PORTB3, //OUT7
-	PORTB4  //OUT8
+	PORTB4, //OUT8
+	PORTB0  //LED0 MCU v1.1
 };
 
 //! Port Input Pins register for the respective in- and outputs
-static volatile uint8_t * PINX[19] = {
+static volatile uint8_t * PINX[NBR_OF_IO+1] = {
 	&PIND, //IN1
 	&PIND, //IN2
 	&PIND, //IN3
@@ -164,11 +167,12 @@ static volatile uint8_t * PINX[19] = {
 	&PINC, //OUT5
 	&PINC, //OUT6
 	&PINB, //OUT7
-	&PINB  //OUT8
+	&PINB, //OUT8
+	&PINB  //LED0 MCU v1.1
 };
 
 //! Port Input Pins register bits for the respective in- and outputs
-static uint8_t PINXn[19] = {
+static uint8_t PINXn[NBR_OF_IO+1] = {
 	PIND3, //IN1
 	PIND2, //IN2
 	PIND1, //IN3
@@ -186,7 +190,8 @@ static uint8_t PINXn[19] = {
 	PINC5, //OUT5
 	PINC6, //OUT6
 	PINB3, //OUT7
-	PINB4  //OUT8
+	PINB4, //OUT8
+	PINB0  //LED0 MCU v1.1
 };
 
 //! Hardware initialisation function.

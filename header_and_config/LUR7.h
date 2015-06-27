@@ -61,6 +61,8 @@
 #define CAN_BAUDRATE	1000        // in kBit
 
 // SYSTEM DEFINITION
+//! The total nuber of IN and OUT pins
+#define NBR_OF_IO	18
 
 //! IN1 is defined as PD3 and used as an input on the PCB.
 #define IN1		0 //PD3
@@ -98,6 +100,8 @@
 #define OUT7	15 //PB3
 //! OUT8 is defined as PB4 and used as an output on the PCB.
 #define OUT8	16 //PB4
+//! LED0 is defined as PB0 and used as an output on the PCB.
+#define LED0	17 //PB4 only v1.1
 
 //! Copy of the first input
 #define FIRST_IN	IN1
@@ -106,7 +110,7 @@
 //! Copy of the first output
 #define FIRST_OUT	OUT1
 //! Copy of the last output
-#define LAST_OUT	OUT8
+#define LAST_OUT	LED0
 
 // ADC
 //! selects IN4 for A/D conversion
