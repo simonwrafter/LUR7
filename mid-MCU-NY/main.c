@@ -312,7 +312,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			update_oiltemp((data[5] << 8) | data[6]);  //! <li> extract oil temperature [C].
 		} else if (id == 0x2004) { //! <li> ID = 0x2004. <ul>
 			uint16_t ana3 = ((uint16_t) data[2] << 8) | data[3];//! <li> extract current gear.
-			if (ana3 > 700 && ana3 < 900){
+			/*if (ana3 > 700 && ana3 < 900){
 				update_gear(1); // 791
 			} else if (ana3 > 1100 && ana3 < 1500){
 				update_gear(0); // 1296
@@ -324,6 +324,20 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				update_gear(4); // 3500
 			} else if (ana3 > 4350 && ana3 < 4600){
 				update_gear(5); // 4453
+			}
+			else {*/
+			if (ana3 > 349 && ana3 <= 639){
+				update_gear(1); // 449
+			} else if (ana3 > 639 && ana3 <= 1092){
+				update_gear(0); // 930
+			} else if (ana3 > 1092 && ana3 <= 1735){
+				update_gear(2); // 1254
+			} else if (ana3 > 1735 && ana3 <= 2704){
+				update_gear(3); // 2216
+			} else if (ana3 > 2704 && ana3 <= 3671){
+				update_gear(4); // 3193
+			} else if (ana3 > 3671 && ana3 < 4250){
+				update_gear(5); // 4150
 			}
 			else {
 				update_gear(10); //blank display

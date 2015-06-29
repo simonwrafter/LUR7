@@ -399,25 +399,25 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 			set_current_revs(((uint16_t) data[6] << 8) | data[7]);
 		}
 		if (id == 0x2004) {
-			/*
+		
 			ana3 = ((uint16_t) data[2] << 8) | data[3];
-			if (ana3 > 700 && ana3 < 900){
-				set_current_gear(1); // 791
-			} else if (ana3 > 1100 && ana3 < 1500){
-				set_current_gear(0); // 1296
-			} else if (ana3 > 1600 && ana3 < 1850){
-				set_current_gear(2); // 1730
-			} else if (ana3 > 2450 && ana3 < 2700){
-				set_current_gear(3); // 2587
-			} else if (ana3 > 3400 && ana3 < 3600){
-				set_current_gear(4); // 3500
-			} else if (ana3 > 4350 && ana3 < 4600){
-				set_current_gear(5); // 4453
+			if (ana3 > 349 && ana3 <= 639){
+				set_current_gear(1); // 449
+			} else if (ana3 > 639 && ana3 <= 1092){
+				set_current_gear(0); // 930
+			} else if (ana3 > 1092 && ana3 <= 1735){
+				set_current_gear(2); // 1254
+			} else if (ana3 > 1735 && ana3 <= 2704){
+				set_current_gear(3); // 2216
+			} else if (ana3 > 2704 && ana3 <= 3671){
+				set_current_gear(4); // 3193
+			} else if (ana3 > 3671 && ana3 < 4250){
+				set_current_gear(5); // 4150
 			}
 			else {
 				set_current_gear(POT_FAIL);
-			}*/
-			set_current_gear(POT_FAIL);
+			}
+			
 
 		}
 	} //! </ul>
