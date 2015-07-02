@@ -179,15 +179,19 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	if (dta_can_counter++ == 20) {
-		dta_can_counter = 0;
+	if (dta_can_counter++ == 40) {
+		//dta_can_counter = 0;
 		can_free_rx(CAN_DTA_MOb);
 		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); //! <li> Reception of DTA packages, ID 0x2000-6.
 		update_RPM(0);
 		update_watertemp(0);
 		update_speed(0);
 		update_oiltemp(0);
-		update_gear(10);
+		update_gear(7);
+	} 
+
+	if (dta_can_counter > 40) {
+		update_gear(7);
 	}
 	uint32_t c_data = ((uint32_t) clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
 	can_setup_tx(CAN_CLUTCH_ID, (uint8_t *) &c_data, CAN_GEAR_CLUTCH_LAUNCH_DLC);

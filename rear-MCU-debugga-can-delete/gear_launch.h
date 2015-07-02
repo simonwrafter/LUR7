@@ -35,8 +35,6 @@
 #ifndef _GEAR_CLUTCH_LAUNCH_H_
 #define _GEAR_CLUTCH_LAUNCH_H_
 
-#define POT_FAIL 11
-
 void set_current_gear(uint8_t gear);
 uint8_t get_current_gear(void);
 void set_current_revs(uint16_t);

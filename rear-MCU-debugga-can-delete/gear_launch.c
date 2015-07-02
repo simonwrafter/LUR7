@@ -61,29 +61,20 @@ static void (*volatile end_fun_ptr)(void);
 
 //********* GEAR ***************************************************************
 
-//! Delay between engaging shift cut and running the solenoid. 1 to 2
-static const uint16_t SHIFT_CUT_DELAY_1_TO_2 = 300;//300; //35 ms
-//! Delay between engaging shift cut and running the solenoid. 2 to 3
-static const uint16_t SHIFT_CUT_DELAY_2_TO_3 = 150;//150; //20 ms
-//! Delay between engaging shift cut and running the solenoid. 3 to 4
-static const uint16_t SHIFT_CUT_DELAY_3_TO_4 = 150;//150; //20 ms
-//! Delay between engaging shift cut and running the solenoid. 4 to 5
-static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 150;//150; //20 ms
-//! Delay between engaging shift cut and running the solenoid. if unknown gear
-static const uint16_t SHIFT_CUT_DELAY_FAIL = 150;//150; //20 ms
-
+//! Delay between engaging shift cut and running the solenoid.
+static const uint16_t SHIFT_CUT_DELAY = 500; //100 ms
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
+static const uint16_t GEAR_UP_DELAY = 800; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 400; //40 ms
+static const uint16_t GEAR_DOWN_DELAY = 800; //30 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 800; //80 ms
+static const uint16_t GEAR_UP_DELAY_FIRST = 500; //50 ms
 //! Time to run the solenoid for gear down from second.
-static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 900; //90 ms
+static const uint16_t GEAR_DOWN_DELAY_SECOND = 500; //50 ms
 //! Time to run the solenoid for gear up from neutral.
-static const uint16_t GEAR_UP_DELAY_N_TO_2 = 700; //70 ms
+static const uint16_t GEAR_UP_DELAY_NEUTRAL = 500; //30 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 770; //77 ms
+static const uint16_t GEAR_DOWN_DELAY_NEUTRAL = 500; //30 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -103,9 +94,9 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_1_to_N = 300; // 25 ms
+static volatile uint16_t neutral_up_try_time = 400; // 30ms
 //! Last delay time used for finding neutral from second.
-static volatile uint16_t neutral_2_to_N = 250; // 30 ms
+static volatile uint16_t neutral_down_try_time = 500;
 //! Number of tries for neutral
 static volatile uint8_t neutral_counter = 0;
 
@@ -116,7 +107,7 @@ static void neutral_single_stabiliser_down(void);
 static void neutral_single_end_down(void);
 
 //***** LINEAR
-static const uint16_t NEUTRAL_DELAY_ADJUST = 20; //2 ms
+static const uint16_t NEUTRAL_DELAY_ADJUST = 50; //5 ms
 
 static void neutral_repeat_worker_linear(void);
 static void neutral_repeat_stabiliser_linear(void);
@@ -133,13 +124,13 @@ static void neutral_repeat_stabiliser_bisect(void);
 
 
 //********** LAUNCH ************************************************************
-
-// ! Time to run the signal for launch control
-//static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
-//volatile const uint8_t launch_mode = FALSE;
-// ! Launch Control, end signal
-//static void end_launch_signal(void);
-
+/*
+//! Time to run the signal for launch control
+static const uint16_t LAUNCH_SIGNAL_DELAY = 500; //50 ms
+volatile const uint8_t launch_mode = FALSE;
+//! Launch Control, end signal
+static void end_launch_signal(void);
+*/
 //******************************************************************************
 // COMMON
 //******************************************************************************
@@ -202,22 +193,12 @@ void set_current_revs(uint16_t revs) {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_up() {
-	if (!busy){// && current_gear != 5) {
+	can_setup_tx(0x7000, (uint8_t *) &current_gear, 1);
+	if (!busy ) { //&& current_gear != 5) {
 		busy = TRUE;
 		set_output(SHIFT_CUT, GND);
 		end_fun_ptr = mid_gear_up;
-		switch (current_gear) {
-			case 1:
-				timer0_start(SHIFT_CUT_DELAY_1_TO_2);
-			case 2:
-				timer0_start(SHIFT_CUT_DELAY_2_TO_3);
-			case 3:
-				timer0_start(SHIFT_CUT_DELAY_3_TO_4);
-			case 4:
-				timer0_start(SHIFT_CUT_DELAY_4_TO_5);
-			default:
-				timer0_start(SHIFT_CUT_DELAY_1_TO_2);
-		}
+		timer0_start(SHIFT_CUT_DELAY);
 	}
 }
 
@@ -239,18 +220,19 @@ void gear_up() {
  * \param current_gear allows the controler to behave in the most appropriate manner
  */
 void gear_down() {
-	if (!busy){// && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
+	//OSÄKER. kolla villkoret till if-satsen
+	if (!busy) {// && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
 		
-		if (current_gear == 0) {
-			timer0_start(GEAR_DOWN_DELAY_N_TO_1);
-		} else if (current_gear == 2 || current_gear == POT_FAIL) {
-			timer0_start(GEAR_DOWN_DELAY_2_TO_1);
-		} else {
-			timer0_start(GEAR_DOWN_DELAY_5_TO_2);
-		}
+		//if (current_gear == 0) {
+		//	timer0_start(GEAR_DOWN_DELAY_NEUTRAL);
+		//} else if (current_gear == 2) {
+		//	timer0_start(GEAR_DOWN_DELAY_SECOND);
+		//} else {
+			timer0_start(GEAR_DOWN_DELAY);
+		//}
 	}
 }
 //! Change gear up, part 2
@@ -259,16 +241,17 @@ void gear_down() {
  * time. end_fun_ptr set to \ref end_gear_change.
  */
 static void mid_gear_up(void) {
+	//OSÄKER. skall den vara bortkommenterad?
+	//set_output(SHIFT_CUT, TRI); // reset shift cut output
 	set_output(GEAR_UP, GND); // run solenoid
 	end_fun_ptr = end_gear_change;
-	
-	if (current_gear == 0) {
-		timer0_start(GEAR_UP_DELAY_N_TO_2);
-	} else if (current_gear == 1 || current_gear == POT_FAIL) {
-		timer0_start(GEAR_UP_DELAY_1_TO_2);
-	} else {
-		timer0_start(GEAR_UP_DELAY_2_TO_5);
-	}
+	//if (current_gear == 0) {
+	//	timer0_start(GEAR_UP_DELAY_NEUTRAL);
+	//} else if (current_gear == 1) {
+	//	timer0_start(GEAR_UP_DELAY_FIRST);
+	//} else {
+		timer0_start(GEAR_UP_DELAY);
+	//}
 }
 
 //! End gear change sequence
@@ -313,17 +296,17 @@ static void end_gear_change(void) {
  */
 void gear_neutral_single() {
 	if (!busy) {
-		if (current_gear == 1 || current_gear == POT_FAIL) {
+		//if (current_gear == 1 || current_gear == 11) {
 			busy = TRUE;
 			set_output(GEAR_UP, GND);
 			end_fun_ptr = neutral_single_stabiliser_up;
-			timer0_start(neutral_1_to_N);
-		} else if (current_gear == 2) {
-			busy = TRUE;
-			set_output(GEAR_DOWN, GND);
-			end_fun_ptr = neutral_single_stabiliser_down;
-			timer0_start(neutral_2_to_N);
-		}
+			timer0_start(neutral_up_try_time);
+		//} else if (current_gear == 2) {
+		//	busy = TRUE;
+		//	set_output(GEAR_DOWN, GND);
+		//	end_fun_ptr = neutral_single_stabiliser_down;
+		//	timer0_start(neutral_down_try_time);
+		//}
 	}
 }
 
@@ -334,11 +317,11 @@ static void neutral_single_stabiliser_up(void) {
 }
 
 static void neutral_single_end_up(void) {
-	if (current_gear == 1) {
-		//neutral_1_to_N += NEUTRAL_DELAY_ADJUST;
-	} else if (current_gear == 2) {
-		//neutral_1_to_N -= NEUTRAL_DELAY_ADJUST;
-	}
+	//if (current_gear == 1) {
+	//	neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
+	//} else if (current_gear == 2) {
+	//	neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
+	//}
 	busy = FALSE;
 }
 
@@ -350,9 +333,9 @@ static void neutral_single_stabiliser_down(void) {
 
 static void neutral_single_end_down(void) {
 	if (current_gear == 1) {
-		neutral_2_to_N -= NEUTRAL_DELAY_ADJUST;
+		neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
 	} else if (current_gear == 2) {
-		neutral_2_to_N += NEUTRAL_DELAY_ADJUST;
+		neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
 	}
 	busy = FALSE;
 }
@@ -392,28 +375,28 @@ static void neutral_repeat_worker_linear(void) {
 	if (current_gear == 1) {
 		//if (last_gear == 0) first attempt
 		if (last_gear == 1) { // if last attempt was to soft
-			neutral_1_to_N += NEUTRAL_DELAY_ADJUST;
+			neutral_up_try_time += NEUTRAL_DELAY_ADJUST;
 		} else if (last_gear == 2) { // if last attempt was to hard
-			neutral_2_to_N -= NEUTRAL_DELAY_ADJUST;
+			neutral_down_try_time -= NEUTRAL_DELAY_ADJUST;
 		}
 		set_output(GEAR_UP, GND);
-		timer0_start(neutral_1_to_N);
+		timer0_start(neutral_up_try_time);
 	} else if (current_gear == 2) {
 		//if (last_gear == 0) first attempt
 		if (last_gear == 1) {  // if last attempt was to hard
-			neutral_1_to_N -= NEUTRAL_DELAY_ADJUST;
+			neutral_up_try_time -= NEUTRAL_DELAY_ADJUST;
 		} else if (last_gear == 2) { // if last attempt was to soft
-			neutral_2_to_N += NEUTRAL_DELAY_ADJUST;
+			neutral_down_try_time += NEUTRAL_DELAY_ADJUST;
 		}
 		set_output(GEAR_DOWN, GND);
-		timer0_start(neutral_2_to_N);
+		timer0_start(neutral_down_try_time);
 	} else {
 		busy = FALSE;
 		uint32_t time_info = 0x0000;
 		if (last_gear == 1) {
-			time_info = (uint32_t) neutral_1_to_N << 16;
+			time_info = (uint32_t) neutral_up_try_time << 16;
 		} else if (last_gear == 2) {
-			time_info = neutral_2_to_N;
+			time_info = neutral_down_try_time;
 		}
 		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
@@ -464,31 +447,31 @@ static void neutral_repeat_worker_bisect(void) {
 
 	if (current_gear == 1) {
 		if (last_gear == 1) { // if last attempt was to soft
-			neutral_up_limit_low = neutral_1_to_N;
+			neutral_up_limit_low = neutral_up_try_time;
 		} else if (last_gear == 2) { // if last attempt was too hard
-			neutral_down_limit_high = neutral_2_to_N;
+			neutral_down_limit_high = neutral_down_try_time;
 		}
-		neutral_1_to_N = (neutral_up_limit_high + neutral_up_limit_low) >> 1; // div by 2
+		neutral_up_try_time = (neutral_up_limit_high + neutral_up_limit_low) >> 1; // div by 2
 		set_output(GEAR_UP, GND);
-		timer0_start(neutral_1_to_N);
+		timer0_start(neutral_up_try_time);
 		
 	} else if (current_gear == 2) {
 		if (last_gear == 1) {  // if last attempt was too hard
-			neutral_up_limit_high = neutral_1_to_N;
+			neutral_up_limit_high = neutral_up_try_time;
 		} else if (last_gear == 2) { // if last attempt was too soft
-			neutral_down_limit_low = neutral_2_to_N;
+			neutral_down_limit_low = neutral_down_try_time;
 		}
-		neutral_2_to_N = (neutral_down_limit_high + neutral_down_limit_low) >> 1; // div by 2
+		neutral_down_try_time = (neutral_down_limit_high + neutral_down_limit_low) >> 1; // div by 2
 		set_output(GEAR_DOWN, GND);
-		timer0_start(neutral_2_to_N);
+		timer0_start(neutral_down_try_time);
 		
 	} else {
 		busy = FALSE; //assume in neutral. (or in third, but that really shouldn't happen.)
 		uint32_t time_info = 0x0000;
 		if (last_gear == 1) {
-			time_info = (uint32_t) neutral_1_to_N << 16;
+			time_info = (uint32_t) neutral_up_try_time << 16;
 		} else if (last_gear == 2) {
-			time_info = neutral_2_to_N;
+			time_info = neutral_down_try_time;
 		}
 		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;

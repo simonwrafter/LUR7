@@ -17,12 +17,12 @@
  */
 
 /*! \file gear_clutch_launch.h
- * The \ref gear_launch defines inputs and constants used on the rear MCU.
+ * The \ref gear_clutch_launch defines inputs and constants used on the rear MCU.
  *
  * All code is released under the GPLv3 license.
  *
- * \see \ref gear_launch
- * \see \ref gear_launch.c
+ * \see \ref gear_clutch_launch
+ * \see \ref gear_clutch_launch.c
  * \see \ref main.c
  * \see \ref config.h
  * \see <http://www.gnu.org/copyleft/gpl.html>
@@ -32,23 +32,18 @@
  * \addtogroup gear_clutch_launch
  */
 
-#ifndef _GEAR_CLUTCH_LAUNCH_H_
-#define _GEAR_CLUTCH_LAUNCH_H_
+#ifndef _CLUTCH_H_
+#define _CLUTCH_H_
 
-#define POT_FAIL 11
+void clutch_init(void);
+void clutch_filter_left(uint16_t pos_left);
+void clutch_filter_right(uint16_t pos_right);
+void clutch_dutycycle_left(void);
+void clutch_dutycycle_right(void);
+uint16_t clutch_get_filtered_left(void);
+uint16_t clutch_get_filtered_right(void);
+uint16_t clutch_get_dutycycle_left(void);
+uint16_t clutch_get_dutycycle_right(void);
+void clutch_set_dutycycle(void);
 
-void set_current_gear(uint8_t gear);
-uint8_t get_current_gear(void);
-void set_current_revs(uint16_t);
-
-void gear_up(void);
-void gear_down(void);
-
-void gear_neutral_single(void);
-void gear_neutral_repeat_linear(void);
-void gear_neutral_repeat_bisect(void);
-
-//void launch_control(void);
-//void launch_stop_clutch(void);
-
-#endif // _GEAR_CLUTCH_LAUNCH_H_
+#endif // _CLUTCH_H_

@@ -82,14 +82,8 @@ volatile uint16_t susp_l_atomic = 0;
 //! An atomically written and safe copy of suspension sensor for use in interrupt.
 volatile uint16_t susp_r_atomic = 0;
 
-//! flag for updating clutch
-volatile uint16_t clutch_flag = FALSE;
-//! atomic clutch readings
-volatile uint16_t clutch_left_atomic = 0;
-//! atomic clutch readings
-volatile uint16_t clutch_right_atomic = 0;
-//! voltage reading of gear pot, received from DTA
-volatile uint16_t ana3 = 0;
+//! backup atomic clutch readings
+volatile uint16_t atomic_clutch_pos = 0;
 
 //! The MOb configured for RX of gear, clutch and launch control instructions.
 volatile uint8_t gcl_MOb;
@@ -98,10 +92,9 @@ volatile uint8_t brk_MOb;
 //! The MOb configured for RX of current gear.
 volatile uint8_t dta_MOb;
 
-
-//const uint32_t failsafe_front_can_id = 0x9001;
-//const uint32_t front_can_count_id = 0x9004;
-//uint8_t failsafe_front_can_error = 1;
+const uint32_t failsafe_front_can_id = 0x9001;
+const uint32_t front_can_count_id = 0x9004;
+uint8_t failsafe_front_can_error = 1;
 
 const uint32_t failsafe_mid_can_id = 0x9002;
 const uint32_t mid_can_count_id = 0x9005;
@@ -113,6 +106,9 @@ uint8_t failsafe_dta_can_error = 1;
 
 const uint32_t gear_id = 0x9010;
 uint8_t print_gear = 11;
+
+//const uint32_t ana3_id = 0x9011;
+volatile uint16_t ana3 = 0;
 
 //! Main function.
 /*!
@@ -158,6 +154,7 @@ int main(void) {
 
 	//! <li> LOOP <ul>
 	while (1) {
+
 		//! <li> Always do: <ol>
 		if (gear_up_flag) { //! <li> if gear_up_flag is set. <ol>
 			gear_up(); //! <li> change up a gear.
@@ -177,16 +174,9 @@ int main(void) {
 			gear_neutral_repeat_flag = FALSE; //! <li> clear neutral flag.
 		} //! </ol>
 		//! </ol>
-		if (clutch_flag) { //! <li> if neutral flag is set. <ol>
-			clutch_filter_left(clutch_left_atomic);
-			clutch_filter_right(clutch_right_atomic);
-			clutch_dutycycle_left();
-			clutch_dutycycle_right();
-			ATOMIC_BLOCK(ATOMIC_FORCEON) {
-				clutch_set_dutycycle();
-			}
-			clutch_flag = FALSE;
-		} //! </ol>
+
+
+		/* Uncomment get sensor values
 
 		susp_l = adc_get(SUSPENSION_L); //! <li> update left suspension value.
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
@@ -197,6 +187,8 @@ int main(void) {
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			susp_r_atomic = susp_r; //! <li> atomic copy of right suspension value.
 		} // end ATOMIC_BLOCK
+
+		*/
 		
 		//! <li> If front in failsafe, do: <ul>
 		if (failsafe_front) {
@@ -211,8 +203,7 @@ int main(void) {
 			//! <li> Clutch control <ol>
 			uint16_t clutch = adc_get(BAK_IN_CLUTCH); //! <li> update clutch position value.
 			ATOMIC_BLOCK(ATOMIC_FORCEON) {
-				clutch_left_atomic = 0;
-				clutch_right_atomic = clutch;
+				atomic_clutch_pos = clutch;
 			}
 			//! </ol>
 		} //! </ul>
@@ -311,7 +302,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		failsafe_front = TRUE;
 		can_free_rx(brk_MOb);
 
-		//can_setup_tx(failsafe_front_can_id, (uint8_t *) &failsafe_front_can_error, 1);
+		can_setup_tx(failsafe_front_can_id, (uint8_t *) &failsafe_front_can_error, 1);
 	}
 
 	if (!failsafe_front && failsafe_front_counter == 20){
@@ -319,8 +310,8 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_STEER_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
 
 		// Skickar ut på CANen att can från front har startats om. Värdet bode vara = 20.
-		//failsafe_front_can_error= failsafe_front_counter;
-		//can_setup_tx(front_can_count_id, (uint8_t *) &failsafe_front_can_error, 1);
+		failsafe_front_can_error= failsafe_front_counter;
+		can_setup_tx(front_can_count_id, (uint8_t *) &failsafe_front_can_error, 1);
 
 	}
 
@@ -330,48 +321,51 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		pc_int_on(BAK_IN_GEAR_UP); // gear up backup
 		pc_int_on(BAK_IN_GEAR_DOWN); // gear down backup
 		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
-
+		
 		failsafe_mid_can_error = failsafe_mid_counter;
 		can_setup_tx(failsafe_mid_can_id, (uint8_t *) &failsafe_mid_can_error, 1);
-
 	}
 
 	if (!failsafe_mid && failsafe_mid_counter == 20) {
 		can_free_rx(gcl_MOb);
 		gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
-	
+
 		// Skickar ut på CANen att can från mid har startats om. Värdet bode vara = 20.
 		failsafe_mid_can_error = failsafe_mid_counter;
 		can_setup_tx(mid_can_count_id, (uint8_t *) &failsafe_mid_can_error, 1);
-
 	}
 
+
 	if (failsafe_mid) {
-		clutch_flag = TRUE;
+		clutch_filter_left(atomic_clutch_pos);
+		clutch_filter_right(atomic_clutch_pos);
+		clutch_dutycycle_left();
+		clutch_dutycycle_right();
+		clutch_set_dutycycle();
 	}
 
 	if (dta_first_received && !failsafe_dta && ++failsafe_dta_counter == 100) {
 		failsafe_dta = TRUE;
 		can_free_rx(dta_MOb);
-		set_current_gear(POT_FAIL);
+		set_current_gear(11);
 		set_current_revs(13000);
 
 		can_setup_tx(failsafe_dta_can_id, (uint8_t *) &failsafe_dta_can_error, 1);
-
 	}
 
-	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 30) {
+	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 20) {
 		can_free_rx(dta_MOb);
 		dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
-
+		
 		// Skickar ut på CANen att can från dta har startats om. Värdet bode vara = 20.
 		failsafe_dta_can_error = failsafe_dta_counter;
 		can_setup_tx(dta_can_count_id, (uint8_t *) &failsafe_dta_can_error, 1);
-	
 	}
 
-	//print_gear = get_current_gear();
-	//can_setup_tx(gear_id, (uint8_t *) &print_gear, 1);
+
+
+	print_gear = get_current_gear();
+	can_setup_tx(gear_id, (uint8_t *) &print_gear, 1);
 
 	//can_setup_tx(ana3_id, (uint8_t *) &ana3, 2);
 
@@ -389,14 +383,11 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		uint32_t holder = ((uint32_t) susp_l_atomic << 16) | susp_r_atomic; // build data
 		can_setup_tx(CAN_REAR_LOG_SUSPENSION_ID, (uint8_t *) &holder, CAN_REAR_LOG_DLC); // send
 	}
-	/*
+
 	uint32_t filter = ((uint32_t) clutch_get_filtered_right() << 16) | clutch_get_filtered_left();
 	can_setup_tx(CAN_REAR_LOG_FILTER_ID, (uint8_t *) &filter, CAN_REAR_LOG_DLC);
 	uint32_t dutycycle = ((uint32_t) clutch_get_dutycycle_right() << 16) | clutch_get_dutycycle_left();
 	can_setup_tx(CAN_REAR_LOG_DUTYCYCLE_ID, (uint8_t *) &dutycycle, CAN_REAR_LOG_DLC);
-	*/
-	uint8_t hold = get_current_gear();
-	can_setup_tx(0x9876, (uint8_t *) &hold, 1);
 }
 
 //see gear_clutch.c
@@ -412,6 +403,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
  */
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	//! <ul>
+
 	if (mob == gcl_MOb) { //! <li> \ref gc_MOb receives a message <ul>
 		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
 		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
@@ -425,9 +417,13 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 				gear_neutral_repeat_flag = TRUE;
 			}
 		} else if (id == CAN_CLUTCH_ID) { //! <li> if message ID is CAN_CLUTCH_ID <ul>
-			clutch_left_atomic = ((uint16_t) data[3] << 8) | data[2];
-			clutch_right_atomic = ((uint16_t) data[1] << 8) | data[0];
-			clutch_flag = TRUE;
+			uint16_t clutch_left = ((uint16_t) data[3] << 8) | data[2];
+			uint16_t clutch_right = ((uint16_t) data[1] << 8) | data[0];
+			clutch_filter_left(clutch_left);
+			clutch_filter_right(clutch_right);
+			clutch_dutycycle_left();
+			clutch_dutycycle_right();
+			clutch_set_dutycycle();
 		} else if (id == CAN_LAUNCH_ID) { //! <li> if message ID is CAN_LAUNCH_ID <ul>
 			//launch_control(); //! engage launch control.
 		} //! </ul>
@@ -440,32 +436,35 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	else if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
 		dta_first_received = TRUE;
 		failsafe_dta_counter = 0; //! <li> reset \ref failsafe_front_counter
+
 		if (id == 0x2000) {
-			set_current_revs(((uint16_t) data[6] << 8) | data[7]);
+			set_current_revs(((uint16_t) data[7] << 8) | data[6]);
+		}
+		if (id == 0x2003) {
+			set_current_gear(data[7]);
 		}
 		if (id == 0x2004) {
-		
 			ana3 = ((uint16_t) data[2] << 8) | data[3];
-			if (ana3 > 349 && ana3 <= 639){
-				set_current_gear(1); // 449
-			} else if (ana3 > 639 && ana3 <= 1092){
-				set_current_gear(0); // 930
-			} else if (ana3 > 1092 && ana3 <= 1735){
-				set_current_gear(2); // 1254
-			} else if (ana3 > 1735 && ana3 <= 2704){
-				set_current_gear(3); // 2216
-			} else if (ana3 > 2704 && ana3 <= 3671){
-				set_current_gear(4); // 3193
-			} else if (ana3 > 3671 && ana3 < 4250){
-				set_current_gear(5); // 4150
-			}
-			else {
-				set_current_gear(POT_FAIL);
-			}
-			
 
+			if (ana3 > 4900 || ana3 < 100){
+				set_current_gear(1);
+			} else if (ana3 > 200 && ana3 < 600){
+				set_current_gear(0);
+			} else if (ana3 > 720 && ana3 < 920){
+				set_current_gear(2);
+			} else if (ana3 > 1613 && ana3 < 1813){
+				set_current_gear(3);
+			} else if (ana3 > 2585 && ana3 < 2785){
+				set_current_gear(4);
+			} else if (ana3 > 3552 && ana3 < 3752){
+				set_current_gear(5);
+			} 
+			else {
+				set_current_gear(11);
+			}
 		}
 	} //! </ul>
+
 //! </ul>
 }
 
