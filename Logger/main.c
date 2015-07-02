@@ -20,15 +20,9 @@
 
 #include <avr/pgmspace.h>
 
-#include "SPI_routines.h"
-#include "SD_routines.h"
-#include "FAT32.h"
+#include "ff.h"
 
 int main(void) {
-	unsigned char option, error, data, FAT32_active;
-	unsigned int i;
-	unsigned char fileName[13];
-	
 	io_init();
 	adc_init();
 	ancomp_init();
@@ -39,30 +33,6 @@ int main(void) {
 	
 	interrupts_on();
 	can_enable();
-	
-	//**********************
-	// Init
-	//**********************
-	
-	cardType = 0; //idioti
-	
-	for (i=0; i<10; i++) {
-		error = SD_init();
-		if (!error) {
-			break;
-		}
-	}
-
-	error = getBootSectorData (); //read boot sector and keep necessary data in global variables
-	if(error) {
-		//FAT32 incompatible drive
-		while (1) {
-			;
-		}
-	}
-	
-	SPI_high_speed();
-	_delay_ms(1);   	//some delay for settling new spi speed
 	
 	while (1) {
 		

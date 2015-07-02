@@ -718,6 +718,7 @@ FRESULT sync_fs (	/* FR_OK: successful, FR_DISK_ERR: failed */
 {
 	FRESULT res;
 
+
 	res = sync_window(fs);
 	if (res == FR_OK) {
 		/* Update FSINFO sector if needed */
