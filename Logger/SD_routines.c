@@ -1,245 +1,226 @@
-//**************************************************************
-// ****** FUNCTIONS FOR SD RAW DATA TRANSFER *******
-//**************************************************************
-//Controller: ATmega32 (Clock: 8 Mhz-internal)
-//Compiler	: AVR-GCC (winAVR with AVRStudio)
-//Project V.: Version - 2.4.1
-//Author	: CC Dharmani, Chennai (India)
-//			  www.dharmanitech.com
-//Date		: 24 Apr 2011
-//**************************************************************
-
-//Link to the Post: http://www.dharmanitech.com/2009/01/sd-card-interfacing-with-atmega8-fat32.html
-
-#include <avr/io.h>
-#include <avr/stdint.h>
-#include <avr/pgmspace.h>
+#include "../header_and_config/LUR7.h"
 #include "SPI_routines.h"
 #include "SD_routines.h"
 
-volatile unsigned long startBlock, totalBlocks; 
-volatile unsigned char SDHC_flag, cardType, buffer[512];
+static volatile uint8_t CardType = 0;
+static uint16_t wait_ready(void);
 
-//******************************************************************
-//Function	: to initialize the SD/SDHC card in SPI mode
-//Arguments	: none
-//return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
-//******************************************************************
 uint8_t SD_init(void) {
-	uint8_t i, response, SD_version;
-	uint16_t retry=0 ;
-
-	for (i=0;i<10;i++) {
-		SPI_transmit(0xff);   //80 clock pulses spent before sending the first command
-	}
+	uint8_t cmd = 0;
+	uint8_t ty = 0;
+	uint8_t ocr[4];
+	
+	SPI_init();
 	SPI_select();
-	do {
-		response = SD_sendCommand(GO_IDLE_STATE, 0); //send 'reset & go idle' command
-		retry++;
-		if(retry>0x20) {
-			return 1;   //time out, card not detected
+	
+	for (uint8_t n = 10; n; n--) {
+		SPI_receive();	/* 80 dummy clocks */
+	}
+	
+	if (SD_sendCommand(CMD0, 0) == 1) {			/* Enter Idle state */
+		if (SD_sendCommand(CMD8, 0x1AA) == 1) {	/* SDv2? */
+			for (uint8_t n = 0; n < 4; n++) {
+				ocr[n] = SPI_receive();		/* Get trailing return value of R7 resp */
+			}
+			if (ocr[2] == 0x01 && ocr[3] == 0xAA) {				/* The card can work at vdd range of 2.7-3.6V */
+				for (uint16_t i = 0; i < 1000; i++) {
+					if (SD_sendCommand(ACMD41, 1UL << 30) == 0) {
+						break;
+					}
+				} /* Wait for leaving idle state (ACMD41 with HCS bit) */
+				
+				if (SD_sendCommand(CMD58, 0) == 0) {		/* Check CCS bit in the OCR */
+					for (uint8_t n = 0; n < 4; n++) {
+						ocr[n] = SPI_receive();
+					}
+					ty = (ocr[0] & 0x40) ? CT_SD2 | CT_BLOCK : CT_SD2;	/* SDv2 */
+				}
+			}
+		} else {							/* SDv1 or MMCv3 */
+			if (SD_sendCommand(ACMD41, 0) <= 1) 	{
+				ty = CT_SD1;
+				cmd = ACMD41;	/* SDv1 */
+			} else {
+				ty = CT_MMC;
+				cmd = CMD1;	/* MMCv3 */
+			}
+			for (uint16_t i = 0; i < 1000; i++) {
+				if (SD_sendCommand(cmd, 0) != 0) {	/* Wait for leaving idle state */
+					break;
+				}
+			}
+			if (SD_sendCommand(CMD16, 512) != 0) {	/* Set R/W block length to 512 */
+				ty = 0;
+			}
 		}
-	} while (response != 0x01);
-
+	}
+	
+	CardType = ty;
 	SPI_deselect();
-	SPI_transmit (0xff);
-	SPI_transmit (0xff);
-
-	retry = 0;
-
-	SD_version = 2; //default set to SD compliance with ver2.x; 
-				//this may change after checking the next command
-	do {
-		response = SD_sendCommand(SEND_IF_COND,0x000001AA); //Check power supply status, mendatory for SDHC card
-		retry++;
-		if(retry>0xfe) {
-			SD_version = 1;
-			cardType = 1;
-			break;
-		} //time out
-	} while (response != 0x01);
-
-	retry = 0;
-
-	do {
-		response = SD_sendCommand(APP_CMD,0); //CMD55, must be sent before sending any ACMD command
-		response = SD_sendCommand(SD_SEND_OP_COND,0x40000000); //ACMD41
-
-		retry++;
-		if (retry>0xfe) {
-			return 2;  //time out, card initialization failed
-		}
-
-	} while (response != 0x00);
-
-	retry = 0;
-	SDHC_flag = 0;
-
-	if (SD_version == 2) {
-		do {
-			response = SD_sendCommand(READ_OCR,0);
-			retry++;
-			if(retry>0xfe) {
-				cardType = 0;
-				break;
-			} //time out
-		} while (response != 0x00);
-		if (SDHC_flag == 1) {
-			cardType = 2;
-		} else {
-			cardType = 3;
-		}
+	
+	if (ty) {			/* Initialization succeded */
+		SPI_high_speed();
+		return 0;
 	}
-	//SD_sendCommand(CRC_ON_OFF, OFF); //disable CRC; deafault - CRC disabled in SPI mode
-	//SD_sendCommand(SET_BLOCK_LEN, 512); //set block size to 512; default size is 512
-	return 0; //successful return
+	return 1;
 }
 
-//******************************************************************
-//Function	: to send a command to SD card
-//Arguments	: unsigned char (8-bit command value)
-// 			  & unsigned long (32-bit command argument)
-//return	: unsigned char; response uint8_t
-//******************************************************************
-uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg) {
-	uint8_t response, retry=0, status;
-
-//SD card accepts uint8_t address while SDHC accepts block address in multiples of 512
-//so, if it's SD card we need to convert block address into corresponding uint8_t address by 
-//multipying it with 512. which is equivalent to shifting it left 9 times
-//following 'if' loop does that
-
-	if(SDHC_flag == 0) {
-		if(cmd == READ_SINGLE_BLOCK     ||
-				cmd == READ_MULTIPLE_BLOCKS  ||
-				cmd == WRITE_SINGLE_BLOCK    ||
-				cmd == WRITE_MULTIPLE_BLOCKS ||
-				cmd == ERASE_BLOCK_START_ADDR||
-				cmd == ERASE_BLOCK_END_ADDR ) {
-			arg = arg << 9;
-		}
-	}
-
-	SPI_select();
-
-	SPI_transmit(cmd | 0x40); //send command, first two bits always '01'
-	SPI_transmit(arg>>24);
-	SPI_transmit(arg>>16);
-	SPI_transmit(arg>>8);
-	SPI_transmit(arg);
-
-	if(cmd == SEND_IF_COND) { //it is compulsory to send correct CRC for CMD8 (CRC=0x87) & CMD0 (CRC=0x95)
-		SPI_transmit(0x87);    //for remaining commands, CRC is ignored in SPI mode
-	} else {
-		SPI_transmit(0x95);
-	}
-
-	while ((response = SPI_receive()) == 0xff) { //wait response
-		if(retry++ > 0xfe) {
-			break; //time out error
-		}
-	}
-
-	if (response == 0x00 && cmd == 58) { //checking response of CMD58
-		status = SPI_receive() & 0x40;     //first uint8_t of the OCR register (bit 31:24)
-		if (status == 0x40) {
-			SDHC_flag = 1;  //we need it to verify SDHC card
-		} else {
-			SDHC_flag = 0;
-		}
-		SPI_receive(); //remaining 3 uint8_ts of the OCR register are ignored here
-		SPI_receive(); //one can use these uint8_ts to check power supply limits of SD
-		SPI_receive(); 
-	}
-
-	SPI_receive(); //extra 8 CLK
-	SPI_deselect();
-
-	return response; //return state
-}
-
-//*****************************************************************
-//Function	: to erase specified no. of blocks of SD card
-//Arguments	: none
-//return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
-//*****************************************************************
-uint8_t SD_erase (uint32_t startBlock, uint32_t totalBlocks) {
-	uint8_t response;
-
-	response = SD_sendCommand(ERASE_BLOCK_START_ADDR, startBlock); //send starting block address
-	if (response != 0x00) { //check for SD status: 0x00 - OK (No flags set)
-		return response;
-	}
-	response = SD_sendCommand(ERASE_BLOCK_END_ADDR,(startBlock + totalBlocks - 1)); //send end block address
-	if (response != 0x00) {
-		return response;
-	}
-	response = SD_sendCommand(ERASE_SELECTED_BLOCKS, 0); //erase all selected blocks
-	if (response != 0x00) {
-		return response;
-	}
-	return 0; //normal return
-}
-
-//******************************************************************
-//Function	: to read a single block from SD card
-//Arguments	: none
-//return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
-//******************************************************************
-uint8_t SD_readSingleBlock(uint32_t startBlock) {
-	uint8_t response;
-	uint16_t i, retry=0;
-
-	response = SD_sendCommand(READ_SINGLE_BLOCK, startBlock); //read a Block command
-	if (response != 0x00) {
-		return response; //check for SD status: 0x00 - OK (No flags set)
-	}
-
-	SPI_select();
-
-	retry = 0;
-	while (SPI_receive() != 0xfe) { //wait for start block token 0xfe (0x11111110)
-		if (retry++ > 0xfffe) {
-			SPI_deselect();
-			return 1;
-		} //return if time-out
-	}
-
-	for (i=0; i<512; i++) { //read 512 uint8_ts
-		buffer[i] = SPI_receive();
-	}
-
-	SPI_receive(); //receive incoming CRC (16-bit), CRC is ignored here
+/*-----------------------------------------------------------------------*
+ * Wait for card ready                                                   *
+ *-----------------------------------------------------------------------*/
+static uint16_t wait_ready(void) { /* 1:OK, 0:Timeout */
+	/* Wait for ready in timeout of 500ms */
 	SPI_receive();
-	SPI_receive(); //extra 8 clock pulses
-	SPI_deselect();
+	for (uint8_t i = 0; i < 50; i++) {
+		if (SPI_receive() == 0xFF) {
+			return 1;
+		}
+		_delay_ms(10);
+	}
 	return 0;
 }
 
-//******************************************************************
-//Function	: to write to a single block of SD card
-//Arguments	: none
-//return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response uint8_t will be sent
-//******************************************************************
-uint8_t SD_writeSingleBlock(uint32_t startBlock) {
-	uint8_t response;
-	uint16_t i, retry=0;
+/*-----------------------------------------------------------------------*
+ * Deselect the card and release SPI bus                                 *
+ *-----------------------------------------------------------------------*/
+void SD_deselect(void) {
+	SPI_deselect();
+	SPI_receive();
+}
 
-	response = SD_sendCommand(WRITE_SINGLE_BLOCK, startBlock); //write a Block command
-  
+/*-----------------------------------------------------------------------*
+ * Select the card and wait for ready                                    *
+ *-----------------------------------------------------------------------*/
+uint16_t SD_select(void) {	/* 1:Successful, 0:Timeout */
+	SPI_select();
+	if (!wait_ready()) {
+		SD_deselect();
+		return 0;
+	}
+	return 1;
+}
+
+uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg) {
+	uint8_t res = 0;
+	
+	if (cmd & 0x80) {	/* ACMD<n> is the command sequense of CMD55-CMD<n> */
+		cmd &= 0x7F;
+		res = SD_sendCommand(CMD55, 0);
+		if (res > 1) {
+			return res;
+		}
+	}
+	
+	/* Select the card and wait for ready */
+	SD_deselect();
+	if (!SD_select()) {
+		return 0xFF;
+	}
+	
+	/* Send command packet */
+	SPI_transmit(0x40 | cmd);				/* Start + Command index */
+	SPI_transmit((uint8_t) (arg >> 24));	/* Argument[31..24] */
+	SPI_transmit((uint8_t) (arg >> 16));	/* Argument[23..16] */
+	SPI_transmit((uint8_t) (arg >> 8));		/* Argument[15..8] */
+	SPI_transmit((uint8_t) arg);			/* Argument[7..0] */
+	uint8_t n = 0x01;								/* Dummy CRC + Stop */
+	
+	if (cmd == CMD0) {
+		n = 0x95;			/* Valid CRC for CMD0(0) */
+	}
+	if (cmd == CMD8) {
+		n = 0x87;			/* Valid CRC for CMD8(0x1AA) */
+	}
+	SPI_transmit(n);
+	
+	/* Receive command response */
+	if (cmd == CMD12) {
+		SPI_receive();		/* Skip a stuff byte when stop reading */
+	}
+	
+	n = 10;					/* Wait for a valid response in timeout of 10 attempts */
+	
+	do {
+		res = SPI_receive();
+	} while ((res & 0x80) && --n);
+	
+	return res;				/* Return with the response value */
+}
+
+static uint8_t SD_receive (uint8_t *buff, uint16_t btr) {
+	uint8_t token;
+	
+	/* Wait for data packet in timeout of 200ms */
+	for (uint8_t i = 0; i < 20; i++) {
+		token = SPI_receive();
+		if (token != 0xFF) {
+			break;
+		}
+		_delay_ms(10);
+	}
+	if(token != 0xFE) {
+		return 0;		/* If not valid data token, retutn with error */
+	}
+	
+	do {				/* Receive the data block into buffer */
+		buff[0] = SPI_receive();
+		buff[1] = SPI_receive();
+		buff[2] = SPI_receive();
+		buff[3] = SPI_receive();
+		buff += 4;
+	} while (btr -= 4);
+	
+	SPI_receive();		/* Discard CRC */
+	SPI_receive();
+	
+	return 1;			/* Return with success */
+}
+
+uint8_t SD_readSingleBlock(uint8_t *buff, uint32_t sector) {
+	if (!(CardType & CT_BLOCK)) {
+		sector *= 512;	/* Convert to byte address if needed */
+	}
+	if (SD_sendCommand(CMD17, sector) == 0) {
+		if (SD_receive(buff, 512)) {
+			return 1;
+		}
+	}
+	SD_deselect();
+	return 0;
+}
+
+uint16_t SD_readMultipleBlock (uint8_t *buff, uint32_t sector, uint16_t count) {
+	if (!(CardType & CT_BLOCK)){
+		sector *= 512;	/* Convert to byte address if needed */
+	}
+	
+	if (SD_sendCommand(CMD18, sector) == 0) {	/* READ_MULTIPLE_BLOCK */
+		do {
+			if (!SD_receive(buff, 512)) {
+				break;
+			}
+			buff += 512;
+		} while (--count);
+		SD_sendCommand(CMD12, 0);				/* STOP_TRANSMISSION */
+	}
+	SD_deselect();
+	return count;
+}
+
+uint8_t SD_writeSingleBlock(uint8_t *buff, uint32_t sector) {
+	uint8_t response = 0;
+	uint16_t retry = 0;
+
+	response = SD_sendCommand(CMD24, sector); //write a Block command
+
 	if (response != 0x00) {
 		return response; //check for SD status: 0x00 - OK (No flags set)
 	}
 
-	SPI_select();
 	SPI_transmit(0xfe);     //Send start block token 0xfe (0x11111110)
 
-	for (i=0; i<512; i++) {    //send 512 uint8_ts data
-		SPI_transmit(buffer[i]);
+	for (uint16_t i = 0; i < 512; i++) {    //send 512 bytes data
+		SPI_transmit(buff[i]);
 	}
 
 	SPI_transmit(0xff);     //transmit dummy CRC (16-bit), CRC is ignored here
@@ -247,159 +228,180 @@ uint8_t SD_writeSingleBlock(uint32_t startBlock) {
 	response = SPI_receive();
 
 	if ((response & 0x1f) != 0x05) { //response= 0xXXX0AAA1 ; AAA='010' - data accepted
-		SPI_deselect();              //AAA='101'-data rejected due to CRC error
+		SD_deselect();               //AAA='101'-data rejected due to CRC error
 		return response;             //AAA='110'-data rejected due to write error
 	}
 
 	while (!SPI_receive()) { //wait for SD card to complete writing and get idle
 		if (retry++ > 0xfffe) {
-			SPI_deselect();
+			SD_deselect();
 			return 1;
 		}
 	}
 
-	SPI_deselect();
+	SD_deselect();
 	SPI_transmit(0xff);   //just spend 8 clock cycle delay before reasserting the CS line
-	SPI_select();         //re-asserting the CS line to verify if card is still busy
+	SD_select();         //re-asserting the CS line to verify if card is still busy
 
 	while (!SPI_receive()) { //wait for SD card to complete writing and get idle
 		if (retry++ > 0xfffe) {
-			SPI_deselect();
+			SD_deselect();
 			return 1;
 		}
 	}
-	SPI_deselect();
+	SD_deselect();
 	return 0;
 }
 
-//***************************************************************************
-//Function	: to read multiple blocks from SD card & send every block to UART
-//Arguments	: none
-//return	: unsigned char; will be 0 if no error,
-// 			  otherwise the response byte will be sent
-//****************************************************************************
-uint8_t SD_readMultipleBlock (uint8_t startBlock, uint32_t totalBlocks) {
+uint8_t SD_writeMultipleBlock(uint8_t *buff, uint32_t sector, uint16_t count) {
 	uint8_t response;
 	uint16_t retry = 0;
 	
-	response = SD_sendCommand(READ_MULTIPLE_BLOCKS, startBlock); //write a Block command
+	response = SD_sendCommand(CMD25, sector); //write a Block command
 	
 	if (response != 0x00) {
 		return response; //check for SD status: 0x00 - OK (No flags set)
 	}
 	
-	SPI_select();
-	
-	while ( totalBlocks ) {
-		retry = 0;
-		while (SPI_receive() != 0xfe) { //wait for start block token 0xfe (0x11111110)
-			if (retry++ > 0xfffe) {
-				SPI_deselect();
-				return 1;
-			} //return if time-out
-		}
-		for (uint16_t i = 0; i<512; i++) { //read 512 bytes
-			buffer[i] = SPI_receive();
-		}
-		
-		SPI_receive(); //receive incoming CRC (16-bit), CRC is ignored here
-		SPI_receive();
-		SPI_receive(); //extra 8 cycles
-	}
-	SD_sendCommand(STOP_TRANSMISSION, 0); //command to stop transmission
-	SPI_deselect();
-	SPI_receive(); //extra 8 clock pulses
-	return 0;
-}
-
-//***************************************************************************
-//Function: to receive data from UART and write to multiple blocks of SD card
-//Arguments: none
-//return: unsigned char; will be 0 if no error,
-// otherwise the response byte will be sent
-//****************************************************************************
-uint8_t SD_writeMultipleBlock(uint32_t startBlock, uint32_t totalBlocks) {
-	uint8_t response;
-	uint8_t data;
-	uint16_t i;
-	uint16_t retry = 0;
-	uint32_t blockCounter = 0;
-	uint32_t size;
-	
-	response = SD_sendCommand(WRITE_MULTIPLE_BLOCKS, startBlock); //write a Block command
-	
-	if (response != 0x00) {
-		return response; //check for SD status: 0x00 - OK (No flags set)
-	}
-	
-	SPI_select();
-	
-	while( blockCounter < totalBlocks ) {
-		i=0;
-		do {
-			data = receiveByte();
-			if(data == 0x08)	//'Back Space' key pressed
-			{
-				if(i != 0)
-				{
-					transmitByte(data);
-					transmitByte(' '); 
-					transmitByte(data); 
-					i--; 
-					size--;
-				}
-				continue;
-			}
-			transmitByte(data);
-			buffer[i++] = data;
-			if(data == 0x0d)
-			{
-				transmitByte(0x0a);
-				buffer[i++] = 0x0a;
-			}
-			if(i == 512) break;
-		}while (data != '~');
-		
-		TX_NEWLINE;
-		transmitString_F(PSTR(" ---- "));
-		TX_NEWLINE;
-		
+	while( count-- ) {
 		SPI_transmit(0xfc); //Send start block token 0xfc (0x11111100)
 		
-		for(i=0; i<512; i++) //send 512 bytes data
-			SPI_transmit( buffer[i] );
+		for(uint16_t i = 0; i < 512; i++) { //send 512 bytes data
+			SPI_transmit(buff[i]);
+		}
 		
 		SPI_transmit(0xff); //transmit dummy CRC (16-bit), CRC is ignored here
 		SPI_transmit(0xff);
 		
 		response = SPI_receive();
-		if( (response & 0x1f) != 0x05) //response= 0xXXX0AAA1 ; AAA='010' - data accepted
-		{                              //AAA='101'-data rejected due to CRC error
-			SD_CS_DEASSERT;             //AAA='110'-data rejected due to write error
-			return response;
+		if( (response & 0x1f) != 0x05) { //response= 0xXXX0AAA1 ; AAA='010' - data accepted
+			SD_deselect();               //AAA='101'-data rejected due to CRC error
+			return response;             //AAA='110'-data rejected due to write error
 		}
 		
-		while(!SPI_receive()) //wait for SD card to complete writing and get idle
-			if(retry++ > 0xfffe){SD_CS_DEASSERT; return 1;}
-			
-			SPI_receive(); //extra 8 bits
-			blockCounter++;
+		while (!SPI_receive()) { //wait for SD card to complete writing and get idle
+			if (retry++ > 0xfffe) {
+				SD_deselect();
+				return 1;
+			}
+		}
+		
+		SPI_receive(); //extra 8 bits
 	}
 	
 	SPI_transmit(0xfd); //send 'stop transmission token'
 	
 	retry = 0;
 	
-	while(!SPI_receive()) //wait for SD card to complete writing and get idle
-		if(retry++ > 0xfffe){SD_CS_DEASSERT; return 1;}
-		
-		SD_CS_DEASSERT;
+	while (!SPI_receive()) { //wait for SD card to complete writing and get idle
+		if (retry++ > 0xfffe) {
+			SD_deselect();
+			return 1;
+		}
+	}
+	
+	SD_deselect();
 	SPI_transmit(0xff); //just spend 8 clock cycle delay before reasserting the CS signal
-	SD_CS_ASSERT; //re assertion of the CS signal is required to verify if card is still busy
+	SD_select(); //re assertion of the CS signal is required to verify if card is still busy
 	
-	while(!SPI_receive()) //wait for SD card to complete writing and get idle
-		if(retry++ > 0xfffe){SD_CS_DEASSERT; return 1;}
-		SD_CS_DEASSERT;
+	retry = 0;
 	
+	while(!SPI_receive()) { //wait for SD card to complete writing and get idle
+		if(retry++ > 0xfffe) {
+			SD_deselect();
+			return 1;
+		}
+	}
+	SD_deselect();
+	
+	return 0;
+}
+
+uint8_t SD_sync() {
+	if (SD_select()) {
+		SD_deselect();
+		return 1;
+	}
+	SD_deselect();
+	return 0;
+}
+
+uint8_t SD_get_sector_count(void * buff) {
+	uint8_t csd[16];
+	if ((SD_sendCommand(CMD9, 0) == 0) && SD_receive(csd, 16)) {
+		if ((csd[0] >> 6) == 1) {	/* SDC ver 2.00 */
+			uint32_t csize = csd[9] + ((uint16_t)csd[8] << 8) + 1;
+			*(uint32_t*)buff = (uint32_t)csize << 10;
+		} else {					/* SDC ver 1.XX or MMC*/
+			uint8_t n = (csd[5] & 15) + ((csd[10] & 128) >> 7) + ((csd[9] & 3) << 1) + 2;
+			uint32_t csize = (csd[8] >> 6) + ((uint16_t)csd[7] << 2) + ((uint16_t)(csd[6] & 3) << 10) + 1;
+			*(uint32_t*)buff = (uint32_t)csize << (n - 9);
+		}
+		return 1;
+	}
+	return 0;
+}
+
+uint8_t SD_get_block_size(void * buff) {
+	uint8_t csd[16];
+	if (CardType & CT_SD2) {	/* SDv2? */
+		if (SD_sendCommand(ACMD13, 0) == 0) {	/* Read SD status */
+			SPI_receive();
+			if (SD_receive(csd, 16)) {				/* Read partial block */
+				for (uint8_t n = 64 - 16; n; n--) {
+					SPI_receive();	/* Purge trailing data */
+				}
+				*(uint32_t*)buff = 16UL << (csd[10] >> 4);
+				return 1;
+			}
+		}
+	} else {					/* SDv1 or MMCv3 */
+		if ((SD_sendCommand(CMD9, 0) == 0) && SD_receive(csd, 16)) {	/* Read CSD */
+			if (CardType & CT_SD1) {	/* SDv1 */
+				*(uint32_t*)buff = (((csd[10] & 63) << 1) + ((uint16_t)(csd[11] & 128) >> 7) + 1) << ((csd[13] >> 6) - 1);
+			} else {					/* MMCv3 */
+				*(uint32_t*)buff = ((uint16_t)((csd[10] & 124) >> 2) + 1) * (((csd[11] & 3) << 3) + ((csd[11] & 224) >> 5) + 1);
+			}
+			return 1;
+		}
+	}
+	return 0;
+}
+
+uint8_t SD_get_cardType() {
+	return CardType;
+}
+
+uint8_t SD_read_csd(uint8_t * ptr) {
+	if (SD_sendCommand(CMD9, 0) == 0 && SD_receive(ptr, 16)) {
+		return 1;
+	}
+	return 0;
+}
+
+uint8_t SD_read_cid(uint8_t * ptr) {
+	if (SD_sendCommand(CMD10, 0) == 0 && SD_receive(ptr, 16)) {
+		return 1;
+	}
+	return 0;
+}
+
+uint8_t SD_read_ocr(uint8_t * ptr) {
+	if (SD_sendCommand(CMD58, 0) == 0) {	/* READ_OCR */
+		for (uint8_t n = 4; n; n--) {
+			*ptr++ = SPI_receive();
+		}
+		return 1;
+	}
+	return 0;
+}
+
+uint8_t SD_get_status(uint8_t * ptr) {
+	if (SD_sendCommand(ACMD13, 0) == 0) {	/* SD_STATUS */
+		SPI_receive();
+		if (SD_receive(ptr, 64)) {
+			return 1;
+		}
+	}
 	return 0;
 }

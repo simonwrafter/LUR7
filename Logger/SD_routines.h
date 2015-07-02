@@ -14,34 +14,52 @@
 #ifndef _SD_ROUTINES_H_
 #define _SD_ROUTINES_H_
 
+/* Definitions for MMC/SDC command */
+#define CMD0	(0)			/* GO_IDLE_STATE */
+#define CMD1	(1)			/* SEND_OP_COND (MMC) */
+#define ACMD41	(0x80+41)	/* SEND_OP_COND (SDC) */
+#define CMD8	(8)			/* SEND_IF_COND */
+#define CMD9	(9)			/* SEND_CSD */
+#define CMD10	(10)		/* SEND_CID */
+#define CMD12	(12)		/* STOP_TRANSMISSION */
+#define ACMD13	(0x80+13)	/* SD_STATUS (SDC) */
+#define CMD16	(16)		/* SET_BLOCKLEN */
+#define CMD17	(17)		/* READ_SINGLE_BLOCK */
+#define CMD18	(18)		/* READ_MULTIPLE_BLOCK */
+#define CMD23	(23)		/* SET_BLOCK_COUNT (MMC) */
+#define ACMD23	(0x80+23)	/* SET_WR_BLK_ERASE_COUNT (SDC) */
+#define CMD24	(24)		/* WRITE_BLOCK */
+#define CMD25	(25)		/* WRITE_MULTIPLE_BLOCK */
+#define CMD55	(55)		/* APP_CMD */
+#define CMD58	(58)		/* READ_OCR */
 
-//SD commands, many of these are not used here
-#define GO_IDLE_STATE            0
-#define SEND_OP_COND             1
-#define SEND_IF_COND			 8
-#define SEND_CSD                 9
-#define STOP_TRANSMISSION        12
-#define SEND_STATUS              13
-#define SET_BLOCK_LEN            16
-#define READ_SINGLE_BLOCK        17
-#define READ_MULTIPLE_BLOCKS     18
-#define WRITE_SINGLE_BLOCK       24
-#define WRITE_MULTIPLE_BLOCKS    25
-#define ERASE_BLOCK_START_ADDR   32
-#define ERASE_BLOCK_END_ADDR     33
-#define ERASE_SELECTED_BLOCKS    38
-#define SD_SEND_OP_COND			 41   //ACMD
-#define APP_CMD					 55
-#define READ_OCR				 58
-#define CRC_ON_OFF               59
-
-#define ON     1
-#define OFF    0
+/* Card type flags (CardType) */
+#define CT_MMC		0x01		/* MMC ver 3 */
+#define CT_SD1		0x02		/* SD ver 1 */
+#define CT_SD2		0x04		/* SD ver 2 */
+#define CT_SDC		(CT_SD1|CT_SD2)	/* SD */
+#define CT_BLOCK	0x08		/* Block addressing */
 
 uint8_t SD_init(void);
+
+void SD_deselect(void);
+uint16_t SD_select(void);
+
 uint8_t SD_sendCommand(uint8_t cmd, uint32_t arg);
-uint8_t SD_readSingleBlock(uint32_t startBlock);
-uint8_t SD_writeSingleBlock(uint32_t startBlock);
-uint8_t SD_erase (uint32_t startBlock, uint32_t totalBlocks);
+
+uint8_t SD_readSingleBlock(uint8_t *buff, uint32_t sector);
+uint16_t SD_readMultipleBlock (uint8_t *buff, uint32_t sector, uint16_t count);
+
+uint8_t SD_writeSingleBlock(uint8_t *buff, uint32_t sector);
+uint8_t SD_writeMultipleBlock(uint8_t *buff, uint32_t sector, uint16_t count);
+
+uint8_t SD_sync(void);
+uint8_t SD_get_sector_count(void * buff);
+uint8_t SD_get_block_size(void * buff);
+uint8_t SD_get_cardType(void);
+uint8_t SD_read_csd(uint8_t * ptr);
+uint8_t SD_read_cid(uint8_t * ptr);
+uint8_t SD_read_ocr(uint8_t * ptr);
+uint8_t SD_get_status(uint8_t * ptr);
 
 #endif

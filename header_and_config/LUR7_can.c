@@ -57,6 +57,7 @@
  */
 
 #include "LUR7.h"
+#include <avr/cpufunc.h> //included for _NOP()
 #include "LUR7_can.h"
 
 /*******************************************************************************
@@ -388,6 +389,7 @@ void _can_handle_RXOK() {
 	CAN_ISR_RXOK(mob, id, dlc, data);
 
 	CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
+	_NOP();
 	CANCDMOB |= (1 << CONMOB1); // re-enable reception
 }
 

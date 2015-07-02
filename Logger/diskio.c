@@ -7,45 +7,28 @@
 /* storage control modules to the FatFs module with a defined API.       */
 /*-----------------------------------------------------------------------*/
 
-#include <avr/stdint.h>
+#include <stdint.h>
 #include "diskio.h"		/* FatFs lower layer API */
-#include "sdcard.h"		/* Example: Header file of existing MMC/SDC contorl module */
+#include "SD_routines.h"
 
 /* Definitions of physical drive number for each drive */
 #define SD		0
 
-static volatile uint8_t disc_status = STA_NOINIT
+static volatile uint8_t disc_status = STA_NOINIT;
 
-/*-----------------------------------------------------------------------*/
-/* Get Drive Status                                                      */
-/*-----------------------------------------------------------------------*/
-
-uint8_t disk_status (uint8_t drv) {
-	if (drv) {
+uint8_t disk_status (uint8_t pdrv) {
+	if (pdrv) {
 		return STA_NOINIT;
 	}
 	return disc_status;
 }
 
-
-
-/*-----------------------------------------------------------------------*/
-/* Inidialize a Drive                                                    */
-/*-----------------------------------------------------------------------*/
-
 uint8_t disk_initialize (uint8_t pdrv) {
-	if (pdrv == SD) {
-		disc_status = SD_init();
-		return disc_status;
+	if (pdrv) {
+		return STA_NOINIT;
 	}
-	return STA_NOINIT;
+	return SD_init();
 }
-
-
-
-/*-----------------------------------------------------------------------*/
-/* Read Sector(s)                                                        */
-/*-----------------------------------------------------------------------*/
 
 DRESULT disk_read (
 	uint8_t pdrv,		/* Physical drive nmuber to identify the drive */
@@ -53,31 +36,23 @@ DRESULT disk_read (
 	uint32_t sector,	/* Sector address in LBA */
 	uint16_t count		/* Number of sectors to read */
 ) {
-	DRESULT res;
-	int result;
-
-	if (pdrv == SD) {
-		
+	uint8_t res = 0;
+	
+	if (pdrv || !count) {
+		return RES_PARERR;
+	}
+	if (disc_status & STA_NOINIT) {
+		return RES_NOTRDY;
 	}
 	
-	case SD :
-		// translate the arguments here
-
-		result = MMC_disk_read(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-
-	return RES_PARERR;
+	if (count == 1) {	/* Single block read */
+		res = SD_readSingleBlock(buff, sector);
+	} else {			/* Multiple block read */
+		res = SD_readMultipleBlock(buff, sector, count);
+	}
+	
+	return res ? RES_ERROR : RES_OK;
 }
-
-
-
-/*-----------------------------------------------------------------------*/
-/* Write Sector(s)                                                       */
-/*-----------------------------------------------------------------------*/
 
 #if _USE_WRITE
 DRESULT disk_write (
@@ -85,56 +60,117 @@ DRESULT disk_write (
 	const uint8_t *buff,	/* Data to be written */
 	uint32_t sector,		/* Sector address in LBA */
 	uint16_t count			/* Number of sectors to write */
-)
-{
-	DRESULT res;
-	int result;
-
-	switch (pdrv) {
-	case ATA :
-		// translate the arguments here
-
-		result = ATA_disk_write(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case MMC :
-		// translate the arguments here
-
-		result = MMC_disk_write(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case USB :
-		// translate the arguments here
-
-		result = USB_disk_write(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
+) {
+	uint8_t res = 0;
+	uint8_t * buffer = (uint8_t *) buff;
+	
+	if (pdrv || !count) {
+		return RES_PARERR;
 	}
-
-	return RES_PARERR;
+	if (disc_status & STA_NOINIT) {
+		return RES_NOTRDY;
+	}
+	
+	if (count == 1) {	/* Single block read */
+		res = SD_writeSingleBlock(buffer, sector);
+	} else {			/* Multiple block read */
+		res = SD_writeMultipleBlock(buffer, sector, count);
+	}
+	
+	return res ? RES_ERROR : RES_OK;
 }
 #endif
-
-
-/*-----------------------------------------------------------------------*/
-/* Miscellaneous Functions                                               */
-/*-----------------------------------------------------------------------*/
 
 #if _USE_IOCTL
 DRESULT disk_ioctl (
 	uint8_t pdrv,		/* Physical drive nmuber (0..) */
 	uint8_t cmd,		/* Control code */
 	void *buff		/* Buffer to send/receive control data */
-)
-{
-	return 0;
+) {
+	DRESULT res = RES_ERROR;
+	uint8_t *ptr = buff;
+	
+	if (pdrv) {
+		return RES_ERROR;
+	}
+	
+	if (cmd == CTRL_POWER) {
+		switch (ptr[0]) {
+			case 0:		/* Sub control code (POWER_OFF) */
+				res = RES_OK;
+				break;
+			case 1:		/* Sub control code (POWER_GET) */
+				ptr[1] = 1;
+				res = RES_OK;
+				break;
+			default :
+				res = RES_PARERR;
+		}
+	} else {
+		if (disc_status & STA_NOINIT) {
+			return RES_NOTRDY;
+		}
+		
+		switch (cmd) {
+			case CTRL_SYNC :		/* Make sure that no pending write process. */
+				if (SD_sync()) {
+					res = RES_OK;
+				}
+				break;
+				
+			case GET_SECTOR_COUNT : /* Get number of sectors on the disk (DWORD) */
+				if (SD_get_sector_count(buff)) {
+					res = RES_OK;
+				}
+				break;
+				
+			case GET_SECTOR_SIZE :	/* Get R/W sector size (uint16_t) */
+				*(uint16_t*)buff = 512;
+				res = RES_OK;
+				break;
+				
+			case GET_BLOCK_SIZE :	/* Get erase block size in unit of sector (DWORD) */
+				if (SD_get_block_size(buff)) {
+					res = RES_OK;
+				}
+				break;
+				
+			case MMC_GET_TYPE :		/* Get card type flags (1 byte) */
+				*ptr = SD_get_cardType();
+				res = RES_OK;
+				break;
+				
+			case MMC_GET_CSD :		/* Receive CSD as a data block (16 bytes) */
+				if (SD_read_csd(ptr)) {
+					res = RES_OK;
+				}
+				break;
+				
+			case MMC_GET_CID :		/* Receive CID as a data block (16 bytes) */
+				if (SD_read_cid(ptr)) {
+					res = RES_OK;
+				}
+				break;
+				
+			case MMC_GET_OCR :		/* Receive OCR as an R3 resp (4 bytes) */
+				if (SD_read_ocr(ptr)) {
+					res = RES_OK;
+				}
+				break;
+				
+			case MMC_GET_SDSTAT :	/* Receive SD status as a data block (64 bytes) */
+				if (SD_get_status(ptr)) {	/* SD_STATUS */
+					res = RES_OK;
+				}
+				break;
+				
+			default:
+				res = RES_PARERR;
+		}
+		
+		SD_deselect();
+	}
+	
+	return res;
 }
 #endif

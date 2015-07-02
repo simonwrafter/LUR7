@@ -1,5 +1,4 @@
-#include <avr/io.h>
-#include <avr/stdint.h>
+#include "../header_and_config/LUR7.h"
 #include "SPI_routines.h"
 
 //SPI initialize for SD card
@@ -14,7 +13,7 @@ void SPI_init(void) {
 	SPSR = (1 << SPI2X);
 }
 
-void SPI_send_uint8_t(uint8_t data) {
+void SPI_transmit(uint8_t data) {
 	SPDR = data;
 	while (!(SPSR & (1<<SPIF))) {
 		;
@@ -39,9 +38,10 @@ void SPI_high_speed(void) {
 
 void SPI_select(void) {
 	PORTC |= (1 << PORTC1);
-	set_output(OU1);
+	set_output(OUT1, ON);
 }
 
 void SPI_deselect(void) {
 	PORTC &= ~(1 << PORTC1);
+	set_output(OUT1, OFF);
 }
