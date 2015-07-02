@@ -139,16 +139,6 @@ int main(void) {
 	return 0; //! </ul>
 }
 
-/*void ugly_reset(void) {
-	set_output(OUT8, GND);
-	ext_int_off(IO_GEAR_UP);
-	ext_int_off(IO_GEAR_DOWN);
-	_delay_ms(1);
-	set_output(OUT8, TRI);
-	ext_int_on(IO_GEAR_UP, 1, 1);
-	ext_int_on(IO_GEAR_DOWN, 1, 1);
-}*/
-
 // Interrupts
 //! Timer Interrupt, 100 Hz
 /*!
@@ -179,10 +169,14 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-	if (dta_can_counter++ == 20) {
-		dta_can_counter = 0;
+	if (dta_can_counter++ > 20) {
 		can_free_rx(CAN_DTA_MOb);
-		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); //! <li> Reception of DTA packages, ID 0x2000-6.
+		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
+		
+		if (CAN_DTA_MOb  != 0xff) {
+			dta_can_counter = 0;
+		}
+		
 		update_RPM(0);
 		update_watertemp(0);
 		update_speed(0);

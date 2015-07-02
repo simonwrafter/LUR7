@@ -50,7 +50,7 @@ static const float REV_MAX = 11000;
 //! Minimum number of LEDs for rev bar
 static const float REV_BAR_MIN = 1;
 //! Maximum number of LEDs for rev bar
-static const float REV_BAR_MAX = 21;
+static const float REV_BAR_MAX = 22;
 
 //! Array of bit patterns for numbers on seven segment display.
 static const uint8_t sev_seg[12] = {
@@ -233,9 +233,8 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 
 void update_display(uint8_t mode) {
 	shift_byte(bin_to_7seg(gear, OFF));
-	//shift_bar(0, 56);
-	shift_bar(0, 24);
 	
+	shift_bar(0, 24);
 	//if (mode) {
 	//	bcd_convert(speed);
 	//} else {
@@ -245,7 +244,8 @@ void update_display(uint8_t mode) {
 	//shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	//shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	
-	shift_bar(revs_to_bar(), REV_BAR_MAX);
+	uint8_t r_led = revs_to_bar();
+	shift_bar(r_led, r_led < 7 ? REV_BAR_MAX : REV_BAR_MAX-1);
 	
 	shift_bar(0, 10);
 	

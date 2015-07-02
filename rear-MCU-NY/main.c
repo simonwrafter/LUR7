@@ -297,7 +297,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		can_free_rx(brk_MOb);
 	}
 
-	if (!failsafe_front && failsafe_front_counter == 20){
+	if (!failsafe_front && failsafe_front_counter > 20){
 		can_free_rx(brk_MOb);
 		brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_STEER_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
 	}
@@ -310,7 +310,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
 	}
 
-	if (!failsafe_mid && failsafe_mid_counter == 20) {
+	if (!failsafe_mid && failsafe_mid_counter > 20) {
 		can_free_rx(gcl_MOb);
 		gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	}
@@ -326,7 +326,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		set_current_revs(13000);
 	}
 
-	if (dta_first_received && !failsafe_dta && failsafe_dta_counter == 20) {
+	if (dta_first_received && !failsafe_dta && failsafe_dta_counter > 20) {
 		can_free_rx(dta_MOb);
 		dta_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 	}

@@ -34,7 +34,7 @@ static const float CLUTCH_DC_LOOSE        = 6000; // slapp vajer. min: 2200
 //! PWM value for open clutch
 static const float CLUTCH_DC_TIGHT        = 13500; // dragen vajer. max: 13500 (?)
 
-static const float clutch_pos_break_factor   = 0.8; // AJUST IF NEEDED!
+static const float clutch_pos_break_factor   = 0.8; // ADJUST IF NEEDED!
 volatile static float clutch_pos_left_break  = 625;
 volatile static float clutch_pos_right_break = 387;
 
