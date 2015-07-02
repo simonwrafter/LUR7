@@ -169,12 +169,8 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
-<<<<<<< HEAD:mid-MCU-NY/main.c
-	if (dta_can_counter++ == 40) {
-		//dta_can_counter = 0;
-=======
+
 	if (dta_can_counter++ > 20) {
->>>>>>> ed71597be99a954c4e0e12fac8e7fbec5cea1cd3:MCU-mid/main.c
 		can_free_rx(CAN_DTA_MOb);
 		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 		
@@ -189,7 +185,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		update_gear(7);
 	} 
 
-	if (dta_can_counter > 40) {
+	if (dta_can_counter > 20) {
 		update_gear(7);
 	}
 	uint32_t c_data = ((uint32_t) clutch_pos_left_atomic << 16) | clutch_pos_right_atomic;
