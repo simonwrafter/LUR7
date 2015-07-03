@@ -18,8 +18,6 @@
 
 #include "../header_and_config/LUR7.h"
 
-#include <avr/pgmspace.h>
-
 #include "ff.h"
 
 int main(void) {

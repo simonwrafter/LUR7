@@ -8,30 +8,27 @@ Created on Tue Apr 14 15:14:43 2015
 from  scipy import *
 from  pylab import *
 
-clutch_start = 490
-clutch_end = 350
+clutch_start = 432
+clutch_end   = 373
 
-CLUTCH_POS_CLOSED = 360.
-clutch_pos_break_closed = 400.
-clutch_pos_break_open = 470.
-CLUTCH_POS_OPEN = 485.
+CLUTCH_POS_LOOSE = 427.
+clutch_pos_break = 387.
+CLUTCH_POS_TIGHT = 378.
 
-CLUTCH_DC_CLOSED = 3000.
-clutch_dc_break_closed = 7000.
-clutch_dc_break_open = 9000.
-CLUTCH_DC_OPEN = 13000.
+CLUTCH_DC_LOOSE = 6000.
+clutch_dc_break = 9500.
+CLUTCH_DC_TIGHT = 13500.
 CLUTCH_DC_MAX = 20000.
 
-clutch_factor_closed  = ((clutch_dc_break_closed - CLUTCH_DC_CLOSED))       / (clutch_pos_break_closed - CLUTCH_POS_CLOSED);
-clutch_factor_mid     = ((clutch_dc_break_open   - clutch_dc_break_closed)) / (clutch_pos_break_open   - clutch_pos_break_closed)
-clutch_factor_open    = ((CLUTCH_DC_OPEN         - clutch_dc_break_open))   / (CLUTCH_POS_OPEN         - clutch_pos_break_open)
+clutch_factor_loose  = ((clutch_dc_break - CLUTCH_DC_LOOSE)) / (clutch_pos_break - CLUTCH_POS_LOOSE)
+clutch_factor_tight  = ((CLUTCH_DC_TIGHT - clutch_dc_break)) / (CLUTCH_POS_TIGHT - clutch_pos_break)
 
-servo_max = 130
+servo_max = 100
 servo_min = 0
 servo_speed = 0.6
 
 time_min = 0
-time_max = 200
+time_max = 500
 time_break = 1
 time = linspace(time_min, time_max, time_max - time_min + 1)
 
@@ -40,7 +37,7 @@ in_clutch = ones(time_max - time_min + 1)
 in_clutch[0:time_break - time_min] = clutch_end
 in_clutch[time_break - time_min:time_max - time_min + 1] = clutch_start
 """
-in_clutch = (CLUTCH_POS_OPEN-CLUTCH_POS_CLOSED)/7*(sin(10*time/(pi))) + (CLUTCH_POS_CLOSED + CLUTCH_POS_OPEN)/2
+in_clutch = (clutch_start-clutch_end)/2*(sin(1*time/(10*pi))) + (clutch_end + clutch_start)/2
 #in_clutch[100: 110] = 490
 
 
@@ -56,30 +53,28 @@ for i in range(time_min, time_max):
 figure(1)
 clf()
 grid(1)
-axis([time_min, time_max, CLUTCH_POS_CLOSED, CLUTCH_POS_OPEN])
+axis([time_min, time_max, clutch_end, clutch_start])
 plot(time, in_clutch, 'k', time, filtered, 'b')
 
 dutycycle = []
 
 for i in range(time_min, time_max+1):
-    if filtered[i-time_min] > CLUTCH_POS_OPEN:
-        dutycycle.append(CLUTCH_DC_OPEN/CLUTCH_DC_MAX)
-    elif filtered[i-time_min] > clutch_pos_break_open:
-        dutycycle.append(((filtered[i-time_min] - clutch_pos_break_open)   * clutch_factor_open   + clutch_dc_break_open) / CLUTCH_DC_MAX)
-    elif filtered[i-time_min] > clutch_pos_break_closed:
-        dutycycle.append(((filtered[i-time_min] - clutch_pos_break_closed) * clutch_factor_mid    + clutch_dc_break_closed) / CLUTCH_DC_MAX)
-    elif filtered[i-time_min] > CLUTCH_POS_CLOSED:
-        dutycycle.append(((filtered[i-time_min] - CLUTCH_POS_CLOSED)       * clutch_factor_closed + CLUTCH_DC_CLOSED) / CLUTCH_DC_MAX)
+    if filtered[i-time_min] > CLUTCH_POS_LOOSE:
+        dutycycle.append(CLUTCH_DC_LOOSE / CLUTCH_DC_MAX)
+    elif filtered[i-time_min] > clutch_pos_break:
+        dutycycle.append(((filtered[i-time_min] - CLUTCH_POS_LOOSE)       * clutch_factor_loose + CLUTCH_DC_LOOSE) / CLUTCH_DC_MAX)
+    elif filtered[i-time_min] > CLUTCH_POS_TIGHT:
+        dutycycle.append(((filtered[i-time_min] - clutch_pos_break)   * clutch_factor_tight   + clutch_dc_break) / CLUTCH_DC_MAX)
     else:
-        dutycycle.append(CLUTCH_DC_CLOSED / CLUTCH_DC_MAX)
+        dutycycle.append(CLUTCH_DC_TIGHT/CLUTCH_DC_MAX)
 
-"""
+
 figure(2)
 clf()
 grid(1)
 
 plot(time, dutycycle)
-"""
+
 
 angle = list()
 for i in range(time_min, time_max+1):
@@ -88,10 +83,17 @@ for i in range(time_min, time_max+1):
     else:
         angle.append(min(angle[i-1-time_min] + servo_speed, servo_max))
 
-given_angle = (array(dutycycle) - CLUTCH_DC_CLOSED / CLUTCH_DC_MAX) / ((CLUTCH_DC_OPEN - CLUTCH_DC_CLOSED)/CLUTCH_DC_MAX) * servo_max
+given_angle = (array(dutycycle) - CLUTCH_DC_LOOSE / CLUTCH_DC_MAX) / ((CLUTCH_DC_TIGHT - CLUTCH_DC_LOOSE)/CLUTCH_DC_MAX) * servo_max
 
 figure(3)
 clf()
 grid(1)
 axis([time_min, time_max, servo_min, servo_max])
 plot(time, angle, 'k', time, given_angle, 'b')
+
+figure(4)
+clf()
+grid(1)
+#axis([])
+plot([0, abs(CLUTCH_POS_LOOSE - clutch_pos_break) / abs(CLUTCH_POS_LOOSE - CLUTCH_POS_TIGHT), 1],
+     [0, abs(clutch_dc_break - CLUTCH_DC_LOOSE) / abs(CLUTCH_DC_TIGHT - CLUTCH_DC_LOOSE), 1])
