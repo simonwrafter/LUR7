@@ -366,10 +366,8 @@ void gear_neutral_repeat_linear() {
 		if (current_gear == 1 || current_gear == 2) {
 			busy = TRUE;
 			neutral_repeat_worker_linear();
-			can_setup_tx(0x6000, (uint8_t *) "LIN0", 4);
 		} else if (current_gear == 11) {
 			gear_neutral_single();
-			can_setup_tx(0x6030, (uint8_t *) "SNG0", 4);
 		}
 	}
 }
@@ -377,17 +375,13 @@ void gear_neutral_repeat_linear() {
 static void neutral_repeat_worker_linear(void) {
 	if (current_gear == 11) {
 		gear_neutral_single();
-		can_setup_tx(0x6031, (uint8_t *) "SNG1", 4);
 		return;
 	}
 
 	if (neutral_counter++ == NEUTRAL_REPEAT_LIMIT) {
 		busy = FALSE;
-		can_setup_tx(0x60ff, (uint8_t *) "STOP", 4);
 		return;
 	}
-
-	can_setup_tx(0x6011, (uint8_t *) "REPT", 4);
 
 	if (current_gear == 1) {
 		//if (last_gear == 0) first attempt
@@ -409,13 +403,6 @@ static void neutral_repeat_worker_linear(void) {
 		timer0_start(neutral_2_to_N);
 	} else {
 		busy = FALSE;
-		uint32_t time_info = 0x0000;
-		if (last_gear == 1) {
-			time_info = (uint32_t) neutral_1_to_N << 16;
-		} else if (last_gear == 2) {
-			time_info = neutral_2_to_N;
-		}
-		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
 	}
 	last_gear = current_gear;
@@ -427,7 +414,6 @@ static void neutral_repeat_stabiliser_linear(void) {
 	set_output(GEAR_DOWN, TRI); // reset output
 	end_fun_ptr = neutral_repeat_worker_linear;
 	timer0_start(NEUTRAL_STABILISATION_DELAY);
-	can_setup_tx(0x6099, (uint8_t *) "LBTS", 4);
 }
 
 //***** BISECT
@@ -484,13 +470,6 @@ static void neutral_repeat_worker_bisect(void) {
 		
 	} else {
 		busy = FALSE; //assume in neutral. (or in third, but that really shouldn't happen.)
-		uint32_t time_info = 0x0000;
-		if (last_gear == 1) {
-			time_info = (uint32_t) neutral_1_to_N << 16;
-		} else if (last_gear == 2) {
-			time_info = neutral_2_to_N;
-		}
-		can_setup_tx(CAN_REAR_LOG_NEUTRAL_ID, (uint8_t *) &time_info, CAN_REAR_LOG_DLC); // send time of successful neutral find
 		return;
 	}
 	last_gear = current_gear;
