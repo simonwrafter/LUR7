@@ -106,7 +106,7 @@ int main(void) {
 
 		uint16_t gear_pot = adc_get(IN8);
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
-			gear_pot_atomic = gear_pot_atomic;
+			gear_pot_atomic = gear_pot;
 		} // end ATOMIC_BLOCK
 
 		//! <li> Brake control <ol>
