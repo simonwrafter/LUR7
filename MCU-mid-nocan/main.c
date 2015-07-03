@@ -163,7 +163,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
 	if (rear_can_counter++ > 20) {
 		can_free_rx(gear_MOb);
-		CAN_DTA_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
+		gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
 		
 		if (gear_MOb  != 0xff) {
 			rear_can_counter = 0;
