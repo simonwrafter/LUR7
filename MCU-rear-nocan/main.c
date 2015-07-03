@@ -66,7 +66,7 @@ int main(void) {
 	io_init();
 	adc_init();
 	ancomp_init();
-	//can_init();
+	can_init();
 	timer0_init();
 	timer1_init(ON);
 
@@ -79,6 +79,7 @@ int main(void) {
 	pc_int_on(BAK_IN_NEUTRAL); // gear neutral backup
 	
 	interrupts_on();
+	can_enable();
 
 	while (1) {
 		if (gear_up_flag) {
@@ -155,6 +156,8 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		set_current_gear(POT_FAIL);
 	}
 	
+	uint8_t holder = get_current_gear();
+	can_setup_tx(0x12345, (uint8_t *) &holder, 1);
 	
 }
 
