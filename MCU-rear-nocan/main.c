@@ -128,11 +128,30 @@ int main(void) {
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
-void pcISR_in3(void) {}
+
+void pcISR_in3(void) {
+	if (!get_input(BAK_IN_GEAR_UP)) {
+		gear_up_flag = TRUE;
+	}
+}
+
 void pcISR_in4(void) {}
-void pcISR_in5(void) {}
+
+void pcISR_in5(void) {
+	if (!get_input(BAK_IN_GEAR_DOWN)) {
+		gear_down_flag = TRUE;
+	}
+}
+
 void pcISR_in6(void) {}
-void pcISR_in7(void) {}
+
+//! Pin Change Interrupt handler for IN7.
+/*! Neutral Gear backup, enabled if mid-MCU is in failsafe mode. */
+void pcISR_in7(void) {
+	if (!get_input(BAK_IN_NEUTRAL)) {
+		gear_neutral_single_flag = TRUE;
+	}
+}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
