@@ -98,6 +98,10 @@ volatile uint8_t brk_MOb;
 //! The MOb configured for RX of current gear.
 volatile uint8_t dta_MOb;
 
+//uint16_t failsafe_front_ID = 0x9001;
+//uint16_t failsafe_front_restart_ID = 0x9004;
+//uint16_t brake_signal_ID = 0x9013;
+
 
 //! Main function.
 /*!
@@ -295,11 +299,13 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (!failsafe_front && ++failsafe_front_counter == 100) {
 		failsafe_front = TRUE;
 		can_free_rx(brk_MOb);
+		//can_setup_tx(failsafe_front_ID, (uint8_t *) &failsafe_front_counter, 1);
 	}
 
 	if (!failsafe_front && failsafe_front_counter > 20){
 		can_free_rx(brk_MOb);
 		brk_MOb = can_setup_rx(CAN_FRONT_LOG_STEER_BRAKE_ID, CAN_FRONT_LOG_STEER_BRAKE_MASK, CAN_FRONT_LOG_DLC); //! <li> Reception of brake light instructions.
+	    //can_setup_tx(failsafe_front_restart_ID, (uint8_t *) &failsafe_front_counter, 1);
 	}
 
 	if (!failsafe_mid && ++failsafe_mid_counter == 100) {
@@ -389,8 +395,9 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 	} //! </ul>
 	else if (mob == brk_MOb) { //! <li> \ref brk_MOb receives a message <ul>
 		failsafe_front_counter = 0; //! <li> reset \ref failsafe_front_counter
-		uint16_t brake_p = ((uint16_t) data[3] << 8) | data[2]; //! <li> reconstruct brake pressure
+		uint16_t brake_p = ((uint16_t) data[1] << 8) | data[0]; //! <li> reconstruct brake pressure
 		brake_light(brake_p); //! <li> control brake light
+		//can_setup_tx(brake_signal_ID, (uint16_t *) &brake_p, 1);
 	} //! </ul>
 	else if (mob == dta_MOb) { //! <li> \ref dta_MOb receives a message <ul>
 		dta_first_received = TRUE;

@@ -62,6 +62,10 @@ volatile uint16_t clutch_right_atomic = 0;
 //! voltage reading of gear pot, received from DTA
 volatile uint16_t gear_pot_atomic = 0;
 
+volatile uint16_t brake = 0;
+
+uint8_t hundred_hz_counter = 0;
+
 int main(void) {
 	io_init();
 	adc_init();
@@ -105,14 +109,17 @@ int main(void) {
 			clutch_flag = FALSE;
 		}
 
-		uint16_t gear_pot = adc_get(IN8);
+		uint16_t gear_pot = adc_get(ADC_IN8);
 		ATOMIC_BLOCK(ATOMIC_FORCEON) {
 			gear_pot_atomic = gear_pot;
 		} // end ATOMIC_BLOCK
 
 		//! <li> Brake control <ol>
-		uint16_t brake = adc_get(BAK_IN_BRAKE); //! <li> update the brake pressure value.
-		brake_light(brake); //! <li> set brake light on/off.
+		brake = adc_get(BAK_IN_BRAKE); //! <li> update the brake pressure value.
+
+		//Struntar i att skicka ut brake_light. DEn gav störningar till servot!
+		//brake_light(brake); //! <li> set brake light on/off.
+
 		//! </ol>
 
 		//! <li> Clutch control <ol>
@@ -155,29 +162,59 @@ void pcISR_in7(void) {
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
+
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	clutch_flag = TRUE;
 	
-	if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){
-		set_current_gear(1); // 449
-	} else if (gear_pot_atomic > 131 && gear_pot_atomic <= 223){
-		set_current_gear(0); // 930
-	} else if (gear_pot_atomic > 223 && gear_pot_atomic <= 355){
-		set_current_gear(2); // 1254
-	} else if (gear_pot_atomic > 355 && gear_pot_atomic <= 553){
-		set_current_gear(3); // 2216
-	} else if (gear_pot_atomic > 553 && gear_pot_atomic <= 752){
-		set_current_gear(4); // 3193
-	} else if (gear_pot_atomic > 752 && gear_pot_atomic < 870){
-		set_current_gear(5); // 4150
+
+	hundred_hz_counter++;
+	//Tror att det blir sämre med högre freq. 10 hz borde räcka gott och väl!
+	if(hundred_hz_counter == 10){
+
+		if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){
+			set_current_gear(1); // 449
+		} else if (gear_pot_atomic > 131 && gear_pot_atomic <= 223){
+			set_current_gear(0); // 930
+		} else if (gear_pot_atomic > 223 && gear_pot_atomic <= 355){
+			set_current_gear(2); // 1254
+		} else if (gear_pot_atomic > 355 && gear_pot_atomic <= 553){
+			set_current_gear(3); // 2216
+		} else if (gear_pot_atomic > 553 && gear_pot_atomic <= 752){
+			set_current_gear(4); // 3193
+		} else if (gear_pot_atomic > 752 && gear_pot_atomic < 870){
+			set_current_gear(5); // 4150
+		}
+		else {
+			set_current_gear(POT_FAIL);
+		}
+
+		uint8_t holder = get_current_gear();
+		can_setup_tx(0x12345, (uint8_t *) &holder, 1);
+		hundred_hz_counter = 0;
 	}
-	else {
-		set_current_gear(POT_FAIL);
+
+	/*
+	hundred_hz_counter++;
+	if(hundred_hz_counter == 1){
+
 	}
-	
-	uint8_t holder = get_current_gear();
-	can_setup_tx(0x12345, (uint8_t *) &holder, 1);
-	
+
+
+	if(hundred_hz_counter == 2){
+
+		can_setup_tx(0x9015, (uint8_t *) &gear_pot_atomic, 2);
+	}
+
+	if(hundred_hz_counter == 3){
+
+		can_setup_tx(0x9016, (uint8_t *) &brake, 2);
+	}
+
+	if(hundred_hz_counter == 4){
+
+		can_setup_tx(0x9017, (uint8_t *) &clutch_right_atomic, 2);
+		hundred_hz_counter = 0;
+	}*/
 }
 
 //see gear_clutch.c

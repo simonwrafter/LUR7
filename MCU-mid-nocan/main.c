@@ -148,28 +148,36 @@ int main(void) {
  *
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
+
+
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
-	if (dta_can_counter++ > 20) {
-		can_free_rx(CAN_DTA_MOb);
-		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
-		
-		if (CAN_DTA_MOb  != 0xff) {
-			dta_can_counter = 0;
+
+
+	if(hundred_hz_counter == 10){
+		if (dta_can_counter++ > 5) {
+			can_free_rx(CAN_DTA_MOb);
+			CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
+			
+			if (CAN_DTA_MOb  != 0xff) {
+				dta_can_counter = 0;
+			}
+			update_RPM(0);
 		}
 		
-		update_RPM(0);
-	}
-	
-	if (rear_can_counter++ > 20) {
-		can_free_rx(gear_MOb);
-		gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
-		
-		if (gear_MOb  != 0xff) {
-			rear_can_counter = 0;
+
+		if (rear_can_counter++ > 5) {
+			can_free_rx(gear_MOb);
+			gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
+			
+			if (gear_MOb  != 0xff) {
+				rear_can_counter = 0;
+			}
+			update_gear(7);
 		}
-		
-		update_gear(10);
+
+
+		hundred_hz_counter = 0;
 	}
 	
 }
@@ -193,7 +201,6 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		if (id == 0x2000) { //! <li> ID = 0x2000. <ul>
 			update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
 			//update_watertemp((data[2] << 8) | data[3]); //! <li> extract water temperature [C].
-			new_info = TRUE; //! <li> set flag to update panel
 		}
 	} //! </ul>
 	

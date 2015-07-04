@@ -73,17 +73,17 @@ static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 150;//150; //20 ms
 static const uint16_t SHIFT_CUT_DELAY_FAIL = 150;//150; //20 ms
 
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
+static const uint16_t GEAR_UP_DELAY_2_TO_5 = 850; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 400; //40 ms
+static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 900; //40 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 800; //80 ms
+static const uint16_t GEAR_UP_DELAY_1_TO_2 = 950; //80 ms
 //! Time to run the solenoid for gear down from second.
 static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 900; //90 ms
 //! Time to run the solenoid for gear up from neutral.
-static const uint16_t GEAR_UP_DELAY_N_TO_2 = 700; //70 ms
+static const uint16_t GEAR_UP_DELAY_N_TO_2 = 850; //70 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 770; //77 ms
+static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 900; //77 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -103,9 +103,9 @@ static const uint8_t NEUTRAL_REPEAT_LIMIT = 10;
 //! Last gear selected before neutral attempt.
 static volatile uint8_t last_gear = 0;
 //! Last delay time used for finding neutral from first.
-static volatile uint16_t neutral_1_to_N = 300; // 25 ms
+static volatile uint16_t neutral_1_to_N = 240; // 24 ms
 //! Last delay time used for finding neutral from second.
-static volatile uint16_t neutral_2_to_N = 250; // 30 ms
+static volatile uint16_t neutral_2_to_N = 250; // 25 ms
 //! Number of tries for neutral
 static volatile uint8_t neutral_counter = 0;
 
