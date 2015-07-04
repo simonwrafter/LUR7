@@ -101,6 +101,10 @@ int main(void) {
 			gear_neutral_single();
 			gear_neutral_single_flag = FALSE;
 		}
+		if (gear_neutral_repeat_flag) {
+			gear_neutral_repeat_linear();
+			gear_neutral_repeat_flag = FALSE;
+		}
 		if (clutch_flag) {
 			clutch_filter_left(clutch_left_atomic);
 			clutch_filter_right(clutch_right_atomic);
