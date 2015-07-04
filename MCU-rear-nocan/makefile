@@ -7,7 +7,8 @@ FORMAT = ihex
 TARGET = main
 SRC = $(TARGET).c ../header_and_config/LUR7_io.c ../header_and_config/LUR7_adc.c ../header_and_config/LUR7_ancomp.c ../header_and_config/LUR7_can.c ../header_and_config/LUR7_interrupt.c ../header_and_config/LUR7_power.c ../header_and_config/LUR7_timer0.c ../header_and_config/LUR7_timer1.c gear_launch.c brake.c clutch.c
 ASRC =
-OPT = s
+OPT =
+#OPT = s
 
 # Name of this Makefile (used for "make depend").
 MAKEFILE = Makefile
@@ -74,7 +75,8 @@ MATH_LIB = -lm
 EXTMEMOPTS =
 
 #LDMAP = $(LDFLAGS) -Wl,-Map=$(TARGET).map,--cref
-LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
+LDFLAGS =
+#LDFLAGS = $(EXTMEMOPTS) $(LDMAP) $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 
 
 # Programming support using avrdude. Settings and variables.
