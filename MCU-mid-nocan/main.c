@@ -184,7 +184,11 @@ void timer0_isr_stop(void) {}
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
-void pcISR_in3(void) {}
+void pcISR_in3(void) {
+	if (!get_input(IN3)) {
+		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	}
+}
 void pcISR_in4(void) {}
 void pcISR_in5(void) {}
 void pcISR_in6(void) {}

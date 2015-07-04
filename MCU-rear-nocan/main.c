@@ -64,7 +64,8 @@ volatile uint16_t gear_pot_atomic = 0;
 
 volatile uint16_t brake = 0;
 
-uint8_t hundred_hz_counter = 0;
+volatile uint8_t failsafe_mid_counter = 0;
+volatile uint8_t gcl_MOb = 0;
 
 int main(void) {
 	io_init();
@@ -76,6 +77,8 @@ int main(void) {
 
 	power_off_default();
 
+	gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC); //! <li> Reception of gear and clutch
+	
 	clutch_init();
 	
 	pc_int_on(BAK_IN_GEAR_UP); // gear up backup
@@ -118,7 +121,7 @@ int main(void) {
 		brake = adc_get(BAK_IN_BRAKE); //! <li> update the brake pressure value.
 
 		//Struntar i att skicka ut brake_light. DEn gav störningar till servot!
-		//brake_light(brake); //! <li> set brake light on/off.
+		brake_light(brake); //! <li> set brake light on/off.
 
 		//! </ol>
 
@@ -166,10 +169,8 @@ void pcISR_in9(void) {}
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	clutch_flag = TRUE;
 	
-
-	hundred_hz_counter++;
 	//Tror att det blir sämre med högre freq. 10 hz borde räcka gott och väl!
-	if(hundred_hz_counter == 10){
+	if(interrupt_nbr % 10 == 0){
 
 		if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){
 			set_current_gear(1); // 449
@@ -190,37 +191,39 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
 		uint8_t holder = get_current_gear();
 		can_setup_tx(0x12345, (uint8_t *) &holder, 1);
-		hundred_hz_counter = 0;
 	}
 
-	/*
-	hundred_hz_counter++;
-	if(hundred_hz_counter == 1){
-
+	if (++failsafe_mid_counter > 20) {
+		can_free_rx(gcl_MOb);
+		gcl_MOb = can_setup_rx(CAN_GEAR_ID, CAN_GEAR_CLUTCH_LAUNCH_MASK, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	}
-
-
-	if(hundred_hz_counter == 2){
-
+	
+	if(interrupt_nbr % 3 == 0){
 		can_setup_tx(0x9015, (uint8_t *) &gear_pot_atomic, 2);
 	}
 
-	if(hundred_hz_counter == 3){
-
+	if(interrupt_nbr % 3 == 1){
 		can_setup_tx(0x9016, (uint8_t *) &brake, 2);
 	}
 
-	if(hundred_hz_counter == 4){
-
+	if(interrupt_nbr % 3 == 2){
 		can_setup_tx(0x9017, (uint8_t *) &clutch_right_atomic, 2);
-		hundred_hz_counter = 0;
-	}*/
+	}
 }
 
 //see gear_clutch.c
 //void timer0_isr_stop(void) {}
 
-void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
+void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
+	if (mob == gcl_MOb) { //! <li> \ref gc_MOb receives a message <ul>
+		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
+		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
+			if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_REPEAT, data, dlc)) {
+				gear_neutral_repeat_flag = TRUE;
+			}
+		}
+	}
+}
 void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 void CAN_ISR_OTHER(void) {}
 

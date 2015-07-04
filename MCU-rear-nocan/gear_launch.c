@@ -73,11 +73,11 @@ static const uint16_t SHIFT_CUT_DELAY_4_TO_5 = 150;//150; //20 ms
 static const uint16_t SHIFT_CUT_DELAY_FAIL = 150;//150; //20 ms
 
 //! Time to run the solenoid for gear up.
-static const uint16_t GEAR_UP_DELAY_2_TO_5 = 850; //30 ms
+static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 900; //40 ms
+static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 400; //40 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 950; //80 ms
+static const uint16_t GEAR_UP_DELAY_1_TO_2 = 950; //95 ms
 //! Time to run the solenoid for gear down from second.
 static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 900; //90 ms
 //! Time to run the solenoid for gear up from neutral.
