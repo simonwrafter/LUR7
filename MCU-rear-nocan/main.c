@@ -219,12 +219,10 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 //void timer0_isr_stop(void) {}
 
 void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
-	if (mob == gcl_MOb) { //! <li> \ref gc_MOb receives a message <ul>
+	if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
 		failsafe_mid_counter = 0; //! <li> reset \ref failsafe_mid_counter
-		if (id == CAN_GEAR_ID) { //! <li> gear change message <ul>
-			if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_REPEAT, data, dlc)) {
-				gear_neutral_repeat_flag = TRUE;
-			}
+		if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_REPEAT, data, dlc)) {
+			gear_neutral_repeat_flag = TRUE;
 		}
 	}
 }

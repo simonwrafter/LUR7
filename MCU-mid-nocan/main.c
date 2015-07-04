@@ -155,7 +155,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	if (interrupt_nbr % 50 == 0) {
 		new_info = TRUE; //! <li> set flag to update panel
 	}
-	/*
+	
 	if (++dta_can_counter > 20 && dta_can_counter % 10 == 0) {
 		can_free_rx(CAN_DTA_MOb);
 		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
@@ -177,18 +177,19 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 
 		update_gear(10);
 	}
-	*/
 }
 
 void timer0_isr_stop(void) {}
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
+
 void pcISR_in3(void) {
 	if (!get_input(IN3)) {
 		can_setup_tx(CAN_GEAR_ID, CAN_MSG_GEAR_NEUTRAL_REPEAT, CAN_GEAR_CLUTCH_LAUNCH_DLC);
 	}
 }
+
 void pcISR_in4(void) {}
 void pcISR_in5(void) {}
 void pcISR_in6(void) {}
