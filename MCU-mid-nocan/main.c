@@ -102,6 +102,8 @@ int main(void) {
 	CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC); //! <li> Reception of DTA packages, ID 0x2000-3.
 	gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
 	//! </ol>
+	
+	pc_int_on(IN3);
 
 	//! <li> Enable system <ol>
 	interrupts_on(); //! <li> enable interrupts.
@@ -113,7 +115,7 @@ int main(void) {
 	while (1) {
 		if (new_info) {
 			new_info = FALSE; //! <li> clear flag
-			update_display(get_input(IO_ALT_BTN)); //! <li> update panel
+			update_display(get_input(0)); //! <li> update panel
 		} //! </ol>
 	} //! </ul>
 	return 0; //! </ul>
@@ -152,11 +154,11 @@ int main(void) {
 
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
-	if (interrupt_nbr  == 0) {
+	if (interrupt_nbr % 50 == 0) {
 		new_info = TRUE; //! <li> set flag to update panel
 	}
 	
-	if (++dta_can_counter % 20 == 19) {
+	if (++dta_can_counter > 20 && dta_can_counter % 10 == 0) {
 		can_free_rx(CAN_DTA_MOb);
 		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 		
@@ -167,7 +169,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		update_RPM(0);
 	}
 	
-	if (++rear_can_counter % 20 == 19) {
+	if (++rear_can_counter > 20 && rear_can_counter % 10 == 0) {
 		can_free_rx(gear_MOb);
 		gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
 		
