@@ -150,11 +150,11 @@ int main(void) {
  */
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
-	if (interrupt_nbr % 20 == 0) {
+	if (interrupt_nbr  == 0) {
 		new_info = TRUE; //! <li> set flag to update panel
 	}
 	
-	if (dta_can_counter++ > 20) {
+	if (++dta_can_counter % 20 == 19) {
 		can_free_rx(CAN_DTA_MOb);
 		CAN_DTA_MOb = can_setup_rx(CAN_DTA_ID, CAN_DTA_MASK, CAN_DTA_DLC);
 		
@@ -165,7 +165,7 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 		update_RPM(0);
 	}
 	
-	if (rear_can_counter++ > 20) {
+	if (++rear_can_counter % 20 == 19) {
 		can_free_rx(gear_MOb);
 		gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
 		
@@ -196,7 +196,6 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		dta_can_counter = 0;
 		if (id == 0x2000) { //! <li> ID = 0x2000. <ul>
 			update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
-			//update_watertemp((data[2] << 8) | data[3]); //! <li> extract water temperature [C].
 		}
 	} //! </ul>
 	
