@@ -70,6 +70,9 @@ static const uint8_t sev_seg[12] = {
 
 //! Engine revs
 static volatile uint16_t revs = 10999;
+
+//! TPS
+static volatile uint16_t TPS = 0;
 //! Current gear
 static volatile uint8_t  gear = 10;
 //! Current speed
@@ -86,11 +89,11 @@ static volatile uint8_t  bcd_vect[3] = {0,0,0};
 //! Set new RPM value.
 void update_RPM(uint16_t new_RPM) {
 	revs = new_RPM;
-	if (revs > 2000) {
-//		set_output(IO_START_BTN_LED, ON);
-	} else {
-//		set_output(IO_START_BTN_LED, OFF);
-	}
+}
+
+//! Set new TPS value.
+void update_TPS(uint16_t new_TPS) {
+	TPS = new_TPS;
 }
 
 //! Set new current gear.
@@ -234,15 +237,15 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 void update_display(uint8_t mode) {
 	shift_byte(bin_to_7seg(gear, OFF));
 	
-	shift_bar(0, 24);
-	//if (mode) {
-	//	bcd_convert(speed);
-	//} else {
-	//	bcd_convert(speed);
-	//}
-	//shift_byte(bin_to_7seg(bcd_vect[0], OFF));
-	//shift_byte(bin_to_7seg(bcd_vect[1], OFF));
-	//shift_byte(bin_to_7seg(bcd_vect[2], OFF));
+	
+	if (mode == 0) {
+		bcd_convert(TPS);
+	} else {
+		shift_bar(0, 24);
+	}
+	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	
 	uint8_t r_led = revs_to_bar();
 	shift_bar(r_led, r_led < 7 ? REV_BAR_MAX : REV_BAR_MAX-1);

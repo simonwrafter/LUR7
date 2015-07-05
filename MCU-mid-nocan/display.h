@@ -56,6 +56,7 @@
 #define TEMP_LVL_10 100
 
 void update_RPM(uint16_t);
+void update_TPS(uint16_t);
 void update_gear(uint8_t);
 void update_speed(uint16_t);
 void update_logid(uint16_t);

@@ -113,7 +113,7 @@ int main(void) {
 	while (1) {
 		if (new_info) {
 			new_info = FALSE; //! <li> clear flag
-			update_display(get_input(0)); //! <li> update panel
+			update_display(get_current_gear()); //! <li> update panel
 		} //! </ol>
 	} //! </ul>
 	return 0; //! </ul>
@@ -203,6 +203,7 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		dta_can_counter = 0;
 		if (id == 0x2000) { //! <li> ID = 0x2000. <ul>
 			update_RPM((data[6] << 8) | data[7]); //! <li> extract RPM.
+			update_TPS((data[4] << 8) | data[5]); //! <li> extract TPS.
 		}
 	} //! </ul>
 	
