@@ -240,12 +240,12 @@ void update_display(uint8_t mode) {
 	
 	if (mode == 0) {
 		bcd_convert(TPS);
+		shift_byte(bin_to_7seg(bcd_vect[0], OFF));
+		shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+		shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	} else {
 		shift_bar(0, 24);
 	}
-	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
-	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	
 	uint8_t r_led = revs_to_bar();
 	shift_bar(r_led, r_led < 7 ? REV_BAR_MAX : REV_BAR_MAX-1);
