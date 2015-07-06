@@ -242,7 +242,7 @@ void update_display(uint8_t mode) {
 		bcd_convert(TPS);
 		shift_byte(bin_to_7seg(bcd_vect[0], OFF));
 		shift_byte(bin_to_7seg(bcd_vect[1], OFF));
-		shift_byte(bin_to_7seg(bcd_vect[2], OFF));gi
+		shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	} else {
 		shift_bar(0, 24);
 	}
