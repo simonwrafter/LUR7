@@ -235,14 +235,16 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 
 
 void update_display(uint8_t mode) {
-	shift_byte(bin_to_7seg(gear, OFF));
-	
 	
 	if (mode == 0) {
 		bcd_convert(TPS);
 	} else {
 		shift_bar(0, 24);
 	}
+
+	shift_byte(bin_to_7seg(gear, OFF));
+
+
 	shift_byte(bin_to_7seg(bcd_vect[0], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
 	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
