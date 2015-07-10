@@ -26,7 +26,7 @@ static const float CLUTCH_POS_LEFT_LOOSE  = 553; // slapp vajer
 //! Threshold value for open clutch
 static const float CLUTCH_POS_LEFT_TIGHT  = 639; // dragen vajer
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_RIGHT_LOOSE = 427;
+static const float CLUTCH_POS_RIGHT_LOOSE = 420;
 //! Threshold value for open clutch
 static const float CLUTCH_POS_RIGHT_TIGHT = 378;
 //! PWM value for closed clutch
@@ -64,9 +64,6 @@ void clutch_init(void) {
 
 	clutch_right_factor_loose = ((clutch_dc_break - CLUTCH_DC_LOOSE)) / (clutch_pos_right_break - CLUTCH_POS_RIGHT_LOOSE);
 	clutch_right_factor_tight   = ((CLUTCH_DC_TIGHT  - clutch_dc_break))  / (CLUTCH_POS_RIGHT_TIGHT  - clutch_pos_right_break);
-	
-	//clutch_pos_left_break      = CLUTCH_POS_LEFT_LOOSE + (CLUTCH_POS_LEFT_TIGHT - CLUTCH_POS_LEFT_LOOSE) * clutch_pos_break_factor;
-	//clutch_pos_right_break     = CLUTCH_POS_RIGHT_TIGHT + (CLUTCH_POS_RIGHT_LOOSE - CLUTCH_POS_RIGHT_TIGHT) * (1.0 - clutch_pos_break_factor);
 }
 
 void clutch_filter_left(uint16_t pos_left) {
