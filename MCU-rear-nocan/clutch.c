@@ -36,7 +36,7 @@ static const float CLUTCH_DC_TIGHT        = 13500; // dragen vajer. max: 13500 (
 
 //static const float clutch_pos_break_factor   = 0.8; // ADJUST IF NEEDED!
 volatile static float clutch_pos_left_break  = 625;
-volatile static float clutch_pos_right_break = 387;
+volatile static float clutch_pos_right_break = 384;
 
 static const float clutch_dc_break = 9500; // AJUST IF NEEDED!
 
