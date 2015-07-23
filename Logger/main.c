@@ -20,6 +20,8 @@
 
 #include "ff.h"
 
+FATFS fs;
+
 int main(void) {
 	io_init();
 	adc_init();
@@ -32,10 +34,28 @@ int main(void) {
 	interrupts_on();
 	can_enable();
 	
+	
+	FIL file;
+	uint8_t buffer[100] = "Hello World!";
+	FRESULT fr;
+	UINT bw;
+	
+	f_mount(&fs, 0, 0);
+	
+	fr = f_open(&file, "log.txt", FA_WRITE);
+	if (fr) {
+		return (int) fr;
+	}
+	
+	fr = f_write(&file, buffer, 15, bw);
+	
+	f_close(&file);
+	
 	while (1) {
 		
 	}
 }
+
 
 void pcISR_in1(void) {}
 void pcISR_in2(void) {}
