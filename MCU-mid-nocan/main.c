@@ -149,10 +149,9 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 
-
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
-	if (interrupt_nbr % 50 == 0) {
+	if (interrupt_nbr % 20 == 0) {
 		new_info = TRUE; //! <li> set flag to update panel
 	}
 	
