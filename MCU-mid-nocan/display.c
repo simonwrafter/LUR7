@@ -235,32 +235,17 @@ uint8_t bin_to_7seg(uint8_t binary, uint8_t dp) {
 
 
 void update_display(uint8_t mode) {
-<<<<<<< HEAD
-	shift_byte(bin_to_7seg(gear, OFF));
-	
-=======
-	
-	shift_byte(bin_to_7seg(gear, OFF));
+	shift_byte(bin_to_7seg(gear, OFF)); // gear
 
-
->>>>>>> 5380517aa0734c850c78f933bd5982645188f5a6
-	//if (mode == 0) {
-		bcd_convert(TPS);
-		shift_byte(bin_to_7seg(bcd_vect[0], OFF));
-		shift_byte(bin_to_7seg(bcd_vect[1], OFF));
-		shift_byte(bin_to_7seg(bcd_vect[2], OFF));
-	//} else {
-	//	shift_bar(0, 24);
-	//}
-<<<<<<< HEAD
-=======
-
->>>>>>> 5380517aa0734c850c78f933bd5982645188f5a6
+	bcd_convert(TPS);
+	shift_byte(bin_to_7seg(bcd_vect[0], OFF)); //TPS
+	shift_byte(bin_to_7seg(bcd_vect[1], OFF));
+	shift_byte(bin_to_7seg(bcd_vect[2], OFF));
 	
-	uint8_t r_led = revs_to_bar();
+	uint8_t r_led = revs_to_bar(); //revs
 	shift_bar(r_led, r_led < 7 ? REV_BAR_MAX : REV_BAR_MAX-1);
 	
-	shift_bar(0, 10);
+	shift_bar(0, 10); //"temp"
 	
 	//if (mode) {
 	//	shift_bar(temp_to_bar(water_temp), 10);
