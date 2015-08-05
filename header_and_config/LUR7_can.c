@@ -116,6 +116,10 @@ uint8_t CAN_MSG_GEAR_DOWN[4] = "NWOD"; //!< Message for Gear Change DOWN
 uint8_t CAN_MSG_GEAR_NEUTRAL_SINGLE[4] = "LGNS"; //!< Message for Neutral Gear (single attempt)
 uint8_t CAN_MSG_GEAR_NEUTRAL_REPEAT[4] = "TEPR"; //!< Message for Neutral Gear (repeat attempt)
 
+uint8_t CAN_MSG_POT_GOOD[4] = "GOOD"; //!< Message for trusting pot value
+uint8_t CAN_MSG_POT_DISS[4] = "DISS"; //!< Message for ignoring pot value
+
+
 // +  +  Launch Control
 uint8_t CAN_MSG_LAUNCH[4] = "HCNL"; //!< Enable/(disable) launch control system.
 

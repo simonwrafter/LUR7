@@ -53,6 +53,8 @@ volatile uint8_t gear_neutral_single_flag = FALSE;
 //! Flag to set if signal to change to neutral (repeated attempts) is received.
 volatile uint8_t gear_neutral_repeat_flag = FALSE;
 
+volatile uint8_t diss_pot = FALSE;
+
 //! flag for updating clutch
 volatile uint16_t clutch_flag = FALSE;
 //! atomic clutch readings
@@ -175,8 +177,9 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
 	//Tror att det blir sämre med högre freq. 10 hz borde räcka gott och väl!
 	if(interrupt_nbr % 10 == 0){
-
-		if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){
+		if (diss_pot) {
+			set_current_gear(POT_FAIL);
+		} else if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){
 			set_current_gear(1); // 449
 		} else if (gear_pot_atomic > 131 && gear_pot_atomic <= 223){
 			set_current_gear(0); // 930
@@ -224,10 +227,24 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 		if (can_data_equals(CAN_MSG_GEAR_NEUTRAL_REPEAT, data, dlc)) {
 			gear_neutral_repeat_flag = TRUE;
 		}
+		if (can_data_equals(CAN_MSG_POT_DISS, data, dlc)) {
+			diss_pot = TRUE;
+		}
+		if (can_data_equals(CAN_MSG_POT_GOOD, data, dlc)) {
+			diss_pot = FALSE;
+		}
 	}
 }
 void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_OTHER(void) {}
+
+void CAN_ISR_OTHER(void) {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
+	if (mob == gcl_MOb) {
+		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
+		_NOP();
+		CANCDMOB |= (1 << CONMOB1); // re-enable reception
+	}
+}
 
 void early_bod_warning_ISR(void) {}
 void early_bod_safe_ISR(void) {}

@@ -27,7 +27,7 @@ uint8_t disk_initialize (uint8_t pdrv) {
 	if (pdrv) {
 		return STA_NOINIT;
 	}
-	return SD_init();
+	return disc_status = SD_init();
 }
 
 DRESULT disk_read (

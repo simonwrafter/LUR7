@@ -20,39 +20,57 @@
 
 #include "ff.h"
 
+#include "SPI_routines.h"
+
 FATFS fs;
 
 int main(void) {
-	io_init();
-	adc_init();
-	ancomp_init();
-	can_init();
-	timer1_init(OFF);
-	power_off_default();
-	power_off_timer0();
+	//io_init();
+	//adc_init();
+	//ancomp_init();
+	//can_init();
+	//timer1_init(OFF);
+	//power_off_default();
+	//power_off_timer0();
 	
+	DDRC |= 1 << DDC1;
+	DDRB |= 1 << DDB0;
 	interrupts_on();
-	can_enable();
+	//can_enable();
 	
+	set_output(LED0, ON);
 	
 	FIL file;
-	uint8_t buffer[100] = "Hello World!";
 	FRESULT fr;
 	UINT bw;
 	
-	f_mount(&fs, 0, 0);
+	_delay_ms(1000);
 	
-	fr = f_open(&file, "log.txt", FA_WRITE);
+	fr = f_mount(&fs, "", 0);
+	_delay_ms(1000);
 	if (fr) {
-		return (int) fr;
+		//set_output(LED0, OFF);
+	} else {
+		fr = f_open(&file, "logloglo.txt", FA_WRITE);
+		if (fr) {/*
+			do {
+				set_output(LED0, ON);
+				_delay_ms(300);
+				set_output(LED0, OFF);
+				_delay_ms(300);
+				set_output(LED0, ON);
+			} while  (--fr);*/
+		} else {
+			fr = f_printf(&file, "Hello World!");
+			f_close(&file);
+		}
 	}
 	
-	fr = f_write(&file, buffer, 15, bw);
-	
-	f_close(&file);
-	
 	while (1) {
-		
+		_delay_ms(1000);
+		SPI_transmit(0x00);
+		SPI_transmit(0xAA);
+		SPI_transmit(0x00);
 	}
 }
 
