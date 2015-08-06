@@ -26,7 +26,7 @@ static const float CLUTCH_POS_LEFT_LOOSE  = 553; // slapp vajer
 //! Threshold value for open clutch
 static const float CLUTCH_POS_LEFT_TIGHT  = 639; // dragen vajer
 //! Threshold value for closed clutch
-static const float CLUTCH_POS_RIGHT_LOOSE = 427;
+static const float CLUTCH_POS_RIGHT_LOOSE = 420;
 //! Threshold value for open clutch
 static const float CLUTCH_POS_RIGHT_TIGHT = 378;
 //! PWM value for closed clutch
