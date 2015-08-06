@@ -101,8 +101,10 @@ int main(void) {
 	gear_MOb = can_setup_rx(0x12345, 0xffffffff, 1);
 	//! </ol>
 	
+	pc_int_on(IN2);
 	pc_int_on(IN3);
-
+	pc_int_on(IN7);
+	
 	//! <li> Enable system <ol>
 	interrupts_on(); //! <li> enable interrupts.
 	can_enable(); //! <li> enable CAN.
@@ -149,10 +151,9 @@ int main(void) {
  * \param interrupt_nbr The id of the interrupt, counting from 0-99.
  */
 
-
 void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
-	if (interrupt_nbr % 50 == 0) {
+	if (interrupt_nbr % 20 == 0) {
 		new_info = TRUE; //! <li> set flag to update panel
 	}
 	
@@ -182,7 +183,11 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 void timer0_isr_stop(void) {}
 
 void pcISR_in1(void) {}
-void pcISR_in2(void) {}
+void pcISR_in2(void) {
+	if (!get_input(IN2)) {
+		can_setup_tx(CAN_GEAR_ID, CAN_MSG_POT_DISS, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	}
+}
 
 void pcISR_in3(void) {
 	if (!get_input(IN3)) {
@@ -193,7 +198,11 @@ void pcISR_in3(void) {
 void pcISR_in4(void) {}
 void pcISR_in5(void) {}
 void pcISR_in6(void) {}
-void pcISR_in7(void) {}
+void pcISR_in7(void) {
+	if (!get_input(IN7)) {
+		can_setup_tx(CAN_GEAR_ID, CAN_MSG_POT_GOOD, CAN_GEAR_CLUTCH_LAUNCH_DLC);
+	}
+}
 void pcISR_in8(void) {}
 void pcISR_in9(void) {}
 
@@ -215,7 +224,14 @@ void CAN_ISR_RXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {
 }
 
 void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
-void CAN_ISR_OTHER(void) {}
+void CAN_ISR_OTHER(void) {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
+	if (mob == CAN_DTA_MOb) {
+		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
+		_NOP();
+		CANCDMOB |= (1 << CONMOB1); // re-enable reception
+	}
+}
 
 void early_bod_warning_ISR(void) {}
 void early_bod_safe_ISR(void) {}

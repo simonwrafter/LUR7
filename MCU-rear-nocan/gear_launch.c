@@ -75,15 +75,15 @@ static const uint16_t SHIFT_CUT_DELAY_FAIL = 150;//150; //20 ms
 //! Time to run the solenoid for gear up.
 static const uint16_t GEAR_UP_DELAY_2_TO_5 = 300; //30 ms
 //! Time to run the solenoid for gear down.
-static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 400; //40 ms
+static const uint16_t GEAR_DOWN_DELAY_5_TO_2 = 500; //40 ms
 //! Time to run the solenoid for gear up from first.
-static const uint16_t GEAR_UP_DELAY_1_TO_2 = 950; //95 ms
+static const uint16_t GEAR_UP_DELAY_1_TO_2 = 850; //95 ms
 //! Time to run the solenoid for gear down from second.
-static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 900; //90 ms
+static const uint16_t GEAR_DOWN_DELAY_2_TO_1 = 800; //90 ms
 //! Time to run the solenoid for gear up from neutral.
-static const uint16_t GEAR_UP_DELAY_N_TO_2 = 850; //70 ms
+static const uint16_t GEAR_UP_DELAY_N_TO_2 = 750; //70 ms
 //! Time to run the solenoid for gear down from neutral.
-static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 900; //77 ms
+static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 800; //77 ms
 
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
@@ -243,7 +243,6 @@ void gear_down() {
 		busy = TRUE;
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
-		
 		if (current_gear == 0) {
 			timer0_start(GEAR_DOWN_DELAY_N_TO_1);
 		} else if (current_gear == 2 || current_gear == POT_FAIL) {

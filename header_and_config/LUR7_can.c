@@ -116,6 +116,10 @@ uint8_t CAN_MSG_GEAR_DOWN[4] = "NWOD"; //!< Message for Gear Change DOWN
 uint8_t CAN_MSG_GEAR_NEUTRAL_SINGLE[4] = "LGNS"; //!< Message for Neutral Gear (single attempt)
 uint8_t CAN_MSG_GEAR_NEUTRAL_REPEAT[4] = "TEPR"; //!< Message for Neutral Gear (repeat attempt)
 
+uint8_t CAN_MSG_POT_GOOD[4] = "GOOD"; //!< Message for trusting pot value
+uint8_t CAN_MSG_POT_DISS[4] = "DISS"; //!< Message for ignoring pot value
+
+
 // +  +  Launch Control
 uint8_t CAN_MSG_LAUNCH[4] = "HCNL"; //!< Enable/(disable) launch control system.
 
@@ -351,21 +355,26 @@ uint8_t _can_get_free_mob() {
  */
 ISR (CAN_INT_vect) {
 	uint8_t save_CANPAGE = CANPAGE; // save CANPAGE
-
-	CANPAGE = CANHPMOB & 0xF0; // select MOb with highest priority interrupt
-
-	if (CANSTMOB & (1 << RXOK)) { //test for RXOK
-		CANSTMOB &= ~(1 << RXOK); // clear interrupt flag
-		_can_handle_RXOK(); //handle RXOK
-	} else if (CANSTMOB & (1 << TXOK)) { //test for TXOK
-		CANSTMOB &= ~(1 << TXOK); // clear interrupt flag
-		_can_handle_TXOK(); //handle TXOK
-	} else { // any other interrupt, most likely an error
-		CAN_ISR_OTHER(); // extern function, handles errors
-		CANSTMOB = 0x00; // clear interrupt flag, FIXME: errors not handled well
-		CANGIT = 0x00; // clear general interrupts
+	
+	// check for valid MOb!!!
+	uint8_t mob = (CANHPMOB & 0xF0) >> 4; // select MOb with highest priority interrupt
+	
+	if (CANSIT2 && (1 << mob)) {
+		CANPAGE = mob << 4;
+		if (CANSTMOB & (1 << RXOK)) { //test for RXOK
+			CANSTMOB &= ~(1 << RXOK); // clear interrupt flag
+			_can_handle_RXOK(); //handle RXOK
+		} else if (CANSTMOB & (1 << TXOK)) { //test for TXOK
+			CANSTMOB &= ~(1 << TXOK); // clear interrupt flag
+			_can_handle_TXOK(); //handle TXOK
+		} else { // any other interrupt, most likely an error
+			//FIXME: Restart RX if needed.
+			CAN_ISR_OTHER(); // extern function, handles errors
+			CANSTMOB = 0x00; // clear interrupt flag, FIXME: errors not handled well
+		}
+	} else {
+		CANGIT = 0xFF; // clear general interrupts
 	}
-
 	CANPAGE = save_CANPAGE; //restore CANPAGE
 }
 

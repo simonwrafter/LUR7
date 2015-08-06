@@ -440,7 +440,14 @@ void CAN_ISR_TXOK(uint8_t mob, uint32_t id, uint8_t dlc, uint8_t * data) {}
 /*!
  * \todo implement CAN error handling
  */
-void CAN_ISR_OTHER(void) {}
+void CAN_ISR_OTHER(void) {
+	uint8_t mob = (CANPAGE & 0xF0) >> 4; // get mob number
+	if (mob == gcl_MOb || mob == brk_MOb || mob == dta_MOb) {
+		CANCDMOB &= ~((1 << CONMOB1) | (1 << CONMOB0)); //disable MOb
+		_NOP();
+		CANCDMOB |= (1 << CONMOB1); // re-enable reception
+	}
+}
 
 //! Brown Out warning.
 /*!

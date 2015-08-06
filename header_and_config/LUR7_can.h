@@ -162,6 +162,8 @@ extern uint8_t CAN_MSG_GEAR_UP[4]; //!< Message for Gear Change UP
 extern uint8_t CAN_MSG_GEAR_DOWN[4]; //!< Message for Gear Change DOWN
 extern uint8_t CAN_MSG_GEAR_NEUTRAL_SINGLE[4]; //!< Message for Neutral Gear (single attempt)
 extern uint8_t CAN_MSG_GEAR_NEUTRAL_REPEAT[4]; //!< Message for Neutral Gear (repeat attempt)
+extern uint8_t CAN_MSG_POT_GOOD[4]; //!< Message for trusting pot value
+extern uint8_t CAN_MSG_POT_DISS[4]; //!< Message for ignoring pot value
 
 // +  +  Launch Control
 extern uint8_t CAN_MSG_LAUNCH[4]; //!< Enable/(disable) launch control system.

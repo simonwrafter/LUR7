@@ -48,6 +48,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/cpufunc.h> //included for _NOP()
 #include <util/atomic.h>
 #include <stdint.h>
 
