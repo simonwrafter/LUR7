@@ -298,7 +298,15 @@ static void end_gear_change(void) {
 static void check_down(void) {
 	shifting_down = FALSE;
 	if (current_gear == last_gear || current_gear == 0) {
-		gear_down();
+		set_output(GEAR_DOWN, GND);
+		end_fun_ptr = end_gear_change;
+		if (current_gear == 0) {
+			timer0_start(GEAR_DOWN_DELAY_N_TO_1);
+		} else if (current_gear == 2 || current_gear == POT_FAIL) {
+			timer0_start(GEAR_DOWN_DELAY_2_TO_1);
+		} else {
+			timer0_start(GEAR_DOWN_DELAY_5_TO_2);
+		}
 	} else {
 		end_gear_change();
 	}
