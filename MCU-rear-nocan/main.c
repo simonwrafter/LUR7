@@ -177,21 +177,41 @@ void timer1_isr_100Hz(uint8_t interrupt_nbr) {
 	
 	//Tror att det blir sämre med högre freq. 10 hz borde räcka gott och väl!
 	if(interrupt_nbr % 10 == 0){
+		
+		
 		if (diss_pot) {
 			set_current_gear(POT_FAIL);
-		} else if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){
+		} else if (gear_pot_atomic > 71 && gear_pot_atomic <= 131){ // 332   68
 			set_current_gear(1); // 449
-		} else if (gear_pot_atomic > 131 && gear_pot_atomic <= 223){
+		} else if (gear_pot_atomic > 131 && gear_pot_atomic <= 223){ // 600  123
 			set_current_gear(0); // 930
-		} else if (gear_pot_atomic > 223 && gear_pot_atomic <= 355){
+		} else if (gear_pot_atomic > 223 && gear_pot_atomic <= 355){ // 942 193
 			set_current_gear(2); // 1254
-		} else if (gear_pot_atomic > 355 && gear_pot_atomic <= 553){
+		} else if (gear_pot_atomic > 355 && gear_pot_atomic <= 553){ // 1630 334
 			set_current_gear(3); // 2216
-		} else if (gear_pot_atomic > 553 && gear_pot_atomic <= 752){
+		} else if (gear_pot_atomic > 553 && gear_pot_atomic <= 752){ // 2333 478
 			set_current_gear(4); // 3193
-		} else if (gear_pot_atomic > 752 && gear_pot_atomic < 870){
+		} else if (gear_pot_atomic > 752 && gear_pot_atomic < 870){ // 2944 603
 			set_current_gear(5); // 4150
-		}
+		} 
+
+		/*
+		if (diss_pot) {
+			set_current_gear(POT_FAIL);
+		} else if (gear_pot_atomic > 0 && gear_pot_atomic <= 100){ // 332   68
+			set_current_gear(1); // 449
+		} else if (gear_pot_atomic > 100 && gear_pot_atomic <= 158){ // 600  123
+			set_current_gear(0); // 930
+		} else if (gear_pot_atomic > 158 && gear_pot_atomic <= 260){ // 942 193
+			set_current_gear(2); // 1254
+		} else if (gear_pot_atomic > 260 && gear_pot_atomic <= 410){ // 1630 334
+			set_current_gear(3); // 2216
+		} else if (gear_pot_atomic > 410 && gear_pot_atomic <= 540){ // 2333 478
+			set_current_gear(4); // 3193
+		} else if (gear_pot_atomic > 540 && gear_pot_atomic < 870){ // 2944 603
+			set_current_gear(5); // 4150
+		} */
+
 		else {
 			set_current_gear(POT_FAIL);
 		}
