@@ -245,8 +245,10 @@ void gear_up() {
 void gear_down() {
 	if (!busy){// && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
 		busy = TRUE;
-		last_gear == current_gear;
-		shifting_down = TRUE;
+		if (current_gear != POT_FAIL) {
+			last_gear == current_gear;
+			shifting_down = TRUE;
+		}
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
 		if (current_gear == 0) {
