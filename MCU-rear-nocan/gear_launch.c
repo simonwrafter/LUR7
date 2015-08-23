@@ -85,6 +85,8 @@ static const uint16_t GEAR_UP_DELAY_N_TO_2 = 750; //70 ms
 //! Time to run the solenoid for gear down from neutral.
 static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 800; //77 ms
 
+static volatile uint8_t shifting_down = FALSE;
+
 //! Lowest revs needed to change up a gear
 //static const uint16_t GEAR_DOWN_REV_LIMIT = 9000; // TODO: what should the limit be?
 
@@ -92,6 +94,8 @@ static const uint16_t GEAR_DOWN_DELAY_N_TO_1 = 800; //77 ms
 static void mid_gear_up(void);
 //! Function to end gear up routine.
 static void end_gear_change(void);
+//!
+static void check_down(void);
 
 //********* NEUTRAL ************************************************************
 
@@ -241,6 +245,10 @@ void gear_up() {
 void gear_down() {
 	if (!busy){// && current_gear != 1 ) { // && current_revs < GEAR_DOWN_REV_LIMIT) {
 		busy = TRUE;
+		if (current_gear != POT_FAIL) {
+			last_gear == current_gear;
+			shifting_down = TRUE;
+		}
 		set_output(GEAR_DOWN, GND);
 		end_fun_ptr = end_gear_change;
 		if (current_gear == 0) {
@@ -275,10 +283,33 @@ static void mid_gear_up(void) {
  * Turns off the solenoid in both directions. Frees the busy flag.
  */
 static void end_gear_change(void) {
-	set_output(SHIFT_CUT, TRI); // reset shift cut output
 	set_output(GEAR_UP, TRI); // reset output
 	set_output(GEAR_DOWN, TRI); // reset output
+	
+	if (shifting_down) {
+		end_fun_ptr = check_down();
+		timer0_start(2500);
+	}
+	
+	set_output(SHIFT_CUT, TRI); // reset shift cut output
 	busy = FALSE; // free unit
+}
+
+static void check_down(void) {
+	shifting_down = FALSE;
+	if (current_gear == last_gear || current_gear == 0) {
+		set_output(GEAR_DOWN, GND);
+		end_fun_ptr = end_gear_change;
+		if (current_gear == 0) {
+			timer0_start(GEAR_DOWN_DELAY_N_TO_1);
+		} else if (current_gear == 2 || current_gear == POT_FAIL) {
+			timer0_start(GEAR_DOWN_DELAY_2_TO_1);
+		} else {
+			timer0_start(GEAR_DOWN_DELAY_5_TO_2);
+		}
+	} else {
+		end_gear_change();
+	}
 }
 
 //******************************************************************************
